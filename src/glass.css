@@ -1,0 +1,1061 @@
+﻿/* A clear pane, a fine edge, and the photograph underneath. */
+:root {
+  --glass-fill: rgb(255 255 255 / 0.018);
+  --glass-border: rgb(255 255 255 / 0.42);
+  --glass-filter: blur(13px) saturate(1.05);
+}
+.site-shell {
+  position: relative;
+  min-height: 100dvh;
+}
+.glass-surface,
+.booking-scene .booking-panel,
+.experience-panel,
+.atlas-panel,
+.consent-panel,
+.booking-questions {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--glass-border);
+  border-radius: 0;
+  box-shadow: none;
+}
+.booking-scene .booking-panel {
+  text-shadow: 0 1px 9px #00000060;
+}
+.booking-scene .booking-scrim {
+  background: linear-gradient(90deg, #080e15ad, #080e1526 48%, #080e1566);
+}
+.booking-exposure {
+  filter: saturate(0.95) contrast(1);
+}
+.atlas-panel {
+  padding: 25px;
+}
+.destination-choices > button,
+.number-options > button,
+.booking-scene .contact-fields input,
+.licence-select select,
+.special-request-label textarea,
+.manual-copy textarea,
+.copy-session {
+  background: #ffffff02;
+  border: 1px solid #ffffff60;
+  border-radius: 0;
+}
+.destination-choices > button:hover,
+.number-options > button:hover {
+  background: #ffffff0d;
+}
+.destination-choices > button[aria-pressed="true"],
+.number-options > button[aria-pressed="true"] {
+  border-color: #fff;
+  background: #ffffff0c;
+  box-shadow: none;
+}
+.destination-choices > button > img {
+  border-radius: 0;
+}
+.booking-next,
+.booking-scene .submit-booking,
+.hero-plan {
+  border-radius: 0;
+  background: #f7f7f2;
+  border-color: #f7f7f2;
+  color: #172122;
+}
+.booking-next:hover,
+.booking-scene .submit-booking:hover,
+.hero-plan:hover {
+  background: #fff;
+  border-color: #fff;
+}
+.booking-next:focus-visible,
+.submit-booking:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 5px;
+}
+.booking-panel {
+  padding: 30px;
+}
+.booking-step > h2 {
+  font-size: 31px;
+  letter-spacing: -0.04em;
+  margin-bottom: 26px;
+}
+.booking-progress {
+  margin-bottom: 23px;
+  border-color: #ffffff3d;
+  padding-bottom: 17px;
+}
+.booking-progress > div {
+  margin-left: auto;
+}
+.booking-progress > span:nth-child(2) {
+  display: none;
+}
+.booking-step-actions {
+  justify-content: space-between;
+  border-color: #ffffff3d;
+  margin-top: 22px;
+  padding-top: 20px;
+}
+.booking-step-actions > .booking-next:only-child {
+  width: 100%;
+}
+.calendar-grid button {
+  border-radius: 0;
+}
+.booking-step .conditions-note,
+.booking-step .choice-advice {
+  font-size: 13px;
+  margin-top: 10px;
+}
+.booking-main-title {
+  font-size: clamp(50px, 5.5vw, 80px);
+}
+.booking-introduction > .eyebrow {
+  font-size: 10px;
+}
+.booking-place {
+  top: 360px;
+}
+.booking-outlines {
+  height: 230px;
+}
+.help-choose {
+  font-size: 14px;
+  margin-top: 13px;
+}
+.booking-step fieldset.number-choice > legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+.number-choice output {
+  font-size: 13px;
+  color: inherit;
+  white-space: nowrap;
+}
+.number-options {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+.number-options > button {
+  min-height: 44px;
+  font-size: 16px;
+  color: inherit;
+  transition: background 0.2s;
+}
+.booking-step > fieldset.number-choice + fieldset.number-choice {
+  margin-top: 27px;
+}
+.licence-select select {
+  background: #ffffff03;
+}
+.licence-select select option {
+  background: #252a2c;
+  color: #fff;
+}
+.instagram-option {
+  border: 0;
+  padding: 0;
+  margin-top: 10px;
+}
+.instagram-option > summary {
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.instagram-option .direct-enquiry {
+  padding: 12px 0;
+  font-size: 14px;
+}
+.instagram-option .text-link {
+  font-size: 14px;
+  display: flex;
+  min-height: 44px;
+  margin-top: 14px;
+}
+.instagram-option .copy-session {
+  margin-top: 12px;
+}
+.session-review {
+  font-size: 13px;
+  margin-bottom: 20px;
+  padding-block: 14px;
+}
+.session-review strong {
+  font-size: 15px;
+}
+.edit-trip {
+  max-width: 40px;
+  font-size: 13px;
+}
+.booking-confirmation > h2 {
+  font-size: 50px;
+}
+.booking-confirmation > p:not(.small):not(.request-reference) {
+  font-size: 16px;
+}
+.booking-confirmation .small {
+  font-size: 14px;
+}
+.request-reference {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+/* The winter photograph stays light; its pane uses ink instead of a dark fill. */
+.booking-scene[data-backdrop="simcoe-ice"] .booking-scrim {
+  background: linear-gradient(90deg, #080e1599, #080e1510 56%, #080e1500);
+}
+.booking-scene[data-backdrop="simcoe-ice"] .booking-panel {
+  color: #111e25;
+  text-shadow: none;
+  background: #ffffff06;
+  border-color: #17212c70;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  .booking-panel
+  :is(
+    small,
+    .field-hint,
+    .step-intro,
+    .conditions-note,
+    .choice-advice,
+    .booking-progress,
+    .session-review,
+    .session-review strong,
+    .booking-back,
+    .number-options button,
+    .edit-trip,
+    .request-reference
+  ) {
+  color: inherit;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  .booking-panel
+  :is(
+    .destination-choices > button,
+    .number-options > button,
+    .contact-fields input,
+    select,
+    textarea,
+    .copy-session
+  ) {
+  color: inherit;
+  border-color: #17212c60;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  .booking-panel
+  :is(
+    .destination-choices > button[aria-pressed="true"],
+    .number-options > button[aria-pressed="true"]
+  ) {
+  border-color: #14212a;
+  background: #ffffff24;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  :is(.booking-progress, .booking-step-actions, .session-review) {
+  border-color: #17212c45;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .booking-progress i {
+  background: #17212c35;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .booking-progress i.is-complete {
+  background: #17212c;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  :is(
+    .calendar-grid button,
+    .calendar-heading,
+    .calendar-weekday,
+    .help-choose,
+    .licence-select
+  ) {
+  color: inherit;
+}
+.booking-scene[data-backdrop="simcoe-ice"]
+  .calendar-grid
+  button[aria-pressed="true"] {
+  background: #17212c;
+  color: #fff;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-select select {
+  color-scheme: light;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-select select option {
+  background: #e9edef;
+  color: #17212c;
+}
+
+/* Three native scrolling chapters. Oversized form steps remain freely scrollable. */
+html.home-snap {
+  scroll-snap-type: y mandatory;
+  scroll-padding-top: 0;
+}
+.booking-home > section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scroll-margin-top: 0;
+}
+.service-hero {
+  height: 100dvh;
+  min-height: 640px;
+  padding-block: 145px 125px;
+}
+.service-hero-copy {
+  max-width: 780px;
+}
+.service-hero h1 {
+  font-size: clamp(64px, 6.6vw, 98px);
+}
+.service-description {
+  font-size: 18px;
+  margin-top: 25px;
+}
+.hero-plan {
+  min-width: 245px;
+  min-height: 54px;
+  font-size: 15px;
+  margin-top: 28px;
+}
+.service-catch {
+  width: 175px;
+  height: 250px;
+  right: 11%;
+  top: 31%;
+}
+.service-hero-bottom {
+  left: 8%;
+  right: 8%;
+  bottom: 31px;
+  border: 0;
+  padding: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  justify-content: space-between;
+  align-items: center;
+}
+.service-hero-bottom a {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  min-height: 44px;
+}
+.service-hero-bottom a span {
+  font-size: 17px;
+}
+.booking-home > .booking-scene {
+  min-height: 100dvh;
+  padding-block: 115px 70px;
+}
+.booking-answers {
+  min-height: 100dvh;
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 130px 8% 155px;
+}
+.booking-answers::before {
+  display: none;
+}
+.booking-answers > .chapter-photo {
+  object-position: 30% 55%;
+  filter: saturate(0.75);
+}
+.booking-answers > .photo-scrim {
+  background: linear-gradient(90deg, #08101555, #08101580 70%);
+}
+.booking-answers h2 {
+  font-size: clamp(48px, 5.5vw, 80px);
+  line-height: 1.06;
+  font-weight: 350;
+  letter-spacing: -0.05em;
+  margin: 0;
+}
+.booking-questions {
+  padding: 8px 27px;
+}
+.booking-questions summary {
+  font-size: 16px;
+  min-height: 64px;
+}
+.booking-questions details p {
+  font-size: 15px;
+  padding-bottom: 22px;
+}
+.answers-book {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  font-size: 15px;
+}
+.chapter-nav {
+  position: fixed;
+  right: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  z-index: 20;
+}
+.chapter-nav a {
+  min-width: 44px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  opacity: 0.5;
+}
+.chapter-nav span {
+  font-size: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.chapter-nav i {
+  width: 12px;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.25s;
+}
+.chapter-nav a[aria-current] {
+  opacity: 1;
+}
+.chapter-nav a[aria-current] i {
+  width: 24px;
+}
+.chapter-nav a[aria-current] span,
+.chapter-nav a:hover span {
+  opacity: 1;
+}
+.is-home > .footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-block: 20px;
+  background: transparent;
+  border: 0;
+  z-index: 5;
+}
+.is-home .footer-bottom > .wordmark,
+.is-home .footer-bottom > span,
+.is-home .footer-bottom > div > a:first-child {
+  display: none;
+}
+.is-home .footer-bottom {
+  justify-content: flex-end;
+  font-size: 10px;
+}
+.is-home .footer-bottom .text-button {
+  font-size: 10px;
+}
+.header.journey-header .journey-nav {
+  gap: 40px;
+}
+.header.journey-header .journey-book {
+  font-size: 13px;
+}
+.gallery-open {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  padding: 8px 0;
+  min-height: 44px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+.gallery-open:hover {
+  opacity: 1;
+}
+.gallery-open > span:last-child {
+  font-size: 15px;
+}
+
+/* A small contact sheet, kept beside the page instead of taking it over. */
+.catch-gallery {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  padding: 26px;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+}
+.catch-gallery::backdrop {
+  background: #03080d30;
+}
+.journal-drawer {
+  position: absolute;
+  right: 26px;
+  bottom: 26px;
+  width: min(850px, calc(100% - 52px));
+  padding: 8px 20px 12px;
+  --frame-height: 215px;
+  --frame-max: 430px;
+  --glass-fill: #0c111710;
+  --glass-filter: blur(20px) brightness(0.7);
+  animation: journal-open 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.journal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 47px;
+  border-bottom: 1px solid #ffffff30;
+}
+.journal-top h2 {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+.journal-top button {
+  height: 44px;
+  width: 44px;
+  border: 0;
+  background: transparent;
+  font-size: 27px;
+  font-weight: 300;
+  margin-right: -12px;
+}
+.journal-rail {
+  display: flex;
+  position: relative;
+  align-items: center;
+  gap: 23px;
+  height: 285px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+.journal-rail::-webkit-scrollbar {
+  display: none;
+}
+.journal-rail::before,
+.journal-rail::after {
+  content: "";
+  flex: 0 0
+    max(
+      12px,
+      calc(
+        (
+            100% -
+              clamp(
+                100px,
+                var(--first-aspect) * var(--frame-height),
+                var(--frame-max)
+              )
+          ) /
+          2 - 23px
+      )
+    );
+}
+.journal-rail::after {
+  flex-basis: max(
+    12px,
+    calc(
+      (
+          100% -
+            clamp(
+              100px,
+              var(--last-aspect) * var(--frame-height),
+              var(--frame-max)
+            )
+        ) /
+        2 - 23px
+    )
+  );
+}
+.journal-frame {
+  flex: 0 0
+    clamp(
+      100px,
+      calc(var(--frame-aspect) * var(--frame-height)),
+      var(--frame-max)
+    );
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: relative;
+  scroll-snap-align: center;
+  opacity: 0.6;
+  transform: scale(0.92);
+  transition:
+    opacity 0.35s,
+    transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.journal-frame[aria-pressed="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+.catch-crop {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--crop-aspect);
+  width: 100%;
+}
+.catch-crop > img {
+  position: absolute;
+  max-width: none;
+  object-fit: fill;
+}
+.frame-number {
+  position: absolute;
+  left: 0;
+  bottom: -21px;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+.gallery-controls {
+  border-top: 1px solid #ffffff30;
+  padding-top: 6px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 18px;
+}
+.gallery-controls button {
+  width: 44px;
+  min-height: 38px;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+}
+.gallery-controls > span {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+@keyframes journal-open {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .glass-surface,
+  .booking-scene .booking-panel,
+  .experience-panel,
+  .atlas-panel,
+  .consent-panel,
+  .booking-questions {
+    background: #101820bc;
+  }
+}
+@media (max-width: 1100px) {
+  .booking-panel {
+    padding: 26px;
+  }
+  .service-hero h1 {
+    font-size: 7.5vw;
+  }
+  .service-catch {
+    width: 145px;
+    height: 210px;
+    right: 7%;
+  }
+  .chapter-nav {
+    right: 9px;
+  }
+}
+@media (min-width: 701px) and (max-height: 850px) {
+  .booking-home > .booking-scene {
+    padding-block: 105px 45px;
+  }
+  .booking-panel {
+    padding: 22px;
+  }
+  .booking-progress {
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+  }
+  .booking-step > h2 {
+    font-size: 29px;
+    margin-bottom: 18px;
+  }
+  .destination-choices {
+    gap: 8px;
+  }
+  .destination-choices > button {
+    min-height: 64px;
+    padding: 7px;
+  }
+  .destination-choices > button > img {
+    height: 48px;
+  }
+  .help-choose {
+    margin-top: 8px;
+  }
+  .booking-step-actions {
+    margin-top: 18px;
+    padding-top: 18px;
+  }
+  .booking-next {
+    min-height: 50px;
+  }
+}
+@media (max-width: 700px) {
+  .service-hero {
+    height: 100dvh;
+    min-height: 610px;
+    padding: 160px 25px 115px;
+  }
+  .service-hero h1 {
+    font-size: clamp(44px, 10.5vw, 65px);
+  }
+  .service-description {
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 285px;
+  }
+  .hero-plan {
+    margin-top: 25px;
+    min-width: 245px;
+  }
+  .service-catch {
+    top: 110px;
+    right: 32px;
+    width: 70px;
+    height: 97px;
+  }
+  .service-hero-bottom {
+    left: 25px;
+    right: 25px;
+    bottom: 25px;
+    font-size: 9px;
+  }
+  .header.journey-header {
+    gap: 12px;
+  }
+  .header.journey-header .journey-nav {
+    gap: 26px;
+  }
+  .header.journey-header .journey-nav > .journey-book {
+    font-size: 13px;
+    gap: 17px;
+  }
+  .booking-home > .booking-scene {
+    padding: 100px 20px 60px;
+    min-height: 100dvh;
+  }
+  .booking-scene .booking-introduction {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .booking-panel {
+    padding: 22px 20px;
+  }
+  .booking-step > h2 {
+    font-size: 29px;
+    margin-bottom: 20px;
+  }
+  .booking-progress {
+    margin-bottom: 18px;
+  }
+  .destination-choices > button {
+    min-height: 64px;
+  }
+  .help-choose {
+    margin-top: 8px;
+  }
+  .booking-step .step-intro {
+    font-size: 14px;
+  }
+  .booking-step fieldset.number-choice > legend {
+    font-size: 15px;
+  }
+  .number-options {
+    gap: 7px;
+  }
+  .number-options > button {
+    min-height: 44px;
+    font-size: 15px;
+  }
+  .booking-next {
+    font-size: 14px;
+    min-height: 50px;
+  }
+  .booking-answers {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    padding: 110px 25px 140px;
+    gap: 40px;
+  }
+  .booking-answers h2 {
+    font-size: 46px;
+  }
+  .booking-questions {
+    margin: 0;
+    padding-inline: 20px;
+  }
+  .booking-answers > .chapter-photo {
+    object-position: 40% 50%;
+  }
+  .chapter-nav {
+    right: 4px;
+  }
+  .chapter-nav a {
+    min-width: 18px;
+    min-height: 36px;
+  }
+  .chapter-nav i {
+    width: 6px;
+  }
+  .chapter-nav a[aria-current] i {
+    width: 12px;
+  }
+  .chapter-nav span {
+    display: none;
+  }
+  .is-home .footer-bottom {
+    justify-content: flex-end;
+  }
+  .is-home .footer-bottom > div {
+    gap: 25px;
+  }
+  .catch-gallery {
+    padding: 12px;
+  }
+  .journal-drawer {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100% - 24px);
+    padding-inline: 14px;
+    --frame-height: 170px;
+    --frame-max: 290px;
+  }
+  .journal-rail {
+    height: 235px;
+    gap: 17px;
+  }
+  .journal-rail::before {
+    flex-basis: max(
+      12px,
+      calc(
+        (
+            100% -
+              clamp(
+                100px,
+                var(--first-aspect) * var(--frame-height),
+                var(--frame-max)
+              )
+          ) /
+          2 - 17px
+      )
+    );
+  }
+  .journal-rail::after {
+    flex-basis: max(
+      12px,
+      calc(
+        (
+            100% -
+              clamp(
+                100px,
+                var(--last-aspect) * var(--frame-height),
+                var(--frame-max)
+              )
+          ) /
+          2 - 17px
+      )
+    );
+  }
+}
+@media (max-width: 360px) {
+  .service-hero {
+    padding-inline: 21px;
+  }
+  .service-hero h1 {
+    font-size: 41px;
+  }
+  .header.journey-header {
+    padding-inline: 21px;
+  }
+  .gallery-open {
+    width: auto;
+  }
+  .gallery-open > span {
+    display: inline;
+  }
+  .header.journey-header .journey-nav {
+    gap: 20px;
+  }
+  .booking-home > .booking-scene {
+    padding-inline: 14px;
+  }
+  .booking-panel {
+    padding-inline: 16px;
+  }
+  .number-options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .booking-answers h2 {
+    font-size: 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.home-snap {
+    scroll-behavior: auto;
+  }
+  .journal-drawer {
+    animation: none;
+  }
+  .journal-frame,
+  .chapter-nav i,
+  .chapter-nav span {
+    transition: none;
+  }
+}
+
+/* The licence menu uses the same square glass surface as its form. */
+.licence-control {
+  position: relative;
+  margin-top: 8px;
+}
+.licence-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid #ffffff60;
+  border-radius: 0;
+  background: #ffffff02;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+.licence-trigger > svg {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.licence-trigger[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.licence-trigger:hover,
+.licence-trigger[aria-expanded="true"] {
+  border-color: currentColor;
+}
+.licence-trigger:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+.licence-trigger[aria-invalid="true"] {
+  border-color: #f2ab95;
+}
+.licence-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 25;
+  padding: 5px;
+  border: 1px solid #ffffff80;
+  border-radius: 0;
+  background: #18232af7;
+  -webkit-backdrop-filter: blur(22px) brightness(0.72);
+  backdrop-filter: blur(22px) brightness(0.72);
+  max-height: min(250px, 45dvh);
+  overflow-y: auto;
+}
+.licence-menu[data-side="above"] {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.licence-menu > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+.licence-menu > button + button {
+  border-top: 1px solid #ffffff25;
+}
+.licence-menu > button.is-active {
+  background: #ffffff12;
+}
+.licence-menu > button[aria-selected="true"] {
+  font-weight: 550;
+}
+.licence-menu > button > span:last-child {
+  min-width: 16px;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-trigger {
+  border-color: #17212c60;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-menu {
+  border-color: #17212c65;
+  background: #e9edeff7;
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-menu > button + button {
+  border-color: #17212c25;
+}
+.booking-scene[data-backdrop="simcoe-ice"] .licence-menu > button.is-active {
+  background: #17212c0d;
+}
+@media (max-width: 700px) {
+  .licence-trigger {
+    font-size: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .licence-trigger > svg {
+    transition: none;
+  }
+}

@@ -1,6 +1,6 @@
-# fishn
+﻿# fishn
 
-A React + TypeScript website for private guided shoreline and ice fishing in Ontario. The homepage is a continuous photographic expedition through three waters and two fishing experiences, with immediate booking entry and an inline conversational request. It uses the supplied photography and five visual references, with geographic artwork based on existing OpenStreetMap data.
+A React + TypeScript website for private guided shoreline and ice fishing in Ontario. The homepage has three native snap sections: a clear service headline, four-step booking, and brief practical answers. A small optional journal drawer contains all 27 supplied photographs. It uses the supplied photography and five visual references, with geographic artwork based on existing OpenStreetMap data.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ The production server runs at **http://127.0.0.1:4173** by default. Set `PORT` t
 
 ## Pages
 
-- `/` — arrival, discovery, four destination/season scenes, the experience, Nikita, and inline booking/confirmation.
+- `/` — guided fishing hero, inline four-step booking/confirmation, and three optional practical answers.
 - `/experiences` — both experiences.
 - `/experiences/shoreline-fishing` and `/experiences/ice-fishing` — advertising-ready landing pages with photo journals, FAQs, and preselected booking links.
 - `/explore` — interactive field atlas with accessible text selection.
@@ -32,7 +32,13 @@ The production server runs at **http://127.0.0.1:4173** by default. Set `PORT` t
 
 Eleven routes are pre-rendered into complete HTML, with route-specific titles, descriptions, canonical URLs, Open Graph tags, sitemap, and robots.txt. React hydrates those pages for navigation and interactivity. The 404 page is returned with an actual 404 status by both production servers.
 
-## Booking email configuration
+## Netlify deployment and forms
+
+The project is ready for Netlify using netlify.toml: Node 24, npm run build:netlify, and dist/client. This build selects Netlify Forms, includes a complete static form blueprint, and submits the four-step session as URL-encoded data. Instagram remains an optional alternative alongside Submit.
+
+Enable form detection, deploy, and set the temporary email recipient in Forms > Submission notifications. The actual email address stays out of frontend code and this public repository. See [NETLIFY_SETUP.md](NETLIFY_SETUP.md) for the exact setup and inbox-change steps. The project is not deployed yet, so no live form delivery is claimed.
+
+## Existing API email configuration
 
 Copy `.env.example` to `.env` and set **server-only** variables:
 
@@ -45,7 +51,7 @@ Copy `.env.example` to `.env` and set **server-only** variables:
 | `VITE_META_PIXEL_ID`         | Optional authorized Meta Pixel ID; public build variable, blank by default |
 | `PORT`                       | Optional local/Node server port                                            |
 
-The business inbox and sender were not supplied. No email addresses or private keys have been invented or placed in frontend code. Until all three email variables exist, `/api/booking/status` reports `ready: false`, the form explains that online requests are opening soon, and Instagram is available as a contact route. A direct submission receives HTTP 503, never a false success.
+For the existing API adapter, all three email variables are required. Without them the API returns HTTP 503 and never a false success. The final contact form remains available and retains answers on an error; the Instagram alternative can copy the session plan. The Netlify production build uses Netlify Forms instead of this API.
 
 When configured, `POST /api/bookings` validates the body with the shared schema, enforces same-origin JSON requests and a 16 KiB limit, checks experience/location/date combinations, and sends a plain-text notification through [Resend’s email API](https://resend.com/docs/api-reference/emails/send-email). The message includes all requested trip/contact fields, licence acknowledgement, optional trip preferences, fishing familiarity, destination-help requests, optional customer notes, request ID, a validated client submission timestamp, and consented campaign attribution. The delivery provider’s receipt headers record trusted server receipt time. Reply-to is the customer’s address.
 
@@ -82,7 +88,7 @@ See [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md) for the visual analysis and [ASSE
 
 `scripts/prepare-assets.mjs` generates WebP variants up to 2560px without upscaling, records actual dimensions and source widths in `src/data/photography.json`, and copies the local Manrope font. Full-screen source sizes account for portrait cover cropping. The hero is preloaded; upcoming water exposures are warmed progressively. Originals remain untouched. No remote font, map SDK, or animation dependency is loaded.
 
-`src/data/scenes.ts` shares the destination/experience/photo mapping between the story and booking. Lake Simcoe shoreline uses `lake-simcoe`; ice uses `Lake-simcoe-ice`; the two rivers use their own named photographs. Booking changes the entire photographic environment and geographic outline, then retains them through the remaining questions and confirmation. Optional kind-of-day and familiarity questions personalize the conversation and the actual guide notification. The first screen can skip directly to the supported destination choices; first-time visitors skip the redundant familiarity question. Party size, preferred date, duration, optional notes/licence acknowledgement, and a visible final summary lead to explicit submission. Existing query preselection and delivery behavior remain intact. Reduced motion presents separate static photographic chapters in place of the sticky crossfading stage.
+src/data/scenes.ts shares the destination/experience/photo mapping. Each session retains its full destination photograph and real outline. The four steps are Session, Date, Group & time, and Your details. People and hours each use a one-tap 1-12 grid. Contact details and optional notes stay in memory. Submit uses the configured host adapter; an optional Instagram disclosure provides a copyable plan. The quiet Journal action opens a compact horizontal filmstrip without leaving the page or losing session choices. All 27 supplied photos are included. Display crops are defined in src/gallery/catches.ts; originals are untouched. Clear square panes use a light neutral fill and localized background blur. The three main sections snap natively, while longer form steps stay scrollable.
 
 The outlines use detailed OpenStreetMap geometry: the Lake Simcoe shoreline plus 20 island contours, named main/East/West Holland branches, and the Nottawasaga main-channel relation. Raw WGS84 source data and provenance are retained in `data/geography-source.json`, outside the public bundle. `node scripts/build-geography.mjs` projects and regenerates the SVG paths offline with a 0.12px distance tolerance. `node scripts/fetch-geography.mjs` deliberately refreshes the native OSM/Nominatim sources; it is not required for an application build. Paths join only at actual matching endpoints, river lines remain open, and source coverage is documented. Reference coordinates are not access points. Visible attribution and the [ODbL source terms](https://www.openstreetmap.org/copyright) remain. See [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md) for sources and scope.
 
@@ -98,7 +104,7 @@ Consented funnel events distinguish viewing the form from actually starting it, 
 
 ### Sites private preview / Worker
 
-`.openai/hosting.json` contains the registered Site ID. `npm run build` emits a self-contained Cloudflare Worker at `dist/server/index.js`, including pre-rendered HTML, React/CSS, fonts, and image bytes. Embedding avoids dependence on a proprietary asset binding and keeps the real `/api/bookings` endpoint available on the same origin. Assets receive ETags and cache headers. The Worker is approximately 9.00 MiB gzip, mostly photography; the images are served as image responses, never downloaded as frontend JavaScript. Check the current [Workers platform limits](https://developers.cloudflare.com/workers/platform/limits/) when deploying to another account.
+`.openai/hosting.json` contains the registered Site ID. `npm run build` emits a self-contained Cloudflare Worker at `dist/server/index.js`, including pre-rendered HTML, React/CSS, fonts, and image bytes. Embedding avoids dependence on a proprietary asset binding and keeps the real `/api/bookings` endpoint available on the same origin. Assets receive ETags and cache headers. The Worker is approximately 9 MiB gzip, mostly photography; the images are served as image responses, never downloaded as frontend JavaScript. Check the current [Workers platform limits](https://developers.cloudflare.com/workers/platform/limits/) when deploying to another account.
 
 Package and publish through the Sites workflow using the project ID in the manifest. Keep the Site private unless the owner requests public access. Set the three email secrets in **Sites runtime environment variables**, not in the hosting manifest. Changing a `VITE_` variable or the canonical origin requires rebuilding. Runtime email secret changes do not require frontend changes.
 
@@ -121,7 +127,7 @@ Browser tests expect the dev server at `127.0.0.1:5173`; `PLAYWRIGHT_BASE_URL` c
 
 The tests cover Ontario date policies, invalid ice locations, licence acknowledgement, consent, provider errors, idempotency, all four booking backdrops and outlines, conversational validation and back navigation, explicit final submission, inline homepage completion, existing routes and Maps links, mobile image loading/overflow, keyboard calendar access, and reduced motion. Browser success uses an explicitly mocked API; it is not evidence of real email delivery.
 
-Desktop (1440px), phone (390px), and reference-ratio portrait (918×1632) captures were compared with all five inspiration images. `npm run verify:visuals` writes 59 screenshots and a report under `.work/visual/conversion-final/`, including motion-enabled water transitions and every booking step. All booking POSTs are intercepted. Additional overflow checks cover 320, 768, and 1024px. See [VERIFICATION.md](VERIFICATION.md) for results and limits. Live email delivery, physical access, current ice conditions, and business operating schedules are not verified by software tests.
+Desktop, phone, portrait, narrow layouts, gallery crops, and all four booking backdrops are checked with npm run verify:visuals. The final captures are in .work/visual/minimal-final/. All POSTs are intercepted. Additional overflow checks cover 320, 768, and 1024px. See VERIFICATION.md for actual results and limits. A separate Netlify-mode browser test verifies the URL-encoded request and failure handling. Live email delivery is tested only after deploying and enabling notifications.
 
 ## Content sources
 

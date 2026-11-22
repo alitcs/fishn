@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>fishn form registration</title>
+  </head>
+  <body data-fishn-form-blueprint>
+    <!-- Netlify reads this static definition at deploy time. The React form posts to this file. -->
+    <form
+      name="fishing-session"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="website"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="fishing-session" />
+      <input type="hidden" name="subject" value="New fishn session request" />
+      <input name="requestId" /><input name="clientSubmittedAt" />
+      <input name="name" /><input type="email" name="email" /><input
+        name="phone"
+      />
+      <input name="experience" /><input name="experienceName" />
+      <input name="location" /><input name="locationName" />
+      <input name="groupSize" /><input name="duration" /><input
+        name="preferredDate"
+      />
+      <input name="licenceAcknowledgement" /><input
+        name="destinationAdviceRequested"
+      />
+      <textarea name="specialRequests"></textarea><input name="website" />
+      <input name="analyticsConsent" />
+      <input name="utm_source" /><input name="utm_medium" /><input
+        name="utm_campaign"
+      />
+      <input name="utm_content" /><input name="utm_term" /><input
+        name="fbclid"
+      />
+    </form>
+  </body>
+</html>

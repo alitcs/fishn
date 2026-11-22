@@ -1,11 +1,11 @@
-import { chromium } from "@playwright/test";
+﻿import { chromium } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 
-// Every booking POST is intercepted. No screenshot sends a real enquiry.
-const out = process.argv[2] || "conversion-final";
+// All POSTs are intercepted. Visual verification never contacts the business.
+const out = process.argv[2] || "minimal-final";
 if (!/^[a-z0-9-]+$/i.test(out))
   throw new Error("Use a simple output folder name.");
-const directory = `.work/visual/${out}`;
+const directory = ".work/visual/" + out;
 await mkdir(directory, { recursive: true });
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173";
 const browser = await chromium.launch({
@@ -21,13 +21,19 @@ async function settle(page) {
       [...document.images]
         .filter((image) => {
           const rect = image.getBoundingClientRect();
-          return rect.width > 0 && rect.bottom > 0 && rect.top < innerHeight;
+          return (
+            rect.width > 0 &&
+            rect.bottom > 0 &&
+            rect.top < innerHeight &&
+            rect.right > 0 &&
+            rect.left < innerWidth
+          );
         })
         .map((image) => image.decode().catch(() => {})),
     );
   });
 }
-async function capture(page, name, selector) {
+async function capture(page, name, selector, fullPage = false) {
   if (selector)
     await page.locator(selector).evaluate((element) =>
       scrollTo({
@@ -36,123 +42,110 @@ async function capture(page, name, selector) {
       }),
     );
   await settle(page);
-  await page.screenshot({ path: `${directory}/${name}.png` });
+  await page.screenshot({ path: directory + "/" + name + ".png", fullPage });
 }
 const next = (page) =>
-  page.getByRole("button", { name: "Continue", exact: true }).click();
+  page
+    .getByRole("button", { name: /^(Choose date|Set group|Your details)$/ })
+    .click();
+const chooseDate = (page) =>
+  page
+    .getByRole("button", { name: /request only/ })
+    .first()
+    .click();
+const trip = (page, name, mode = "Shoreline Fishing") =>
+  page.getByRole("button", { name: name + " — " + mode, exact: true }).click();
+async function reachContact(page) {
+  await next(page);
+  await chooseDate(page);
+  await next(page);
+  await next(page);
+}
 for (const [device, viewport] of [
   ["desktop", { width: 1440, height: 1000 }],
   ["mobile", { width: 390, height: 844 }],
 ]) {
   const page = await browser.newPage({ viewport, reducedMotion: "reduce" });
   page.on("pageerror", (error) => errors.push(error.message));
+  await page.route("**/api/booking/status", (route) =>
+    route.fulfill({ json: { ready: true } }),
+  );
   await page.route("**/api/bookings", (route) =>
     route.fulfill({
       status: 502,
       json: { message: "Delivery could not be verified. Please try again." },
     }),
   );
-  await page.goto(`${baseURL}/`);
-  for (const [name, selector] of [
-    ["arrival", ".arrival"],
-    ["discovery", ".threshold"],
-    ["simcoe-shore", '[data-scene="0"]'],
-    ["holland", '[data-scene="1"]'],
-    ["nottawasaga", '[data-scene="2"]'],
-    ["simcoe-ice", '[data-scene="3"]'],
-    ["experience", ".day-story"],
-    ["guide", ".together-story"],
-    ["invitation", ".commitment"],
-    ["embedded-book", "#book"],
-  ]) {
-    await capture(page, `${device}-${name}`, selector);
-  }
+  await page.route("**/__forms.html", (route) =>
+    route.request().method() === "POST"
+      ? route.fulfill({
+          status: 500,
+          contentType: "text/html",
+          body: "Submission unavailable",
+        })
+      : route.continue(),
+  );
+  await page.goto(baseURL + "/");
+  await capture(page, device + "-hero", ".service-hero");
+  await capture(page, device + "-inline-book", "#book");
+  await capture(page, device + "-answers", ".booking-answers");
+  await capture(page, device + "-home-full", ".service-hero", true);
   report.push({
     device,
     route: "/",
-    heroSource: await page
-      .locator(".arrival>img")
-      .evaluate((image) => image.currentSrc),
+    height: await page.evaluate(() => document.documentElement.scrollHeight),
     overflow: await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth,
     ),
   });
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
-  await page.goto(`${baseURL}/book`);
-  await capture(page, `${device}-book-intent`);
-  await page.getByRole("button", { name: /A peaceful escape/ }).click();
-  await capture(page, `${device}-book-experience-level`);
-  await page.getByRole("button", { name: /I’m completely new/ }).click();
-  await capture(page, `${device}-book-simcoe-shore`);
-  for (const [location, name] of [
-    ["Holland River", "holland"],
-    ["Nottawasaga River", "nottawasaga"],
-  ]) {
-    await page
-      .getByRole("button", {
-        name: `${location} — Shoreline Fishing`,
-        exact: true,
-      })
-      .click();
-    await capture(page, `${device}-book-${name}`);
-  }
-  await page
-    .getByRole("button", { name: "Lake Simcoe — Ice Fishing", exact: true })
-    .click();
-  await capture(page, `${device}-book-simcoe-ice`);
-  await page
-    .getByRole("button", { name: /I’m not sure — help me choose/ })
-    .click();
-  await capture(page, `${device}-book-help-choosing`);
-  await page
-    .getByRole("button", {
-      name: "Nottawasaga River — Shoreline Fishing",
-      exact: true,
-    })
-    .click();
-  await next(page);
-  await page.getByRole("button", { name: "4+ people", exact: true }).click();
-  await page.getByLabel("How many people?").fill("6");
-  await capture(page, `${device}-book-people`);
+  await page.goto(baseURL + "/book");
+  await capture(page, device + "-book-simcoe");
+  await trip(page, "Holland River");
+  await capture(page, device + "-book-holland");
+  await trip(page, "Nottawasaga River");
+  await capture(page, device + "-book-nottawasaga");
+  await trip(page, "Lake Simcoe", "Ice Fishing");
+  await capture(page, device + "-book-ice");
+  await page.getByRole("button", { name: "Choose for me" }).click();
+  await capture(page, device + "-book-help");
+  await trip(page, "Holland River");
   await next(page);
   await next(page);
-  await capture(page, `${device}-book-date-validation`);
-  await page
-    .getByRole("button", { name: /request only/ })
-    .first()
-    .click();
-  await capture(page, `${device}-book-date`);
+  await capture(page, device + "-date-error", "#book");
+  await chooseDate(page);
+  await capture(page, device + "-date", "#book");
   await next(page);
-  await capture(page, `${device}-book-duration`);
-  await page.getByRole("button", { name: "3 hours", exact: true }).click();
-  await page
-    .getByRole("textbox", { name: /Any special requests/ })
-    .fill("Please discuss equipment arrangements for our group.");
-  await capture(page, `${device}-book-notes-licence`);
-  await page
-    .getByRole("radio", {
-      name: "I’ll get the required licence before my trip.",
-    })
-    .check();
+  await page.getByRole("button", { name: "12 people", exact: true }).click();
+  await page.getByRole("button", { name: "12 hours", exact: true }).click();
+  await capture(page, device + "-group", "#book");
   await next(page);
-  await capture(page, `${device}-book-contact`);
+  await capture(page, device + "-contact", "#book");
+  await capture(page, device + "-contact-full", "#book", true);
   const submit = page.getByRole("button", {
-    name: "Request my fishing trip",
+    name: "Submit",
     exact: true,
   });
   await submit.click();
-  await capture(page, `${device}-book-contact-validation`);
+  await capture(page, device + "-contact-errors", "#book", true);
   await page.getByLabel("Full name").fill("Visual QA Visitor");
   await page.getByLabel("Email address").fill("visual-qa@example.com");
   await page.getByLabel("Phone number").fill("+1 416 555 0100");
+  await page.getByRole("combobox", { name: "Fishing licence" }).click();
+  await page
+    .getByRole("option", { name: /required licence before my trip/ })
+    .click();
+  await page.getByText("Add a note (optional)", { exact: true }).click();
+  await page
+    .getByLabel("Anything Nikita should know?")
+    .fill("Please discuss equipment arrangements.");
   await submit.click();
   await page
     .getByRole("alert")
-    .filter({ hasText: "Delivery could not be verified" })
+    .filter({
+      hasText: /Delivery could not be verified|couldn.*t be submitted/,
+    })
     .waitFor();
-  await capture(page, `${device}-book-delivery-error`);
+  await capture(page, device + "-delivery-error", "#book", true);
   await page.route("**/api/bookings", (route) => {
     const data = route.request().postDataJSON();
     return route.fulfill({
@@ -164,47 +157,59 @@ for (const [device, viewport] of [
       },
     });
   });
+  await page.route("**/__forms.html", (route) =>
+    route.request().method() === "POST"
+      ? route.fulfill({
+          status: 200,
+          contentType: "text/html",
+          body: "<html><body>Thank you</body></html>",
+        })
+      : route.continue(),
+  );
   await submit.click();
-  await page.getByRole("heading", { name: "Adventure requested." }).waitFor();
-  await capture(page, `${device}-book-submitted-mock`);
+  await page.getByRole("heading", { name: "Request sent." }).waitFor();
+  await capture(page, device + "-sent-mock", "#book");
+  await page.route("**/api/booking/status", (route) =>
+    route.fulfill({ json: { ready: false } }),
+  );
+  await page.goto(baseURL + "/book");
+  await reachContact(page);
+  await page
+    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .click();
+  await capture(page, device + "-instagram", "#book", true);
+  await page.getByRole("button", { name: "Open catch gallery" }).click();
+  for (let i = 0; i < (await page.locator(".journal-frame").count()); i++) {
+    if (i)
+      await page
+        .getByRole("button", { name: "Next catch", exact: true })
+        .click();
+    await capture(page, device + "-gallery-" + i);
+  }
+  await page.keyboard.press("Escape");
   report.push({
     device,
     route: "/book",
-    confirmationTop: (await page.locator("#confirmation-title").boundingBox())
-      .y,
     overflow: await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth,
     ),
   });
   await page.close();
 }
-
-// Record the actual sticky/crossfade behavior with motion enabled as well.
-const motionPage = await browser.newPage({
+const motion = await browser.newPage({
   viewport: { width: 1440, height: 1000 },
   reducedMotion: "no-preference",
 });
-motionPage.on("pageerror", (error) => errors.push(error.message));
-await motionPage.goto(`${baseURL}/`);
-for (let index = 0; index < 4; index++) {
-  await motionPage.locator(`[data-scene="${index}"]`).evaluate((element) =>
-    scrollTo({
-      top: element.getBoundingClientRect().top + scrollY + 50,
-      behavior: "instant",
-    }),
-  );
-  await motionPage.waitForFunction(
-    (index) =>
-      document
-        .querySelector(".water-journey")
-        ?.getAttribute("data-active-scene") ===
-      ["simcoe-shore", "holland-shore", "nottawasaga-shore", "simcoe-ice"][
-        index
-      ],
-    index,
-  );
-  await settle(motionPage);
-  await motionPage.waitForFunction(() =>
+motion.on("pageerror", (error) => errors.push(error.message));
+await motion.goto(baseURL + "/book");
+for (const [name, mode] of [
+  ["Lake Simcoe", "Shoreline Fishing"],
+  ["Holland River", "Shoreline Fishing"],
+  ["Nottawasaga River", "Shoreline Fishing"],
+  ["Lake Simcoe", "Ice Fishing"],
+]) {
+  await trip(motion, name, mode);
+  await motion.waitForFunction(() =>
     document
       .getAnimations()
       .every(
@@ -213,34 +218,62 @@ for (let index = 0; index < 4; index++) {
           animation.effect?.getTiming().iterations === Infinity,
       ),
   );
-  await capture(motionPage, `motion-water-${index + 1}`);
+  await capture(
+    motion,
+    "motion-" + (await motion.locator("#book").getAttribute("data-backdrop")),
+  );
   report.push({
     device: "desktop-motion",
-    scene: index,
-    activeImage: await motionPage
-      .locator(".water-exposure.is-active img")
+    scene: await motion.locator("#book").getAttribute("data-backdrop"),
+    image: await motion
+      .locator(".booking-exposure.is-active")
       .getAttribute("src"),
-    stagePosition: await motionPage
-      .locator(".water-stage")
-      .evaluate((element) => Math.round(element.getBoundingClientRect().top)),
+    opacity: await motion
+      .locator(".booking-exposure.is-active")
+      .evaluate((element) => getComputedStyle(element).opacity),
   });
 }
-await motionPage.close();
-
+await motion.close();
 for (const width of [320, 768, 1024]) {
   const page = await browser.newPage({
     viewport: { width, height: 900 },
     reducedMotion: "reduce",
   });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.route("**/api/booking/status", (route) =>
+    route.fulfill({ json: { ready: true } }),
+  );
   for (const route of ["/", "/experiences", "/explore", "/book"]) {
-    await page.goto(`${baseURL}${route}`);
+    await page.goto(baseURL + route);
     report.push({
-      device: `width-${width}`,
+      device: "width-" + width,
       route,
       overflow: await page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth,
       ),
     });
+    if (route === "/book") {
+      await capture(page, "width-" + width + "-book");
+      await next(page);
+      await chooseDate(page);
+      await next(page);
+      report.push({
+        device: "width-" + width,
+        step: "group",
+        overflow: await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+      });
+      await next(page);
+      await capture(page, "width-" + width + "-contact", "#book", true);
+      report.push({
+        device: "width-" + width,
+        step: "contact",
+        overflow: await page.evaluate(
+          () => document.documentElement.scrollWidth > innerWidth,
+        ),
+      });
+    }
   }
   await page.close();
 }
@@ -248,13 +281,12 @@ const portrait = await browser.newPage({
   viewport: { width: 918, height: 1632 },
   reducedMotion: "reduce",
 });
-await portrait.goto(`${baseURL}/`);
-await capture(portrait, "reference-portrait-arrival", ".arrival");
-await capture(portrait, "reference-portrait-experience", ".day-story");
-await capture(portrait, "reference-portrait-water", '[data-scene="1"]');
+await portrait.goto(baseURL + "/");
+await capture(portrait, "portrait-hero", ".service-hero");
+await capture(portrait, "portrait-book", "#book");
 await portrait.close();
 await writeFile(
-  `${directory}/report.json`,
+  directory + "/report.json",
   JSON.stringify({ errors, report }, null, 2),
 );
 await browser.close();

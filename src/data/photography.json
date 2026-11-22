@@ -205,6 +205,20 @@
       }
     ]
   },
+  "icefishtail1": {
+    "width": 1152,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishtail1-journal-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishtail1-journal-960.webp"
+      }
+    ]
+  },
   "icefishtail3": {
     "width": 1152,
     "height": 1440,
@@ -256,6 +270,34 @@
       {
         "width": 736,
         "src": "/images/lure-960.webp"
+      }
+    ]
+  },
+  "manyfishice": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/manyfishice-journal-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/manyfishice-journal-960.webp"
+      }
+    ]
+  },
+  "monster+ice": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monster+ice-journal-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monster+ice-journal-960.webp"
       }
     ]
   },
@@ -331,6 +373,20 @@
       }
     ]
   },
+  "monsterheadfish": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterheadfish-journal-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterheadfish-journal-960.webp"
+      }
+    ]
+  },
   "monsterheadfish1": {
     "width": 1440,
     "height": 1440,
@@ -346,6 +402,20 @@
       {
         "width": 1440,
         "src": "/images/monsterheadfish1-1600.webp"
+      }
+    ]
+  },
+  "monsterskinice": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterskinice-journal-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterskinice-journal-960.webp"
       }
     ]
   },

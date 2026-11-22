@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { CatchGallery } from "./gallery/CatchGallery";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { officialLinks } from "./data/config";
 import { AnalyticsSettings, track } from "./services/analytics";
@@ -33,6 +35,7 @@ export function Photo({
   priority = false,
   onLoad,
   sizes = "(max-width: 700px) 100vw, 50vw",
+  style,
 }: {
   name: string;
   alt: string;
@@ -41,6 +44,7 @@ export function Photo({
   priority?: boolean;
   onLoad?: React.ReactEventHandler<HTMLImageElement>;
   sizes?: string;
+  style?: CSSProperties;
 }) {
   const photo = photography[name as keyof typeof photography];
   // A tall cover crop needs enough pixels for its height, not just viewport width.
@@ -51,7 +55,12 @@ export function Photo({
   return (
     <img
       className={className}
-      src={`/images/${name}-960.webp`}
+      style={style}
+      src={
+        photo?.sources.find((source) => source.width >= 960)?.src ??
+        photo?.sources.at(-1)?.src ??
+        `/images/${name}-960.webp`
+      }
       srcSet={photo?.sources
         .map((source) => `${source.src} ${source.width}w`)
         .join(", ")}
@@ -144,21 +153,23 @@ export function ChapterNote({
   );
 }
 const routeTitles: Record<string, string> = {
-  "/": "A little further from the everyday.",
+  "/": "Private guided fishing in Ontario",
   "/experiences": "Find your kind of outside.",
   "/experiences/shoreline-fishing": "Shoreline Fishing in Ontario",
   "/experiences/ice-fishing": "Guided Ice Fishing on Lake Simcoe",
   "/explore": "An atlas of good days.",
   "/about": "Meet your guide",
-  "/book": "Request your adventure",
+  "/book": "Plan your fishing session",
   "/privacy": "Privacy & your information",
 };
 export function Layout() {
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const { pathname } = useLocation();
   const previous = useRef(pathname);
   const photoHeader = pathname !== "/privacy";
   useEffect(() => {
     document.title = `fishn — ${routeTitles[pathname] ?? "Explore Ontario"}`;
+    document.documentElement.classList.toggle("home-snap", pathname === "/");
     if (previous.current !== pathname) {
       window.scrollTo(0, 0);
       document
@@ -168,7 +179,7 @@ export function Layout() {
     }
   }, [pathname]);
   return (
-    <>
+    <div className={`site-shell ${pathname === "/" ? "is-home" : ""}`}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
@@ -178,23 +189,30 @@ export function Layout() {
         <Link to="/" className="wordmark" aria-label="fishn home">
           fishn<span className="brand-dot">.</span>
         </Link>
-        {pathname === "/" ? (
-          <span className="header-note">AN INVITATION TO SLOW DOWN.</span>
-        ) : (
-          <Link className="journey-return" to="/">
-            Back to the journey
-          </Link>
-        )}
         <nav aria-label="Main navigation" className="journey-nav">
+          <button
+            type="button"
+            className="gallery-open"
+            onClick={() => setGalleryOpen(true)}
+            aria-haspopup="dialog"
+            aria-label="Open catch gallery"
+          >
+            <span>Journal</span>
+            <span aria-hidden="true">+</span>
+          </button>
           {pathname === "/" ? (
-            <BookLink className="journey-book" source="header">
-              Plan your fishing trip <span aria-hidden="true">+</span>
-            </BookLink>
-          ) : pathname === "/book" ? (
-            <span className="eyebrow">A GOOD DAY IN THE MAKING</span>
-          ) : (
+            <a
+              className="journey-book"
+              href="#book"
+              onClick={() =>
+                track("BookingEntryClicked", { placement: "header" })
+              }
+            >
+              Book <span aria-hidden="true">↗</span>
+            </a>
+          ) : pathname === "/book" ? null : (
             <BookLink className="journey-book">
-              Plan your fishing trip <span aria-hidden="true">+</span>
+              Book <span aria-hidden="true">↗</span>
             </BookLink>
           )}
         </nav>
@@ -202,6 +220,7 @@ export function Layout() {
       <main id="main">
         <Outlet />
       </main>
+      <CatchGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
       <footer className="footer">
         <div className="footer-bottom">
           <Link className="wordmark" to="/">
@@ -216,7 +235,7 @@ export function Layout() {
           <span>© {new Date().getFullYear()} fishn</span>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
 export function Invitation() {

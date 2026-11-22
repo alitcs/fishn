@@ -33,7 +33,7 @@ export const bookingSchema = z
       ),
     experience: z.enum(["shoreline-fishing", "ice-fishing"]),
     location: z.enum(["lake-simcoe", "holland-river", "nottawasaga-river"]),
-    groupSize: z.number().int().min(1).max(100),
+    groupSize: z.number().int().min(1).max(12),
     duration: z
       .number()
       .refine(

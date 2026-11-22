@@ -119,7 +119,6 @@ export function Calendar({
           );
         })}
       </div>
-      <p className="calendar-note">All selectable dates are request-only.</p>
     </div>
   );
 }

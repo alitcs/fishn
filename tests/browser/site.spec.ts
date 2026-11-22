@@ -1,93 +1,87 @@
-import { test, expect } from "@playwright/test";
+﻿import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+
 const next = (page: Page) =>
-  page.getByRole("button", { name: /^(Continue|Skip for now)$/ }).click();
+  page
+    .getByRole("button", { name: /^(Choose date|Set group|Your details)$/ })
+    .click();
 const tripButton = (
   page: Page,
   place = "Lake Simcoe",
   experience = "Shoreline Fishing",
 ) =>
-  page.getByRole("button", { name: `${place} — ${experience}`, exact: true });
+  page.getByRole("button", { name: place + " — " + experience, exact: true });
 const submitButton = (page: Page) =>
-  page.getByRole("button", { name: "Request my fishing trip", exact: true });
-async function reachWater(page: Page) {
-  while (Number(await page.locator("#book").getAttribute("data-step")) < 2)
-    await next(page);
-}
-async function reachContact(page: Page) {
-  await reachWater(page);
-  await next(page);
-  await next(page);
-  await page
+  page.getByRole("button", { name: "Submit", exact: true });
+const chooseDate = (page: Page) =>
+  page
     .getByRole("button", { name: /request only/ })
     .first()
     .click();
+async function reachContact(page: Page) {
   await next(page);
-  await page.getByRole("button", { name: "2 hours", exact: true }).click();
-  await page
-    .getByRole("radio", {
-      name: "I’ll get the required licence before my trip.",
-    })
-    .check();
+  await chooseDate(page);
+  await next(page);
   await next(page);
 }
 async function fillContact(page: Page) {
   await page.getByLabel("Full name").fill("Test Visitor");
   await page.getByLabel("Email address").fill("visitor@example.com");
   await page.getByLabel("Phone number").fill("+1 416 555 0100");
+  await page.getByRole("combobox", { name: "Fishing licence" }).click();
+  await page
+    .getByRole("option", { name: /required licence before my trip/ })
+    .click();
 }
+async function mockSuccess(page: Page) {
+  await page.route("**/api/bookings", (route) => {
+    const data = route.request().postDataJSON();
+    return route.fulfill({
+      status: 201,
+      json: {
+        requestId: data.requestId,
+        status: "pending",
+        submittedAt: new Date().toISOString(),
+      },
+    });
+  });
+}
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/booking/status", (route) =>
+    route.fulfill({ json: { ready: true } }),
+  );
+});
 
-test("hero explains guided fishing and offers immediate booking while the scroll journey remains intact", async ({
+test("the service is explicit and the hero leads directly into the inline four-step flow", async ({
   page,
 }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "A little further",
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Guided fishingin Ontario.",
   );
-  await expect(page.locator(".arrival-service")).toContainText(
-    "Private guided fishing",
+  await expect(page.locator(".service-description")).toContainText(
+    "Private sessions. Beginners welcome.",
   );
-  await expect(page.locator(".arrival-fishing img")).toBeVisible();
+  await expect(page.locator(".hero-plan")).toBeVisible();
+  await expect(page.locator(".service-catch img")).toBeVisible();
   await page.locator(".hero-plan").click();
-  await expect(page).toHaveURL(/\/book$/);
+  await expect(page).toHaveURL(/\/#book$/);
+  await expect(page.locator(".booking-progress")).toHaveAttribute(
+    "aria-label",
+    "Step 1 of 4: Session",
+  );
   await expect(
-    page.getByRole("heading", {
-      name: "What kind of day are you looking for?",
-    }),
+    page.getByRole("heading", { name: "Choose your water." }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Go straight to trip details", exact: true })
-    .click();
-  await expect(page.locator("#book")).toHaveAttribute("data-step", "2");
-  await page.goto("/");
-  for (const [i, id] of [
-    "simcoe-shore",
-    "holland-shore",
-    "nottawasaga-shore",
-    "simcoe-ice",
-  ].entries()) {
-    await page.locator(`[data-scene="${i}"]`).evaluate((element) =>
-      scrollTo({
-        top: element.getBoundingClientRect().top + scrollY + 100,
-        behavior: "instant",
-      }),
-    );
-    await expect(page.locator(".water-journey")).toHaveAttribute(
-      "data-active-scene",
-      id,
-    );
-    await expect(page.locator(".water-exposure.is-active img")).toBeVisible();
-  }
-  await page.locator("#book").scrollIntoViewIfNeeded();
-  await expect(
-    page.getByRole("heading", {
-      name: "What kind of day are you looking for?",
-    }),
-  ).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
+  expect(
+    await page
+      .locator(".service-hero")
+      .evaluate((el) => el.nextElementSibling?.id),
+  ).toBe("book");
+  await expect(page.locator("main h1")).toHaveCount(1);
 });
 
-test("existing experience, source, Maps, and preselection routes remain available", async ({
+test("existing detail, Maps, and experience preselection routes work", async ({
   page,
 }) => {
   await page.goto("/experiences");
@@ -95,7 +89,6 @@ test("existing experience, source, Maps, and preselection routes remain availabl
   await page
     .getByRole("link", { name: "Request ice fishing", exact: true })
     .click();
-  await reachWater(page);
   await expect(tripButton(page, "Lake Simcoe", "Ice Fishing")).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -117,11 +110,10 @@ test("existing experience, source, Maps, and preselection routes remain availabl
   ).toHaveAttribute("href", /google.com\/maps\/search/);
 });
 
-test("all four available destination/experience combinations keep the correct photograph and outline", async ({
+test("all four session choices retain their real photograph and geographic outline", async ({
   page,
 }) => {
   await page.goto("/book");
-  await reachWater(page);
   for (const [place, experience, id, image] of [
     ["Lake Simcoe", "Shoreline Fishing", "lake-simcoe", "lake-simcoe"],
     ["Holland River", "Shoreline Fishing", "holland-river", "HollandRiver"],
@@ -136,14 +128,14 @@ test("all four available destination/experience combinations keep the correct ph
     await tripButton(page, place, experience).click();
     await expect(page.locator(".booking-exposure.is-active")).toHaveAttribute(
       "src",
-      new RegExp(`/images/${image}-`),
+      new RegExp("/images/" + image + "-"),
     );
     await expect(page.locator(".booking-outlines .is-active")).toHaveAttribute(
       "data-location",
       id,
     );
   }
-  await expect(page.locator(".destination-choices>button")).toHaveCount(4);
+  await expect(page.locator(".destination-choices > button")).toHaveCount(4);
   await expect(
     page.getByRole("button", {
       name: "Holland River — Ice Fishing",
@@ -152,40 +144,38 @@ test("all four available destination/experience combinations keep the correct ph
   ).toHaveCount(0);
 });
 
-test("first-time visitors avoid a repeated experience question and can ask for destination help", async ({
+test("uncertain visitors can ask Nikita to choose without extra preference questions", async ({
   page,
 }) => {
   await page.goto("/book");
-  await page
-    .getByRole("button", { name: /My first fishing experience/ })
-    .click();
-  await expect(page.locator("#book")).toHaveAttribute("data-step", "2");
-  await expect(page.locator(".personalized-guidance")).toContainText(
-    "First time?",
+  await page.getByRole("button", { name: "Choose for me" }).click();
+  await expect(page.locator(".choice-advice")).toContainText(
+    "Location confirmed with Nikita.",
   );
-  await page
-    .getByRole("button", { name: /I’m not sure — help me choose/ })
-    .click();
-  await expect(page.locator(".choice-advice")).toContainText("starting point");
   await expect(page.locator("#book")).toHaveAttribute(
     "data-backdrop",
     "simcoe-shore",
   );
+  await reachContact(page);
+  await expect(page.locator(".session-review")).toContainText(
+    "Location with Nikita",
+  );
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await expect(page.locator(".help-choose")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await tripButton(page, "Holland River").click();
   await expect(page.locator(".choice-advice")).toHaveCount(0);
-  await page.getByRole("button", { name: "Back", exact: true }).click();
-  await expect(page.locator("#book")).toHaveAttribute("data-step", "0");
-  await expect(
-    page.getByRole("button", { name: /My first fishing experience/ }),
-  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".help-choose")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
 });
 
-test("conversation validates, retains answers and optional notes, and retries the same real request", async ({
+test("four-step request validates, preserves answers, and safely retries delivery", async ({
   page,
 }) => {
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
   const requests: Record<string, unknown>[] = [];
   await page.route("**/api/bookings", (route) => {
     requests.push(route.request().postDataJSON());
@@ -195,67 +185,60 @@ test("conversation validates, retains answers and optional notes, and retries th
     });
   });
   await page.goto("/book?experience=shoreline-fishing&location=holland-river");
-  await page.getByRole("button", { name: /A peaceful escape/ }).click();
-  await page.getByRole("button", { name: /I’m completely new/ }).click();
   await expect(tripButton(page, "Holland River")).toHaveAttribute(
     "aria-pressed",
     "true",
   );
   await tripButton(page, "Lake Simcoe", "Ice Fishing").click();
   await next(page);
-  await page.getByRole("button", { name: "4+ people", exact: true }).click();
-  await page.getByLabel("How many people?").fill("6");
   await next(page);
+  await expect(
+    page.getByText("Please choose a preferred request date."),
+  ).toBeVisible();
+  await chooseDate(page);
   await next(page);
-  await expect(page.getByRole("alert")).toContainText("A little detail");
-  await page
-    .getByRole("button", { name: /request only/ })
-    .first()
-    .click();
+  await page.getByRole("button", { name: "12 people", exact: true }).click();
+  await page.getByRole("button", { name: "12 hours", exact: true }).click();
+  await expect(page.locator(".number-options > button")).toHaveCount(24);
+  await expect(page.locator("input[type=number]")).toHaveCount(0);
   await next(page);
-  await page.getByRole("button", { name: "3 hours", exact: true }).click();
-  await page
-    .getByRole("textbox", { name: /Any special requests/ })
-    .fill("Please discuss equipment for our group.");
-  await next(page);
+  await expect(page.locator(".booking-progress")).toHaveAttribute(
+    "aria-label",
+    "Step 4 of 4: Your details",
+  );
+  await expect(page.locator(".session-review")).toContainText("12 people");
+  expect(requests).toHaveLength(0);
+  await submitButton(page).click();
   await expect(
     page.getByText("Please acknowledge the fishing licence requirements."),
   ).toBeVisible();
-  await page
-    .getByRole("radio", {
-      name: "I’ll get the required licence before my trip.",
-    })
-    .check();
-  await next(page);
-  await expect(page.getByRole("alert")).toHaveCount(0);
-  expect(requests).toHaveLength(0);
-  await expect(page.locator(".conversation-summary")).toContainText("6 people");
-  await expect(page.locator(".conversation-summary")).toContainText(
-    "No payment now",
-  );
-  await submitButton(page).click();
-  await expect(page.getByRole("alert")).toContainText("A few details");
   await fillContact(page);
+  await page.getByText("Add a note (optional)", { exact: true }).click();
+  await page
+    .getByLabel("Anything Nikita should know?")
+    .fill("Please discuss equipment for our group.");
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(
-    page.getByRole("textbox", { name: /Any special requests/ }),
-  ).toHaveValue("Please discuss equipment for our group.");
+    page.getByRole("button", { name: "12 people", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await next(page);
   await expect(page.getByLabel("Full name")).toHaveValue("Test Visitor");
-  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.getByText("Add a note (optional)", { exact: true }).click();
+  await expect(page.getByLabel("Anything Nikita should know?")).toHaveValue(
+    "Please discuss equipment for our group.",
+  );
   expect(requests).toHaveLength(0);
   await submitButton(page).click();
   await expect(page.getByRole("alert")).toContainText(
     "Delivery could not be verified",
   );
-  await expect(page.getByLabel("Full name")).toHaveValue("Test Visitor");
   const storage = await page.evaluate(() => JSON.stringify(localStorage));
-  for (const text of [
+  for (const value of [
     "visitor@example.com",
     "Test Visitor",
     "Please discuss equipment",
   ])
-    expect(storage).not.toContain(text);
+    expect(storage).not.toContain(value);
   await page.route("**/api/bookings", (route) => {
     const data = route.request().postDataJSON();
     requests.push(data);
@@ -270,72 +253,123 @@ test("conversation validates, retains answers and optional notes, and retries th
   });
   await submitButton(page).click();
   await expect(
-    page.getByRole("heading", { name: "Adventure requested." }),
+    page.getByRole("heading", { name: "Request sent." }),
   ).toBeVisible();
-  await expect(page.getByText(/not yet confirmed or reserved/)).toBeVisible();
+  await expect(
+    page.getByText(/Date and price await confirmation/),
+  ).toBeVisible();
   expect(requests).toHaveLength(2);
   expect(requests[0].requestId).toBe(requests[1].requestId);
   expect(requests[1]).toMatchObject({
-    groupSize: 6,
-    duration: 3,
+    groupSize: 12,
+    duration: 12,
     location: "lake-simcoe",
     experience: "ice-fishing",
-    tripIntent: "escape",
-    fishingLevel: "new",
     specialRequests: "Please discuss equipment for our group.",
   });
+  expect(requests[1]).not.toHaveProperty("tripIntent");
   expect(
     (await page.locator("#confirmation-title").boundingBox())!.y,
   ).toBeGreaterThan(88);
 });
 
-test("optional questions can be skipped and unconfigured delivery never claims a submission", async ({
+test("submission remains available alongside the optional Instagram route", async ({
   page,
 }) => {
   await page.route("**/api/booking/status", (route) =>
     route.fulfill({ json: { ready: false } }),
   );
-  await page.goto("/book");
-  await expect(
-    page.getByText("Online requests are opening soon."),
-  ).toBeVisible();
-  await reachContact(page);
-  await expect(submitButton(page)).toBeDisabled();
-  await expect(
-    page.getByRole("link", { name: /contact Nikita on Instagram/ }),
-  ).toHaveAttribute("href", /instagram.com/);
-});
-
-test("the entire request still works inline on the homepage", async ({
-  page,
-}) => {
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
-  await page.route("**/api/bookings", (route) => {
-    const data = route.request().postDataJSON();
-    return route.fulfill({
-      status: 201,
-      json: {
-        requestId: data.requestId,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          (window as typeof window & { copiedPlan: string }).copiedPlan = value;
+        },
       },
     });
   });
+  let submissions = 0;
+  await page.route("**/api/bookings", (route) => {
+    submissions++;
+    return route.abort();
+  });
+  await page.goto("/book");
+  await reachContact(page);
+  await expect(page.getByLabel("Full name")).toBeVisible();
+  await expect(submitButton(page)).toBeEnabled();
+  await page
+    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Copy session details", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Copied." }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => (window as typeof window & { copiedPlan: string }).copiedPlan,
+    ),
+  ).toContain("Lake Simcoe");
+  await expect(
+    page.getByRole("link", { name: "Open Instagram" }),
+  ).toHaveAttribute("href", /instagram.com/);
+  await expect(
+    page.getByRole("heading", { name: "Request sent." }),
+  ).toHaveCount(0);
+  expect(submissions).toBe(0);
+});
+
+test("clipboard denial still leaves a selectable plan for the Instagram message", async ({
+  page,
+}) => {
+  await page.route("**/api/booking/status", (route) =>
+    route.fulfill({ json: { ready: false } }),
+  );
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async () => {
+          throw new Error("Clipboard unavailable");
+        },
+      },
+    }),
+  );
+  await page.goto("/book");
+  await reachContact(page);
+  await page
+    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Copy session details", exact: true })
+    .click();
+  await expect(page.getByLabel("Copy this into your message")).toHaveValue(
+    /Hi Nikita/,
+  );
+  await expect(
+    page.getByRole("link", { name: "Open Instagram" }),
+  ).toBeVisible();
+});
+
+test("the complete request works inline without a page change or premature submission", async ({
+  page,
+}) => {
+  await mockSuccess(page);
   await page.goto("/");
-  await page.locator("#book").scrollIntoViewIfNeeded();
+  await page.locator(".hero-plan").click();
   await reachContact(page);
   await fillContact(page);
   await submitButton(page).click();
   await expect(
-    page.getByRole("heading", { name: "Adventure requested." }),
+    page.getByRole("heading", { name: "Request sent." }),
   ).toBeVisible();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/#book$/);
   await expect(page.locator("main h1")).toHaveCount(1);
 });
 
-test("consented funnel measurement uses selected options and excludes contact details and notes", async ({
+test("consented funnel measurement excludes personal details and notes", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -346,69 +380,40 @@ test("consented funnel measurement uses selected options and excludes contact de
       target.funnel.push(args);
     };
   });
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
-  await page.route("**/api/bookings", (route) => {
-    const data = route.request().postDataJSON();
-    return route.fulfill({
-      status: 201,
-      json: {
-        requestId: data.requestId,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
-      },
-    });
-  });
+  await mockSuccess(page);
   await page.goto("/book");
-  await page.getByRole("button", { name: /A peaceful escape/ }).click();
-  await page.getByRole("button", { name: /I’m completely new/ }).click();
   await tripButton(page, "Holland River").click();
-  await next(page);
-  await next(page);
-  await page
-    .getByRole("button", { name: /request only/ })
-    .first()
-    .click();
-  await next(page);
-  await page.getByRole("button", { name: "2 hours", exact: true }).click();
-  await page
-    .getByRole("textbox", { name: /Any special requests/ })
-    .fill("Private customer note.");
-  await page
-    .getByRole("radio", {
-      name: "I’ll get the required licence before my trip.",
-    })
-    .check();
-  await next(page);
+  await reachContact(page);
   await fillContact(page);
+  await page.getByText("Add a note (optional)", { exact: true }).click();
+  await page
+    .getByLabel("Anything Nikita should know?")
+    .fill("Private customer note.");
   await submitButton(page).click();
   await expect(
-    page.getByRole("heading", { name: "Adventure requested." }),
+    page.getByRole("heading", { name: "Request sent." }),
   ).toBeVisible();
   const events = await page.evaluate(
     () => (window as typeof window & { funnel: unknown[][] }).funnel,
   );
-  const names = events.map((event) => event[1]);
   for (const name of [
     "BookingStarted",
-    "TripPreferenceSelected",
     "DestinationSelected",
     "BookingDetailsCompleted",
     "ContactStepReached",
     "Lead",
   ])
-    expect(names).toContain(name);
-  for (const text of [
+    expect(events.map((event) => event[1])).toContain(name);
+  for (const value of [
     "Test Visitor",
     "visitor@example.com",
     "Private customer note",
     "416 555",
   ])
-    expect(JSON.stringify(events)).not.toContain(text);
+    expect(JSON.stringify(events)).not.toContain(value);
 });
 
-test("mobile routes retain image loading and do not overflow", async ({
+test("mobile routes load their photography without overflow", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -454,20 +459,12 @@ test("mobile routes retain image loading and do not overflow", async ({
   expect(errors).toEqual([]);
 });
 
-test("reduced motion and keyboard date selection remain usable", async ({
+test("reduced motion and keyboard navigation remain usable", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await expect(page.locator(".scene-static-photo").first()).toHaveCSS(
-    "display",
-    "block",
-  );
-  await expect(page.locator(".water-stage")).toHaveCSS("display", "none");
   await page.goto("/book");
-  await reachWater(page);
-  await next(page);
   await next(page);
   await page
     .getByRole("button", { name: /request only/ })
@@ -480,4 +477,154 @@ test("reduced motion and keyboard date selection remain usable", async ({
       () => getComputedStyle(document.documentElement).scrollBehavior,
     ),
   ).toBe("auto");
+  await page.keyboard.press("Enter");
+  await next(page);
+  await expect(
+    page.getByRole("button", { name: "2 hours", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "3 people", exact: true }).click();
+  await expect(page.locator("#book")).toHaveAttribute("data-step", "2");
+  await next(page);
+  await expect(page.locator("#booking-step-title")).toBeFocused();
+});
+
+test("the optional gallery preserves the session, traps focus, and supports keyboard browsing", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.locator(".hero-plan").click();
+  await next(page);
+  await chooseDate(page);
+  const selectedDate = await page
+    .locator(".calendar-grid button[aria-pressed=true]")
+    .getAttribute("data-date");
+  await page.getByRole("button", { name: "Open catch gallery" }).click();
+  const dialog = page.getByRole("dialog", { name: "Journal" });
+  await expect(dialog).toBeVisible();
+  await expect(page.locator(".journal-frame")).toHaveCount(27);
+  expect(
+    await page.locator(".journal-frame img").evaluateAll(async (nodes) => {
+      const images = nodes as HTMLImageElement[];
+      images.forEach((image) => (image.loading = "eager"));
+      await Promise.all(images.map((image) => image.decode().catch(() => {})));
+      return images
+        .filter((image) => !image.naturalWidth)
+        .map((image) => image.src);
+    }),
+  ).toEqual([]);
+  await page.getByRole("button", { name: "Next catch", exact: true }).click();
+  await expect(page.locator(".gallery-controls > span")).toHaveText("02 / 27");
+  await expect(
+    page.locator(".journal-frame[aria-pressed=true] img"),
+  ).toHaveAttribute("src", /monsterfish2/);
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 27");
+  await page.keyboard.press("End");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("27 / 27");
+  await expect(
+    page.locator(".journal-frame[aria-pressed=true] img"),
+  ).toHaveAttribute("src", /winterpath/);
+  await page.keyboard.press("Home");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 27");
+  await page.keyboard.press("Tab");
+  expect(
+    await page.evaluate(() =>
+      Boolean(document.activeElement?.closest("dialog")),
+    ),
+  ).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(page.locator("#book")).toHaveAttribute("data-step", "1");
+  await expect(
+    page.locator(".calendar-grid button[aria-pressed=true]"),
+  ).toHaveAttribute("data-date", selectedDate!);
+  await expect(
+    page.getByRole("button", { name: "Open catch gallery" }),
+  ).toBeFocused();
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe(
+    "hidden",
+  );
+});
+
+test("the three homepage chapters snap in order while the contact form remains scrollable", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveCSS(
+    "scroll-snap-type",
+    "y mandatory",
+  );
+  await page.mouse.move(400, 450);
+  await page.mouse.wheel(0, 750);
+  await expect
+    .poll(() =>
+      page
+        .locator("#book")
+        .evaluate((el) => Math.abs(el.getBoundingClientRect().top)),
+    )
+    .toBeLessThan(3);
+  await page.mouse.wheel(0, 750);
+  await expect
+    .poll(() =>
+      page
+        .locator("#good-to-know")
+        .evaluate((el) => Math.abs(el.getBoundingClientRect().top)),
+    )
+    .toBeLessThan(3);
+  await expect(
+    page.getByRole("heading", { name: "Good to know." }),
+  ).toBeVisible();
+  await page.locator(".answers-book").click();
+  await expect
+    .poll(() =>
+      page
+        .locator("#book")
+        .evaluate((el) => Math.abs(el.getBoundingClientRect().top)),
+    )
+    .toBeLessThan(3);
+  await page.setViewportSize({ width: 390, height: 700 });
+  await page.goto("/");
+  await page.locator(".hero-plan").click();
+  await reachContact(page);
+  await fillContact(page);
+  await submitButton(page).scrollIntoViewIfNeeded();
+  await expect(submitButton(page)).toBeInViewport();
+  await expect(page.locator("#book")).toHaveAttribute("data-step", "3");
+  const activeBounds = await page.locator("#book").boundingBox();
+  expect(activeBounds!.y).toBeLessThan(0);
+  expect(activeBounds!.y + activeBounds!.height).toBeGreaterThan(0);
+});
+
+test("licence menu supports keyboard selection, dismissal, and retained values", async ({
+  page,
+}) => {
+  await page.goto("/book");
+  await reachContact(page);
+  const select = page.getByRole("combobox", { name: "Fishing licence" });
+  await select.focus();
+  await page.keyboard.press("Enter");
+  await expect(select).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("End");
+  await expect(select).toHaveAttribute(
+    "aria-activedescendant",
+    "licence-option-before-trip",
+  );
+  await page.keyboard.press("Enter");
+  await expect(select).toContainText("required licence before my trip");
+  await expect(
+    page.locator('input[name="licenceAcknowledgement"]'),
+  ).toHaveValue("before-trip");
+  await select.click();
+  await page.keyboard.press("Escape");
+  await expect(select).toHaveAttribute("aria-expanded", "false");
+  await expect(select).toBeFocused();
+  await select.click();
+  await page
+    .getByRole("heading", { name: "Your details.", exact: true })
+    .click();
+  await expect(select).toHaveAttribute("aria-expanded", "false");
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await next(page);
+  await expect(select).toContainText("required licence before my trip");
 });

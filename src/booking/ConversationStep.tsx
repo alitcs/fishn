@@ -1,24 +1,23 @@
+﻿import { useState } from "react";
 import type { Dispatch, ReactNode, SetStateAction } from "react";
-import { External } from "../components";
-import { fishingLevels, tripGuidance, tripIntents } from "../data/booking";
-import type { FishingLevel, TripIntent } from "../data/booking";
-import { durationOptions, officialLinks } from "../data/config";
+import { External, Photo } from "../components";
+import {
+  durationOptions,
+  groupSizeOptions,
+  officialLinks,
+} from "../data/config";
 import { locations } from "../data/locations";
 import { tripScenes } from "../data/scenes";
 import { Calendar } from "./Calendar";
 import type { Selection } from "./BookingPage";
-import { licenceOptions } from "./schema";
+import { LicenceSelect } from "./LicenceSelect";
 
 type Contact = { name: string; email: string; phone: string; website: string };
 type Props = {
   step: number;
   selection: Selection;
-  groupMore: boolean;
   update: <K extends keyof Selection>(key: K, value: Selection[K]) => void;
-  chooseIntent: (intent: TripIntent) => void;
-  chooseLevel: (level: FishingLevel) => void;
   chooseDestination: (id: string, advice?: boolean) => void;
-  setGroupMore: Dispatch<SetStateAction<boolean>>;
   goToStep: (step: number) => void;
   specialRequests: string;
   setSpecialRequests: Dispatch<SetStateAction<string>>;
@@ -30,27 +29,45 @@ type Props = {
   formattedDate: string;
 };
 const titles = [
-  "What kind of day are you looking for?",
-  "Have you been fishing before?",
-  "Let’s find your water.",
-  "Who’s coming along?",
-  "When would you like to go?",
-  "How long feels right?",
-  "Anything we should know?",
-  "Let’s arrange your trip.",
+  "Choose your water.",
+  "Choose a date.",
+  "People & hours.",
+  "Your details.",
 ];
 
 export function ConversationStep(props: Props) {
-  const { step, selection, update, errors, groupMore, contact, busy } = props;
+  const { step, selection, update, errors, contact, busy } = props;
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "manual">(
+    "idle",
+  );
   const error = (key: string): ReactNode =>
     errors[key] ? (
-      <p className="field-error" id={`${key}-error`}>
+      <p className="field-error" id={key + "-error"}>
         {errors[key]}
       </p>
     ) : null;
   const place = locations.find(
     (location) => location.id === selection.location,
   )!;
+  const mode =
+    selection.experience === "ice-fishing"
+      ? "Ice fishing"
+      : "Shoreline fishing";
+  const requestText = [
+    "Hi Nikita, I’d like to request a guided fishing session.",
+    selection.destinationAdviceRequested
+      ? "Please help me choose a location (Lake Simcoe shoreline as a starting point)."
+      : place.name + " · " + mode,
+    props.formattedDate +
+      " · " +
+      selection.groupSize +
+      (selection.groupSize === 1 ? " person" : " people") +
+      " · " +
+      selection.duration +
+      (selection.duration === 1 ? " hour" : " hours"),
+    "Could you confirm pricing, availability, and what to bring?",
+  ].join("\n");
+
   return (
     <div className="booking-step" key={step}>
       <h2 id="booking-step-title" tabIndex={-1}>
@@ -58,123 +75,44 @@ export function ConversationStep(props: Props) {
       </h2>
       {step === 0 && (
         <>
-          <p className="step-intro">
-            Start with the feeling. We’ll take it from there.
-            <br />
-            <span className="optional-note">
-              These preferences are optional.
-            </span>
-          </p>
-          <button
-            type="button"
-            className="skip-planning"
-            onClick={() => props.goToStep(2)}
-          >
-            Go straight to trip details
-          </button>
-          <fieldset>
-            <legend className="sr-only">Your kind of fishing day</legend>
-            <div className="conversation-choices">
-              {tripIntents.map((option) => (
-                <button
-                  type="button"
-                  key={option.value}
-                  aria-pressed={selection.tripIntent === option.value}
-                  onClick={() => props.chooseIntent(option.value)}
-                >
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.detail}</small>
-                  </span>
-                  <i aria-hidden="true">+</i>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </>
-      )}
-      {step === 1 && (
-        <>
-          <p className="step-intro">
-            First-timers are welcome. This helps Nikita understand the day you
-            have in mind.
-            <br />
-            <span className="optional-note">
-              Optional — every experience level can enquire.
-            </span>
-          </p>
-          <fieldset>
-            <legend className="sr-only">Your fishing experience</legend>
-            <div className="conversation-choices">
-              {fishingLevels.map((option) => (
-                <button
-                  type="button"
-                  key={option.value}
-                  aria-pressed={selection.fishingLevel === option.value}
-                  onClick={() => props.chooseLevel(option.value)}
-                >
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.detail}</small>
-                  </span>
-                  <i aria-hidden="true">+</i>
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </>
-      )}
-      {step === 2 && (
-        <>
-          <p className="step-intro personalized-guidance">
-            {tripGuidance(
-              selection.tripIntent,
-              selection.fishingLevel,
-              selection.experience,
-            )}
-          </p>
           <fieldset>
             <legend className="sr-only">Choose a fishing destination</legend>
-            <div className="conversation-choices destination-choices">
-              {tripScenes.map((scene) => (
-                <button
-                  key={scene.id}
-                  type="button"
-                  aria-label={`${locations.find((location) => location.id === scene.location)!.name} — ${scene.experience === "ice-fishing" ? "Ice Fishing" : "Shoreline Fishing"}`}
-                  aria-pressed={
-                    !selection.destinationAdviceRequested &&
-                    selection.location === scene.location &&
-                    selection.experience === scene.experience
-                  }
-                  onClick={() => props.chooseDestination(scene.id)}
-                >
-                  <span>
-                    <strong>
-                      {
-                        locations.find(
-                          (location) => location.id === scene.location,
-                        )!.name
-                      }
-                    </strong>
-                    <small>
-                      {scene.experience === "ice-fishing"
-                        ? "Ice fishing · season and conditions reviewed"
-                        : scene.location === "lake-simcoe"
-                          ? "Shoreline fishing · an open lake horizon"
-                          : scene.location === "holland-river"
-                            ? "Shoreline fishing · a calmer river setting"
-                            : "Shoreline fishing · moving water and changing light"}
-                    </small>
-                  </span>
-                  <i aria-hidden="true">
-                    {!selection.destinationAdviceRequested &&
-                    selection.location === scene.location &&
-                    selection.experience === scene.experience
-                      ? "−"
-                      : "+"}
-                  </i>
-                </button>
-              ))}
+            <div className="destination-choices">
+              {tripScenes.map((scene) => {
+                const selected =
+                  !selection.destinationAdviceRequested &&
+                  selection.location === scene.location &&
+                  selection.experience === scene.experience;
+                const name = locations.find(
+                  (location) => location.id === scene.location,
+                )!.name;
+                return (
+                  <button
+                    key={scene.id}
+                    type="button"
+                    aria-label={
+                      name +
+                      " — " +
+                      (scene.experience === "ice-fishing"
+                        ? "Ice Fishing"
+                        : "Shoreline Fishing")
+                    }
+                    aria-pressed={selected}
+                    onClick={() => props.chooseDestination(scene.id)}
+                  >
+                    <Photo name={scene.image} alt="" sizes="72px" eager />
+                    <span>
+                      <strong>{name}</strong>
+                      <small>
+                        {scene.experience === "ice-fishing"
+                          ? "Ice fishing"
+                          : "Shoreline fishing"}
+                      </small>
+                    </span>
+                    <i aria-hidden="true">{selected ? "✓" : "→"}</i>
+                  </button>
+                );
+              })}
             </div>
           </fieldset>
           <button
@@ -183,78 +121,27 @@ export function ConversationStep(props: Props) {
             aria-pressed={selection.destinationAdviceRequested}
             onClick={() => props.chooseDestination("simcoe-shore", true)}
           >
-            I’m not sure — help me choose
+            {selection.destinationAdviceRequested
+              ? "✓ Guide chooses"
+              : "Choose for me"}
           </button>
           {selection.destinationAdviceRequested && (
             <p className="choice-advice" role="status">
-              Let’s use Lake Simcoe shoreline as a starting point. Nikita will
-              help choose the final location with you. You can change this
-              suggestion.
+              Location confirmed with Nikita.
             </p>
           )}
           {selection.experience === "ice-fishing" && (
             <p className="conditions-note">
-              Ice fishing is Lake Simcoe only. Your preferred date is reviewed
-              against the season, suitable ice conditions, and permissions; it
-              does not indicate safe ice.
+              Subject to season, suitable ice, and guide approval.
             </p>
           )}
         </>
       )}
-      {step === 3 && (
-        <fieldset>
-          <legend className="sr-only">Number of people</legend>
-          <p className="step-intro">
-            Your outing is private. Come on your own or bring your people.
-          </p>
-          <div className="segmented people-options">
-            {[1, 2, 3, 4].map((size) => (
-              <button
-                type="button"
-                key={size}
-                aria-pressed={
-                  size === 4
-                    ? groupMore
-                    : !groupMore && selection.groupSize === size
-                }
-                onClick={() => {
-                  props.setGroupMore(size === 4);
-                  update("groupSize", size);
-                  if (size !== 4) props.goToStep(4);
-                }}
-              >
-                {size === 4 ? "4+" : size}
-                <span>{size === 1 ? "person" : "people"}</span>
-              </button>
-            ))}
-          </div>
-          {groupMore && (
-            <label className="extra-group">
-              How many people?
-              <input
-                type="number"
-                min="4"
-                max="100"
-                value={selection.groupSize}
-                onChange={(event) =>
-                  update("groupSize", Number(event.target.value))
-                }
-                aria-invalid={Boolean(errors.groupSize)}
-                aria-describedby={
-                  errors.groupSize ? "groupSize-error" : undefined
-                }
-              />
-            </label>
-          )}
-          {error("groupSize")}
-        </fieldset>
-      )}
-      {step === 4 && (
+      {step === 1 && (
         <fieldset>
           <legend className="sr-only">Preferred date</legend>
           <p className="step-intro">
-            Choose a preferred date. These are request dates, not live
-            appointments. Nikita confirms what’s possible.
+            Preferred date. Nikita confirms availability.
           </p>
           <Calendar
             value={selection.preferredDate}
@@ -263,165 +150,87 @@ export function ConversationStep(props: Props) {
             invalid={Boolean(errors.preferredDate)}
           />
           {error("preferredDate")}
-          <p className="field-hint">
-            Weather, conditions, permissions, and fishing rules shape the final
-            plan.{" "}
-            {selection.experience === "ice-fishing"
-              ? "Ice trips also require suitable ice and the appropriate season."
-              : ""}
-          </p>
         </fieldset>
       )}
-      {step === 5 && (
-        <fieldset>
-          <legend className="sr-only">Session duration</legend>
-          <p className="step-intro">
-            A short escape or a longer pause. Choose the time you’d like to
-            request.
-          </p>
-          <div className="segmented duration-options">
-            {durationOptions.map((hours) => (
-              <button
-                type="button"
-                key={hours}
-                aria-pressed={selection.duration === hours}
-                onClick={() => {
-                  update("duration", hours);
-                  props.goToStep(6);
-                }}
-              >
-                {hours}
-                <span>{hours === 1 ? "hour" : "hours"}</span>
-              </button>
-            ))}
-          </div>
-          <p className="field-hint">
-            Nikita shares pricing before you commit. No payment is taken with
-            this request.
-          </p>
-        </fieldset>
-      )}
-      {step === 6 && (
+      {step === 2 && (
         <>
-          <label className="special-request-label">
-            Any special requests? <span>Optional</span>
-            <textarea
-              name="specialRequests"
-              maxLength={1500}
-              rows={2}
-              value={props.specialRequests}
-              onChange={(event) => props.setSpecialRequests(event.target.value)}
-              placeholder="Anything you’d like Nikita to know about your day."
-              aria-invalid={Boolean(errors.specialRequests)}
-              aria-describedby={
-                errors.specialRequests ? "specialRequests-error" : undefined
-              }
-            />
-          </label>
-          {error("specialRequests")}
-          <fieldset className="licence-section">
-            <legend>One thing before we head out.</legend>
-            <p id="licence-label" className="step-intro">
-              Are you all set with the fishing licence requirements?
-            </p>
-            <div
-              className="licence-options"
-              role="radiogroup"
-              aria-labelledby="licence-label"
-              aria-invalid={Boolean(errors.licenceAcknowledgement)}
-              aria-describedby={
-                errors.licenceAcknowledgement
-                  ? "licenceAcknowledgement-error"
-                  : undefined
-              }
-            >
-              {licenceOptions.map((option) => (
-                <label key={option.value}>
-                  <input
-                    type="radio"
-                    name="licence"
-                    value={option.value}
-                    checked={selection.licenceAcknowledgement === option.value}
-                    onChange={() =>
-                      update("licenceAcknowledgement", option.value)
+          {(
+            [
+              {
+                key: "groupSize",
+                title: "People",
+                options: groupSizeOptions,
+                unit: "people",
+                singular: "person",
+              },
+              {
+                key: "duration",
+                title: "Hours",
+                options: durationOptions,
+                unit: "hours",
+                singular: "hour",
+              },
+            ] as const
+          ).map((choice) => (
+            <fieldset className="number-choice" key={choice.key}>
+              <legend>
+                {choice.title}
+                <output aria-live="polite">
+                  {selection[choice.key]}{" "}
+                  {selection[choice.key] === 1 ? choice.singular : choice.unit}
+                </output>
+              </legend>
+              <div className="number-options">
+                {choice.options.map((value) => (
+                  <button
+                    type="button"
+                    key={value}
+                    aria-label={
+                      value +
+                      " " +
+                      (value === 1 ? choice.singular : choice.unit)
                     }
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-            {error("licenceAcknowledgement")}
-            <details>
-              <summary>A little help with the licence rules</summary>
-              <p>
-                Most Ontario and other Canadian residents aged 18–64 need a
-                fishing licence. Residents under 18 or 65 and older generally
-                don’t need to buy one, but must carry the required ID.
-                International visitors have different requirements.
-              </p>
-              <p>
-                A one-day sport fishing licence does not require an Outdoors
-                Card. Check the current rules for your residency and
-                circumstances. Each person is responsible for meeting the
-                requirements; this acknowledgement is not legal verification.
-              </p>
-              <div className="licence-links">
-                <External href={officialLinks.licence}>
-                  Ontario fishing licences
-                </External>
-                <External href={officialLinks.visitors}>
-                  International visitor guidance
-                </External>
-                <External href={officialLinks.regulations}>
-                  Official Ontario rules & regulations
-                </External>
+                    aria-pressed={selection[choice.key] === value}
+                    onClick={() => update(choice.key, value)}
+                  >
+                    {value}
+                  </button>
+                ))}
               </div>
-            </details>
-          </fieldset>
+              {error(choice.key)}
+            </fieldset>
+          ))}
         </>
       )}
-      {step === 7 && (
+      {step === 3 && (
         <>
-          <p className="step-intro">
-            Nikita will review your request and get in touch to agree pricing,
-            equipment, the meeting point, and conditions before you commit.
-          </p>
-          <dl className="conversation-summary">
-            <div>
-              <dt>Your fishing day</dt>
-              <dd>
-                {place.name} ·{" "}
-                {selection.experience === "ice-fishing"
-                  ? "Ice Fishing"
-                  : "Shoreline Fishing"}
+          <div className="session-review">
+            <p>
+              <strong>
                 {selection.destinationAdviceRequested
-                  ? " · help choosing requested"
-                  : ""}
-              </dd>
-            </div>
-            <div>
-              <dt>Your request</dt>
-              <dd>
-                {props.formattedDate} · {selection.groupSize}{" "}
-                {selection.groupSize === 1 ? "person" : "people"} ·{" "}
-                {selection.duration}{" "}
-                {selection.duration === 1 ? "hour" : "hours"}
-              </dd>
-            </div>
-            <div>
-              <dt>Pricing</dt>
-              <dd>Shared by Nikita before you commit. No payment now.</dd>
-            </div>
-          </dl>
-          <button
-            type="button"
-            className="edit-trip"
-            onClick={() => props.goToStep(2)}
-          >
-            Edit trip details
-          </button>
+                  ? "Location with Nikita"
+                  : place.name}
+              </strong>
+              <span>{mode}</span>
+            </p>
+            <p>
+              {props.formattedDate} · {selection.groupSize}{" "}
+              {selection.groupSize === 1 ? "person" : "people"} ·{" "}
+              {selection.duration}h
+            </p>
+            <button
+              type="button"
+              className="edit-trip"
+              onClick={() => {
+                setCopyState("idle");
+                props.goToStep(0);
+              }}
+            >
+              Edit
+            </button>
+          </div>
           <fieldset disabled={busy}>
-            <legend className="sr-only">Contact details</legend>
+            <legend className="sr-only">Your contact details</legend>
             <div className="contact-fields">
               {(
                 [
@@ -469,13 +278,45 @@ export function ConversationStep(props: Props) {
                     }}
                     aria-invalid={Boolean(errors[field.key])}
                     aria-describedby={
-                      errors[field.key] ? `${field.key}-error` : undefined
+                      errors[field.key] ? field.key + "-error" : undefined
                     }
                   />
                   {error(field.key)}
                 </label>
               ))}
             </div>
+            <LicenceSelect
+              value={selection.licenceAcknowledgement}
+              onChange={(value) => update("licenceAcknowledgement", value)}
+              invalid={Boolean(errors.licenceAcknowledgement)}
+            />
+            {error("licenceAcknowledgement")}
+            <External className="licence-help" href={officialLinks.licence}>
+              Licence guidance ↗
+            </External>
+            <details
+              className="optional-request"
+              open={Boolean(errors.specialRequests) || undefined}
+            >
+              <summary>Add a note (optional)</summary>
+              <label className="special-request-label">
+                Anything Nikita should know?
+                <textarea
+                  name="specialRequests"
+                  maxLength={1500}
+                  rows={2}
+                  value={props.specialRequests}
+                  onChange={(event) =>
+                    props.setSpecialRequests(event.target.value)
+                  }
+                  aria-invalid={Boolean(errors.specialRequests)}
+                  aria-describedby={
+                    errors.specialRequests ? "specialRequests-error" : undefined
+                  }
+                />
+              </label>
+              {error("specialRequests")}
+            </details>
             <div className="honeypot" aria-hidden="true">
               <label>
                 Leave this empty
@@ -495,6 +336,45 @@ export function ConversationStep(props: Props) {
               </label>
             </div>
           </fieldset>
+          <details className="instagram-option">
+            <summary>Instagram ↗</summary>
+            <div className="direct-enquiry">
+              <p>Copy your session details, then send them in your message.</p>
+              <button
+                className="copy-session"
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(requestText);
+                    setCopyState("copied");
+                  } catch {
+                    setCopyState("manual");
+                  }
+                }}
+              >
+                {copyState === "copied"
+                  ? "✓ Session details copied"
+                  : "Copy session details"}
+              </button>
+              {copyState === "copied" && (
+                <p role="status">Copied. Open Instagram and paste your plan.</p>
+              )}
+              {copyState === "manual" && (
+                <label className="manual-copy">
+                  Copy this into your message
+                  <textarea
+                    readOnly
+                    value={requestText}
+                    rows={6}
+                    onFocus={(event) => event.target.select()}
+                  />
+                </label>
+              )}
+              <External className="text-link" href={officialLinks.instagram}>
+                Open Instagram
+              </External>
+            </div>
+          </details>
         </>
       )}
     </div>

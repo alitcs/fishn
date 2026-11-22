@@ -9,8 +9,10 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env server/dev.mjs",
     "build": "npm run typecheck && node scripts/prepare-assets.mjs && vite build && vite build --ssr src/entry-server.tsx --outDir .work/ssr && node scripts/prerender.mjs && node scripts/build-worker.mjs",
+    "build:netlify": "npm run typecheck && node scripts/prepare-assets.mjs && vite build --mode netlify && vite build --mode netlify --ssr src/entry-server.tsx --outDir .work/ssr && node scripts/prerender.mjs",
     "start": "node --env-file-if-exists=.env server/start.mjs",
     "preview": "npm run start",
+    "preview:netlify": "node server/preview-netlify.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "tsx --test tests/*.test.ts",

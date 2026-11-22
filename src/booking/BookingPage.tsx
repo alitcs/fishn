@@ -3,12 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { External, Photo } from "../components";
 import { WaterOutline } from "../Atlas";
 import { getTripScene, tripScenes } from "../data/scenes";
-import geography from "../data/geography.json";
 import {
   durationOptions,
   experiences,
   isRequestDateAllowed,
-  officialLinks,
 } from "../data/config";
 import type { ExperienceId, LocationId } from "../data/config";
 import { locations } from "../data/locations";
@@ -17,8 +15,7 @@ import { bookingSchema, licenceOptions } from "./schema";
 import type { BookingInput, BookingResponse } from "./schema";
 import { BookingError, submitBooking } from "./service";
 import { ConversationStep } from "./ConversationStep";
-import { tripIntents, fishingLevels } from "../data/booking";
-import type { TripIntent, FishingLevel } from "../data/booking";
+import { netlifyFormName, netlifyFormEndpoint } from "./netlify";
 export type Selection = {
   experience: ExperienceId;
   location: LocationId;
@@ -26,8 +23,6 @@ export type Selection = {
   duration: number;
   preferredDate: string;
   licenceAcknowledgement: string;
-  tripIntent: TripIntent | "";
-  fishingLevel: FishingLevel | "";
   destinationAdviceRequested: boolean;
 };
 const defaults: Selection = {
@@ -37,8 +32,6 @@ const defaults: Selection = {
   duration: 2,
   preferredDate: "",
   licenceAcknowledgement: "",
-  tripIntent: "",
-  fishingLevel: "",
   destinationAdviceRequested: false,
 };
 const storageKey = "fishn-trip-preferences";
@@ -46,7 +39,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const [params] = useSearchParams();
   const [selection, setSelection] = useState<Selection>(defaults);
   const [hydrated, setHydrated] = useState(false);
-  const [groupMore, setGroupMore] = useState(false);
   const [contact, setContact] = useState({
     name: "",
     email: "",
@@ -56,7 +48,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [ready, setReady] = useState<boolean | null>(null);
   const [step, setStep] = useState(0);
   const [specialRequests, setSpecialRequests] = useState("");
   const flowStarted = useRef(false);
@@ -85,7 +76,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
         if (
           Number.isInteger(saved.groupSize) &&
           saved.groupSize >= 1 &&
-          saved.groupSize <= 100
+          saved.groupSize <= 12
         )
           initial.groupSize = saved.groupSize;
         if (durationOptions.includes(saved.duration))
@@ -96,10 +87,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
           licenceOptions.some((l) => l.value === saved.licenceAcknowledgement)
         )
           initial.licenceAcknowledgement = saved.licenceAcknowledgement;
-        if (tripIntents.some((option) => option.value === saved.tripIntent))
-          initial.tripIntent = saved.tripIntent;
-        if (fishingLevels.some((option) => option.value === saved.fishingLevel))
-          initial.fishingLevel = saved.fishingLevel;
         initial.destinationAdviceRequested =
           saved.destinationAdviceRequested === true;
       }
@@ -123,7 +110,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
     // Browser-only preferences are reconciled after static HTML hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelection(initial);
-    setGroupMore(initial.groupSize >= 4);
     setHydrated(true);
   }, [params]);
   useEffect(() => {
@@ -151,36 +137,14 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
         /* Optional preference storage. */
       }
   }, [selection, hydrated]);
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch("/api/booking/status", { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => setReady(data.ready === true))
-      .catch(() => {
-        if (!controller.signal.aborted) setReady(false);
-      });
-    return () => controller.abort();
-  }, []);
   const experience = experiences.find((e) => e.id === selection.experience)!;
   const place = locations.find(
     (location) => location.id === selection.location,
   )!;
   const scene = getTripScene(selection.location, selection.experience);
   const Heading = embedded ? "h2" : "h1";
-  const stepNames = [
-    "Your kind of day",
-    "A little about you",
-    "Your water",
-    "Your people",
-    "Your date",
-    "Your pace",
-    "Anything else",
-    "Let’s arrange it",
-  ];
-  const flow =
-    selection.tripIntent === "first-time"
-      ? [0, 2, 3, 4, 5, 6, 7]
-      : [0, 1, 2, 3, 4, 5, 6, 7];
+  const stepNames = ["Session", "Date", "Group & time", "Your details"];
+  const flow = [0, 1, 2, 3];
   const progressIndex = flow.indexOf(step);
   function startFlow() {
     if (flowStarted.current) return;
@@ -189,8 +153,8 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   }
   function goToStep(next: number) {
     startFlow();
-    if (next === 7 && !measuredSteps.current.has(7)) {
-      measuredSteps.current.add(7);
+    if (next === 3 && !measuredSteps.current.has(3)) {
+      measuredSteps.current.add(3);
       track("BookingDetailsCompleted", {
         experience: selection.experience,
         group_size: selection.groupSize,
@@ -209,48 +173,24 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   function nextStep() {
     const fields: Record<string, string> = {};
     if (
-      step === 4 &&
+      step === 1 &&
       !isRequestDateAllowed(selection.preferredDate, selection.experience)
     )
       fields.preferredDate = "Please choose a preferred request date.";
     if (
-      step === 3 &&
+      step === 2 &&
       (!Number.isInteger(selection.groupSize) ||
-        selection.groupSize < (groupMore ? 4 : 1) ||
-        selection.groupSize > 100)
+        selection.groupSize < 1 ||
+        selection.groupSize > 12)
     )
-      fields.groupSize = "Please enter your group size, from 4 to 100 people.";
-    if (
-      step === 6 &&
-      !licenceOptions.some(
-        (option) => option.value === selection.licenceAcknowledgement,
-      )
-    )
-      fields.licenceAcknowledgement =
-        "Please acknowledge the fishing licence requirements.";
+      fields.groupSize = "Please choose a group size from 1 to 12.";
     setErrors(fields);
     if (Object.keys(fields).length) {
-      setMessage("A little detail before we continue.");
+      setMessage("Please check the detail below.");
       setTimeout(() => messageRef.current?.focus(), 0);
       return;
     }
     goToStep(flow[Math.min(flow.length - 1, progressIndex + 1)]);
-  }
-  function chooseIntent(value: TripIntent) {
-    startFlow();
-    setSelection((previous) => ({
-      ...previous,
-      tripIntent: value,
-      ...(value === "first-time" ? { fishingLevel: "new" as const } : {}),
-    }));
-    track("TripPreferenceSelected", { preference: value });
-    goToStep(value === "first-time" ? 2 : 1);
-  }
-  function chooseLevel(value: FishingLevel) {
-    startFlow();
-    update("fishingLevel", value);
-    track("FishingExperienceSelected", { experience_level: value });
-    goToStep(2);
   }
   function chooseDestination(id: string, advice = false) {
     startFlow();
@@ -295,7 +235,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   }
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (step < 7) {
+    if (step < 3) {
       nextStep();
       return;
     }
@@ -304,8 +244,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
     setErrors({});
     const base = {
       ...selection,
-      tripIntent: selection.tripIntent || undefined,
-      fishingLevel: selection.fishingLevel || undefined,
       specialRequests,
       ...contact,
       analyticsConsent: hasConsent(),
@@ -323,27 +261,25 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
       requestId: attempt.current.requestId,
       clientSubmittedAt: attempt.current.clientSubmittedAt,
     });
-    if (!parsed.success || (groupMore && selection.groupSize < 4)) {
-      const fields = !parsed.success
-        ? Object.fromEntries(
-            parsed.error.issues.map((i) => [i.path[0] ?? "form", i.message]),
-          )
-        : { groupSize: "Please enter the actual group size, starting at 4." };
+    if (!parsed.success) {
+      const fields = Object.fromEntries(
+        parsed.error.issues.map((i) => [i.path[0] ?? "form", i.message]),
+      );
       setErrors(fields);
       const fieldSteps: Record<string, number> = {
-        location: 2,
-        experience: 2,
-        preferredDate: 4,
-        groupSize: 3,
-        duration: 5,
-        licenceAcknowledgement: 6,
-        specialRequests: 6,
-        name: 7,
-        email: 7,
-        phone: 7,
+        location: 0,
+        experience: 0,
+        preferredDate: 1,
+        groupSize: 2,
+        duration: 2,
+        licenceAcknowledgement: 3,
+        specialRequests: 3,
+        name: 3,
+        email: 3,
+        phone: 3,
       };
       setStep(
-        Math.min(...Object.keys(fields).map((field) => fieldSteps[field] ?? 7)),
+        Math.min(...Object.keys(fields).map((field) => fieldSteps[field] ?? 3)),
       );
       setMessage("A few details need a look.");
       setTimeout(() => {
@@ -402,7 +338,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
       ref={section}
       id="book"
       className={`booking-scene photo-chapter ${embedded ? "booking-embedded" : "booking-standalone"}`}
-      aria-label="Plan your fishing day"
+      aria-label="Plan your fishing session"
       data-backdrop={scene.id}
       data-step={confirmation ? "confirmation" : step}
     >
@@ -434,11 +370,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
             />
           ))}
         </div>
-        <p className="eyebrow">
-          {geography.features[place.id].coordinate}
-          <br />
-          GEOGRAPHIC REFERENCE
-        </p>
       </div>
       <External
         className="booking-map-credit"
@@ -447,25 +378,15 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
         © OpenStreetMap contributors
       </External>
       <div className="booking-introduction">
-        <p className="eyebrow">THE NEXT CHAPTER IS YOURS.</p>
-        <Heading className="booking-main-title">
-          Your next
-          <br />
-          <span>good day.</span>
-        </Heading>
+        <p className="eyebrow">GUIDED BY NIKITA</p>
+        <Heading className="booking-main-title">Your session.</Heading>
       </div>
       {confirmation ? (
         <div className="booking-panel booking-confirmation">
-          <p className="eyebrow">A GOOD DAY IS TAKING SHAPE</p>
           <h2 id="confirmation-title" tabIndex={-1}>
-            Adventure
-            <br />
-            requested.
+            Request sent.
           </h2>
-          <p>
-            Thanks for reaching out. Nikita will be in touch to confirm the
-            details of your trip.
-          </p>
+          <p>Nikita will confirm your session.</p>
           <div className="confirmation-summary">
             <span>{experience.name}</span>
             <span>{place.name}</span>
@@ -475,10 +396,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
               {selection.duration}h
             </span>
           </div>
-          <p className="small">
-            This is a submitted request. Your date, pricing, meeting point, and
-            trip are not yet confirmed or reserved.
-          </p>
+          <p className="small">Date and price await confirmation.</p>
           <p className="request-reference">
             Request reference: {confirmation.requestId}
           </p>
@@ -488,7 +406,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
             onClick={() => {
               setConfirmation(null);
               setSelection({ ...defaults });
-              setGroupMore(false);
               setStep(0);
               setSpecialRequests("");
               flowStarted.current = false;
@@ -496,7 +413,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
               attempt.current = null;
             }}
           >
-            Plan another day
+            New session
           </button>
         </div>
       ) : (
@@ -510,7 +427,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
               {String(progressIndex + 1).padStart(2, "0")} /{" "}
               {String(flow.length).padStart(2, "0")}
             </span>
-            <span>{stepNames[step]}</span>
             <div aria-hidden="true">
               {flow.map((number, i) => (
                 <i
@@ -522,19 +438,19 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
           </div>
           <form
             ref={form}
+            name={netlifyFormName}
+            method="POST"
+            action={netlifyFormEndpoint}
             onSubmit={submit}
             noValidate
             aria-label="Booking request"
           >
+            <input type="hidden" name="form-name" value={netlifyFormName} />
             <ConversationStep
               step={step}
               selection={selection}
-              groupMore={groupMore}
               update={update}
-              chooseIntent={chooseIntent}
-              chooseLevel={chooseLevel}
               chooseDestination={chooseDestination}
-              setGroupMore={setGroupMore}
               goToStep={goToStep}
               specialRequests={specialRequests}
               setSpecialRequests={setSpecialRequests}
@@ -555,24 +471,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
                 {message}
               </div>
             )}
-            {ready === false && (
-              <div className="booking-delivery-state" role="status">
-                <strong>Online requests are opening soon.</strong>
-                <span>
-                  {step === 7 ? (
-                    <>
-                      To send your enquiry now,{" "}
-                      <External href={officialLinks.instagram}>
-                        contact Nikita on Instagram
-                      </External>
-                      .
-                    </>
-                  ) : (
-                    "You can still plan your day here."
-                  )}
-                </span>
-              </div>
-            )}
             <div className="booking-step-actions">
               {step > 0 ? (
                 <button
@@ -583,14 +481,8 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
                 >
                   Back
                 </button>
-              ) : (
-                <span className="booking-first-note">
-                  A request first.
-                  <br />
-                  The details, together.
-                </span>
-              )}
-              {step < 7 ? (
+              ) : null}
+              {step < 3 ? (
                 <button
                   type="button"
                   className="button booking-next"
@@ -600,46 +492,28 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
                     nextStep();
                   }}
                 >
-                  {(step === 0 && !selection.tripIntent) ||
-                  (step === 1 && !selection.fishingLevel)
-                    ? "Skip for now"
-                    : "Continue"}{" "}
-                  <span aria-hidden="true">+</span>
+                  {["Choose date", "Set group", "Your details"][step]}
+                  <span aria-hidden="true">→</span>
                 </button>
               ) : (
                 <button
                   className="button submit-booking"
                   key="submit-request"
                   type="submit"
-                  disabled={busy || ready !== true}
+                  disabled={busy}
                   aria-busy={busy}
                 >
-                  {busy ? "Sending your request…" : "Request my fishing trip"}
+                  {busy ? "Submitting…" : "Submit"}
                 </button>
               )}
             </div>
-            {step === 7 && (
+            {step === 3 && (
               <p className="field-hint submit-note">
-                A request, not a confirmed booking. No payment is taken.
-                <br />
-                Your details are used to arrange your trip.{" "}
-                <Link to="/privacy">Read our privacy notice.</Link>
+                No payment now. Nikita confirms pricing and availability.{" "}
+                <Link to="/privacy">Privacy</Link>
               </p>
             )}
           </form>
-          {step > 0 && (
-            <p className="booking-tripline">
-              {place.name} <span> / </span>
-              {experience.name}
-              {selection.preferredDate && (
-                <>
-                  {" "}
-                  <span> / </span>
-                  {formattedDate}
-                </>
-              )}
-            </p>
-          )}
         </div>
       )}
     </section>

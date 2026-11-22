@@ -366,7 +366,7 @@ export function ExperienceDetail() {
             </div>
             <div>
               <span>THE PACE</span>
-              <p>Request 1–4 hours</p>
+              <p>Request 1–12 hours</p>
             </div>
             <div>
               <span>THE KNOW-HOW</span>
@@ -664,26 +664,27 @@ export function PrivacyPage() {
       <h2>When you request a day</h2>
       <p>
         We ask for your name, email, phone number, trip preferences, and an
-        acknowledgement of the fishing licence requirements. You may also share
-        the kind of day you want, your fishing experience, whether you would
-        like help choosing a destination, and an optional note. This information
-        is used to respond to your enquiry and arrange your experience. No
-        identity documents or licence images are collected.
+        acknowledgement of the fishing licence requirements. You may also ask
+        for help choosing a destination and add an optional note. This
+        information is used to respond to your enquiry and arrange your
+        experience. No identity documents or licence images are collected.
       </p>
       <p>
-        Requests are sent securely to fishn’s configured business inbox through
-        Resend, our email delivery provider. A request is only marked submitted
-        after the delivery service accepts it. The business keeps the
-        information needed to handle your enquiry; contact Nikita to ask about
-        access or deletion.
+        Netlify-hosted requests are collected through Netlify Forms and can be
+        delivered to the configured notification inbox. Other deployments may
+        use Resend for delivery. A request is only marked submitted after the
+        configured service accepts it. You can also copy your session plan and
+        send it yourself through Instagram. Copying the plan does not send it.
+        The business keeps the information needed to handle your enquiry;
+        contact Nikita to ask about access or deletion.
       </p>
       <h2>Remembering your selections</h2>
       <p>
         This browser can remember your experience, location, group size,
-        duration, date, licence acknowledgement, and non-contact trip
-        preferences. Contact information and optional notes are kept in memory
-        while you fill out the form and is not saved in browser storage. You can
-        clear the remembered selections on the booking page.
+        duration, date, licence acknowledgement, and destination-help choice.
+        Contact information and optional notes stay in memory while you fill out
+        the form and are not saved in browser storage. You can remove remembered
+        selections through your browser’s site-data settings.
       </p>
       <h2>Optional analytics</h2>
       <p>

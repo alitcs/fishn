@@ -3,8 +3,8 @@ import { build } from "esbuild";
 import { render } from "../.work/ssr/entry-server.js";
 const routes = {
   "/": [
-    "A little further from the everyday.",
-    "Private guided shoreline and ice fishing in Ontario with Nikita. Beginners welcome. A little fresh air, good company, and a day beyond the everyday.",
+    "Private guided fishing in Ontario",
+    "Plan a private guided shoreline or ice fishing session in Ontario with Nikita. Beginners welcome. Choose your session, date, and group in four easy steps.",
   ],
   "/experiences": [
     "Find your kind of outside.",
@@ -39,7 +39,7 @@ const routes = {
     "Meet Nikita, the local outdoorsman behind fishn. Private fishing experiences rooted in a love of Ontario’s lakes, rivers, and natural surroundings.",
   ],
   "/book": [
-    "Request your adventure",
+    "Plan your fishing session",
     "Request your private guided fishing day in Ontario. Choose an experience, general location, group, duration, and preferred date. Nikita confirms the details.",
   ],
   "/privacy": [
@@ -53,6 +53,7 @@ const photography = JSON.parse(
 );
 const origin = (
   process.env.SITE_URL ||
+  process.env.URL ||
   "https://fishn-ontario-outside.stellarcouch.chatgpt.site"
 ).replace(/\/$/, "");
 for (const [route, [title, description]] of Object.entries(routes)) {

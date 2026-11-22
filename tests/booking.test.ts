@@ -198,3 +198,21 @@ test("conversation fields are bounded and do not permit unknown preference value
     false,
   );
 });
+
+test("group size and duration accept 1 through 12 and reject values outside the range", () => {
+  assert.equal(
+    bookingSchema.safeParse({ ...valid(), groupSize: 12, duration: 12 })
+      .success,
+    true,
+  );
+  assert.equal(
+    bookingSchema.safeParse({ ...valid(), groupSize: 1, duration: 1 }).success,
+    true,
+  );
+  for (const field of ["groupSize", "duration"])
+    for (const value of [0, 13, 2.5])
+      assert.equal(
+        bookingSchema.safeParse({ ...valid(), [field]: value }).success,
+        false,
+      );
+});

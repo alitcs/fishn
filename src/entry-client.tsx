@@ -5,6 +5,7 @@ import { captureAttribution } from "./services/analytics";
 import "./styles.css";
 import "./journey.css";
 import "./conversion.css";
+import "./glass.css";
 captureAttribution();
 const root = document.getElementById("root")!;
 const app = (
