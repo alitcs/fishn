@@ -1,0 +1,1775 @@
+/* A continuous photographic expedition. The scroll wheel remains native. */
+.journey-header {
+  height: 88px;
+}
+.header.journey-header .header-note {
+  margin-left: 38px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+}
+.header.journey-header .journey-nav {
+  display: flex;
+  position: static;
+  margin-left: auto;
+  padding: 0;
+  background: none;
+  border: 0;
+  width: auto;
+  flex-direction: row;
+}
+.header.journey-header .journey-nav > .journey-book {
+  display: flex;
+  align-items: center;
+  gap: 38px;
+  min-height: 44px;
+  border-bottom: 1px solid #ffffff75;
+  padding: 7px 0;
+  font-size: 13px;
+}
+.header.journey-header .journey-nav > .journey-book::after {
+  display: none;
+}
+.journey-book > span {
+  font-size: 20px;
+  font-weight: 300;
+}
+.journey-return {
+  font-size: 12px;
+  margin-left: 20px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.journey-nav > .eyebrow {
+  font-size: 10px;
+}
+.journey {
+  --scene-gutter: clamp(25px, 7vw, 112px);
+}
+.journey > .photo-chapter {
+  min-height: 100svh;
+}
+.journey [data-atmosphere] > .chapter-photo {
+  transform: translate3d(0, var(--drift, 0px), 0) scale(1.055);
+}
+.journey .photo-chapter::after {
+  opacity: 0.07;
+}
+.arrival {
+  height: 100svh;
+  min-height: 700px !important;
+}
+.arrival > .chapter-photo {
+  filter: saturate(0.72) contrast(0.98);
+  object-position: 50% 53%;
+}
+.arrival-shade {
+  background:
+    linear-gradient(
+      180deg,
+      #0713182b,
+      transparent 30%,
+      #0713112b 55%,
+      #07131194
+    ),
+    linear-gradient(90deg, #0a171834, transparent 70%);
+}
+.arrival-top {
+  position: absolute;
+  top: 24%;
+  left: var(--scene-gutter);
+  right: var(--scene-gutter);
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+}
+.arrival-statement {
+  position: absolute;
+  left: 14%;
+  top: 41%;
+}
+.arrival-statement > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 23px;
+}
+.arrival h1 {
+  font-size: clamp(58px, 6.1vw, 94px);
+  line-height: 1.04;
+  letter-spacing: -0.06em;
+  font-weight: 350;
+  animation: resolve-type 1.3s var(--ease) both;
+}
+.arrival h1 > span {
+  font-weight: 300;
+}
+.arrival-observation {
+  position: absolute;
+  right: 13%;
+  top: 36%;
+  width: 132px;
+}
+.arrival-observation .focus-frame {
+  height: 100px;
+}
+.arrival-observation p {
+  font-size: 9px;
+  margin-top: 17px;
+  line-height: 1.7;
+  letter-spacing: 0.03em;
+}
+.arrival-bottom {
+  position: absolute;
+  bottom: 35px;
+  left: var(--scene-gutter);
+  right: var(--scene-gutter);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: end;
+  border-top: 1px solid #ffffff65;
+  padding-top: 23px;
+}
+.arrival-bottom > .eyebrow {
+  font-size: 10px;
+}
+.arrival-bottom > p {
+  font-size: 11px;
+  line-height: 1.6;
+  justify-self: center;
+  letter-spacing: 0.02em;
+}
+.scroll-thread {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-self: end;
+}
+.scroll-thread i {
+  width: 1px;
+  height: 40px;
+  background: #ffffffa3;
+  display: block;
+  position: relative;
+}
+.scroll-thread i::after {
+  content: "";
+  height: 7px;
+  width: 7px;
+  border-bottom: 1px solid #fff;
+  border-right: 1px solid #fff;
+  position: absolute;
+  bottom: 0;
+  left: -3px;
+  transform: rotate(45deg);
+}
+.journey > .threshold {
+  min-height: 90svh;
+}
+.threshold > .chapter-photo {
+  object-position: 70% 52%;
+  filter: blur(1.5px) saturate(0.55) brightness(0.77);
+}
+.threshold .photo-scrim {
+  background:
+    linear-gradient(90deg, #0d211970, #0d211914),
+    linear-gradient(180deg, #0b1a1240, #0b1a1220 70%, #0b1a1255);
+}
+.threshold-top {
+  position: absolute;
+  top: 125px;
+  left: var(--scene-gutter);
+  font-size: 10px;
+}
+.threshold-copy {
+  position: absolute;
+  left: 46%;
+  right: var(--scene-gutter);
+  top: 28%;
+}
+.threshold-copy > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 26px;
+}
+.threshold h2 {
+  font-size: clamp(60px, 6.8vw, 98px);
+  line-height: 0.99;
+  letter-spacing: -0.055em;
+}
+.threshold h2 span {
+  font-weight: 300;
+}
+.threshold-copy > p:last-child {
+  font-size: 14px;
+  line-height: 1.8;
+  margin-top: 30px;
+  max-width: 400px;
+}
+.threshold-bottom {
+  position: absolute;
+  bottom: 45px;
+  left: var(--scene-gutter);
+  font-size: 10px;
+}
+/* One stationary photographic canvas, four naturally scrolling chapters. */
+.water-journey {
+  position: relative;
+  isolation: isolate;
+}
+.water-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 600px;
+  overflow: hidden;
+}
+.water-exposure {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.15s var(--ease);
+  background: #11221d;
+}
+.water-exposure.is-active {
+  opacity: 1;
+}
+.water-exposure > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--focal, center);
+  filter: saturate(0.7) contrast(0.98);
+  transform: scale(1.045);
+  transition: transform 2.4s var(--ease);
+}
+.water-exposure.is-active > img {
+  transform: scale(1.015);
+}
+.water-stage-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #09181573, #09181516 66%),
+    linear-gradient(0deg, #09181585, transparent 55%, #0918152e);
+}
+.water-stage-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.065;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23g)' d='M0 0h180v180H0z'/%3E%3C/svg%3E");
+}
+.water-stage-label {
+  position: absolute;
+  left: var(--scene-gutter);
+  top: 125px;
+  font-size: 10px;
+}
+.water-stage-index {
+  position: absolute;
+  left: var(--gutter);
+  top: 43%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-size: 10px;
+}
+.water-stage-index > span {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  opacity: 0.4;
+  transition: opacity 0.7s;
+}
+.water-stage-index > span.is-current {
+  opacity: 1;
+}
+.water-stage-index i {
+  display: block;
+  width: 10px;
+  height: 1px;
+  background: #fff;
+  transition: width 0.7s var(--ease);
+}
+.water-stage-index .is-current i {
+  width: 30px;
+}
+.water-story {
+  position: relative;
+  margin-top: -100svh;
+  z-index: 1;
+  pointer-events: none;
+}
+.water-scene {
+  min-height: 110svh;
+  position: relative;
+  padding: 150px var(--scene-gutter);
+  display: flex;
+  align-items: center;
+}
+.scene-static-photo {
+  display: none;
+}
+.water-journey:not([data-enhanced="true"]) .water-stage {
+  display: none;
+  position: relative;
+}
+.water-journey:not([data-enhanced="true"]) .water-story {
+  margin-top: 0;
+}
+.water-journey:not([data-enhanced="true"]) .water-scene {
+  isolation: isolate;
+}
+.water-journey:not([data-enhanced="true"]) .scene-static-photo {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  filter: saturate(0.7) brightness(0.7);
+}
+.water-journey:not([data-enhanced="true"]) .water-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, #0a1a1760, transparent),
+    linear-gradient(0deg, #0a1a1770, transparent);
+  z-index: -1;
+}
+.scene-copy {
+  max-width: 580px;
+  margin-left: 8%;
+}
+.scene-copy > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 25px;
+}
+.scene-copy h2 {
+  font-size: clamp(62px, 6.8vw, 100px);
+  line-height: 1.02;
+  font-weight: 350;
+}
+.scene-copy h2 > span {
+  font-weight: 300;
+}
+.scene-copy > p:last-child {
+  font-size: 15px;
+  max-width: 330px;
+  line-height: 1.8;
+  margin-top: 28px;
+}
+.water-scene.is-current .scene-copy {
+  animation: scene-resolve 0.9s var(--ease) both;
+}
+.scene-cartography {
+  position: absolute;
+  left: 64%;
+  right: 11%;
+  top: 31%;
+  max-width: 370px;
+}
+.scene-map-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 10px;
+}
+.scene-cartography > .water-outline {
+  height: 270px;
+  width: 100%;
+  margin: 25px 0 20px;
+}
+.scene-cartography > p {
+  font-size: 10px;
+  letter-spacing: 0.025em;
+}
+.scene-cartography > p span {
+  font-size: 9px;
+  opacity: 0.8;
+}
+.water-scene.is-current .water-outline path {
+  stroke-dasharray: 1;
+  animation: draw-water 2.1s var(--ease) both;
+}
+.scene-footnote {
+  position: absolute;
+  bottom: 145px;
+  left: var(--scene-gutter);
+  max-width: 410px;
+}
+.scene-footnote > .eyebrow {
+  font-size: 10px;
+}
+.scene-footnote > p {
+  font-size: 13px;
+  margin-top: 10px;
+  line-height: 1.65;
+  max-width: 340px;
+}
+.scene-source {
+  position: absolute;
+  bottom: 87px;
+  right: var(--scene-gutter);
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  pointer-events: auto;
+}
+.scene-source > a {
+  font-size: 10px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.water-scene-1 .scene-copy {
+  margin-left: 14%;
+}
+.water-scene-2 .scene-copy {
+  margin-left: 8%;
+}
+.water-scene-3 .scene-copy {
+  max-width: 700px;
+  margin-left: 8%;
+}
+.water-scene-3 .scene-copy h2 {
+  font-size: clamp(55px, 6.1vw, 88px);
+}
+.water-scene-3 .scene-cartography {
+  top: 36%;
+}
+/* Desire: a single field journal, then a personal introduction. */
+.day-story {
+  display: flex;
+  align-items: center;
+  padding: 150px var(--scene-gutter) 210px;
+}
+.day-story > .chapter-photo {
+  object-position: 65% 55%;
+  filter: saturate(0.58) brightness(0.83);
+}
+.day-story .photo-scrim {
+  background: linear-gradient(0deg, #071a11ab, #071a1130 80%);
+}
+.day-story .chapter-note {
+  left: var(--scene-gutter);
+  right: var(--scene-gutter);
+  font-size: 10px;
+}
+.day-editorial {
+  width: 680px;
+  max-width: 80%;
+  margin: 0 0 0 35%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 165px;
+  gap: 35px;
+  padding: 33px;
+  border: 1px solid #ffffff80;
+  background: #bac6b10b;
+  backdrop-filter: blur(5px);
+}
+.day-editorial > div > .eyebrow {
+  font-size: 10px;
+}
+.day-editorial h2 {
+  font-size: clamp(43px, 4.3vw, 62px);
+  line-height: 1.01;
+  margin: 25px 0;
+}
+.day-editorial .fine-rule {
+  background: #ffffff85;
+  margin-bottom: 22px;
+}
+.day-editorial > div > p:last-child {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.day-editorial figure {
+  align-self: center;
+}
+.day-editorial figure img {
+  height: 270px;
+}
+.day-editorial figcaption {
+  font-size: 8px;
+  margin-top: 13px;
+}
+.day-details {
+  position: absolute;
+  left: var(--scene-gutter);
+  right: var(--scene-gutter);
+  bottom: 45px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  border-top: 1px solid var(--line);
+  padding-top: 25px;
+}
+.day-details > p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.day-details .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 10px;
+}
+.together-story {
+  display: flex;
+  align-items: center;
+  padding: 150px var(--scene-gutter);
+}
+.journey .together-story > .together-soft {
+  object-position: 35% 100%;
+  filter: blur(6px) saturate(0.6) brightness(0.65);
+  transform: scale(1.025);
+}
+.journey .together-story > .together-sharp {
+  object-position: 35% 100%;
+  clip-path: inset(34% 47% 31% 0);
+  filter: saturate(0.65) brightness(0.87);
+  transform: none;
+}
+.together-story .photo-scrim {
+  background: linear-gradient(
+    90deg,
+    #0b191320,
+    #0b191330 43%,
+    #091812be 65%,
+    #091812cb
+  );
+}
+.together-focus {
+  position: absolute;
+  left: 12%;
+  top: 34%;
+  width: 32%;
+  height: 35%;
+}
+.together-focus .focus-frame {
+  height: 100%;
+}
+.together-focus > span {
+  display: block;
+  margin-top: 18px;
+  font-size: 9px;
+}
+.together-copy {
+  width: 42%;
+  max-width: 470px;
+  margin-left: 55%;
+}
+.together-copy > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 25px;
+}
+.together-copy h2 {
+  font-size: clamp(48px, 4.8vw, 70px);
+  line-height: 1.02;
+  margin-bottom: 30px;
+}
+.together-copy h2 span {
+  font-weight: 300;
+}
+.together-copy > p:not(.eyebrow) {
+  font-size: 15px;
+  line-height: 1.8;
+  margin-top: 18px;
+}
+.guide-social {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 12px;
+  border-bottom: 1px solid #ffffff60;
+  margin-top: 20px;
+}
+.together-signoff {
+  position: absolute;
+  left: var(--scene-gutter);
+  bottom: 40px;
+  font-size: 10px;
+}
+.journey > .commitment {
+  min-height: 80svh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 140px var(--scene-gutter);
+}
+.commitment > .chapter-photo {
+  object-position: 50% 57%;
+  filter: saturate(0.6) brightness(0.72);
+}
+.commitment .photo-scrim {
+  background: #0b181947;
+}
+.commitment > div:not(.photo-scrim) > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 25px;
+}
+.commitment h2 {
+  font-size: clamp(52px, 6vw, 88px);
+  line-height: 1.05;
+}
+.commitment h2 span {
+  font-weight: 300;
+}
+.commitment > div:not(.photo-scrim) > p:last-child {
+  margin-top: 30px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.commitment-thread {
+  position: absolute;
+  width: 1px;
+  height: 95px;
+  bottom: 0;
+  left: 50%;
+  background: #ffffff65;
+}
+/* Booking happens inside the same landscape, one question at a time. */
+.booking-scene {
+  min-height: max(940px, 100svh);
+  padding: 145px 7% 100px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9%;
+  align-items: start;
+  scroll-margin-top: 0;
+}
+.booking-backdrops {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background: #0d1d1a;
+}
+.booking-exposure {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 55%;
+  opacity: 0;
+  filter: saturate(0.65) contrast(0.96);
+  transition:
+    opacity 1s var(--ease),
+    transform 1.8s var(--ease);
+  transform: scale(1.035);
+}
+.booking-exposure.is-active {
+  opacity: 1;
+  transform: scale(1.005);
+}
+.booking-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, #0a1a1738, #0a1a1730 30%, #0a1a17c4 57%, #0a1a17df),
+    linear-gradient(0deg, #0a1a1785, transparent 60%);
+}
+.booking-introduction {
+  max-width: 420px;
+}
+.booking-introduction > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 24px;
+}
+.booking-main-title {
+  font-size: clamp(50px, 5.3vw, 77px);
+  line-height: 1.03;
+  font-weight: 350;
+}
+.booking-main-title span {
+  font-weight: 300;
+}
+.booking-place {
+  position: absolute;
+  left: 7%;
+  top: 43%;
+  width: 27%;
+  max-width: 340px;
+}
+.booking-place > .eyebrow {
+  font-size: 10px;
+}
+.booking-place > p:last-child {
+  font-size: 9px;
+  letter-spacing: 0.025em;
+}
+.booking-outlines {
+  height: 250px;
+  position: relative;
+  margin: 17px 0 20px;
+}
+.booking-outlines .water-outline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease);
+}
+.booking-outlines .water-outline.is-active {
+  opacity: 1;
+}
+.booking-map-credit {
+  position: absolute;
+  bottom: 35px;
+  left: 7%;
+  font-size: 10px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  z-index: 4;
+}
+.booking-panel {
+  width: 100%;
+  max-width: 490px;
+  justify-self: end;
+  padding-top: 5px;
+}
+.booking-progress {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-bottom: 21px;
+  border-bottom: 1px solid #ffffff60;
+  margin-bottom: 30px;
+}
+.booking-progress > .eyebrow {
+  font-size: 11px;
+}
+.booking-progress > span:nth-child(2) {
+  font-size: 13px;
+}
+.booking-progress > div {
+  display: flex;
+  gap: 5px;
+  margin-left: auto;
+}
+.booking-progress i {
+  width: 15px;
+  height: 1px;
+  display: block;
+  background: #ffffff35;
+}
+.booking-progress i.is-complete {
+  background: #fff;
+}
+.booking-step {
+  min-height: 390px;
+  animation: scene-resolve 0.45s var(--ease) both;
+}
+.booking-step > h2 {
+  font-size: clamp(32px, 3.1vw, 46px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+  margin-bottom: 32px;
+  scroll-margin-top: 120px;
+}
+.booking-step > h2:focus {
+  outline: none;
+}
+.booking-step .step-intro {
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 24px;
+  max-width: 450px;
+}
+.destination-options {
+  display: grid;
+}
+.destination-options > button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #ffffff45;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 61px;
+  padding: 13px 0;
+  font-size: 20px;
+  letter-spacing: -0.025em;
+  color: #e2e6dc;
+}
+.destination-options > button:first-child {
+  border-top: 1px solid #ffffff45;
+}
+.destination-options > button[aria-pressed="true"] {
+  color: white;
+  border-bottom-color: white;
+}
+.destination-options > button > span:last-child {
+  font-weight: 300;
+  font-size: 19px;
+}
+.fishing-choice {
+  margin-top: 29px;
+}
+.fishing-choice legend {
+  font-size: 13px;
+  margin-bottom: 9px;
+}
+.booking-scene .experience-options {
+  gap: 22px;
+  border: 0;
+}
+.booking-scene .experience-options > button {
+  margin: 0;
+  padding: 12px 0;
+  min-height: 48px;
+  border-bottom: 1px solid #ffffff40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  gap: 15px;
+  font-size: 14px;
+}
+.booking-scene .experience-options > button[aria-pressed="true"] {
+  border-color: white;
+}
+.booking-scene .experience-options > button > span {
+  font-size: 12px;
+  display: block;
+}
+.booking-scene .field-hint {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 17px;
+  color: #d4ddd1;
+}
+.booking-step-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #ffffff60;
+  margin-top: 28px;
+}
+.booking-back {
+  min-height: 48px;
+  min-width: 60px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 14px;
+  padding: 10px 0;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+.booking-first-note {
+  font-size: 11px;
+  line-height: 1.7;
+  color: #d8e0d3;
+}
+.booking-next {
+  min-width: 175px;
+  border-color: #ffffffb5;
+  min-height: 49px;
+  padding: 12px 20px;
+  font-size: 14px;
+}
+.booking-delivery-state {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-left: 1px solid #dde6c8;
+  padding: 4px 0 4px 14px;
+  margin-top: 23px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #d4ddcf;
+}
+.booking-delivery-state strong {
+  font-weight: 450;
+}
+.booking-delivery-state a {
+  text-decoration: underline;
+}
+.booking-tripline {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #d5ded1;
+  margin-top: 27px;
+}
+.booking-tripline > span {
+  margin: 0 7px;
+  color: #99a897;
+}
+.booking-scene .calendar {
+  max-width: 390px;
+  margin-top: 12px;
+}
+.booking-scene .calendar-heading {
+  margin-bottom: 10px;
+}
+.booking-scene .calendar-grid button {
+  font-size: 15px;
+  min-height: 44px;
+}
+.booking-scene .calendar-weekday {
+  line-height: 24px;
+}
+.booking-scene .conditions-note {
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 18px;
+}
+.booking-scene .segmented {
+  gap: 12px;
+  margin: 32px 0 25px;
+}
+.booking-scene .segmented > button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: 16px 8px;
+  font-size: 37px;
+  font-weight: 350;
+  background: #ffffff04;
+}
+.booking-scene .segmented > button[aria-pressed="true"] {
+  background: #ffffff12;
+  border-color: #fff;
+}
+.booking-scene .segmented > button > span {
+  font-size: 12px;
+  font-weight: 400;
+  margin-top: 8px;
+}
+.booking-scene .extra-group {
+  margin-top: 30px;
+  font-size: 14px;
+}
+.booking-scene .extra-group input {
+  max-width: 190px;
+  background: transparent;
+}
+.booking-scene .licence-options {
+  margin-top: 20px;
+  gap: 0;
+}
+.booking-scene .licence-options label {
+  min-height: 60px;
+  padding: 15px 0;
+  border-bottom: 1px solid #ffffff35;
+  font-size: 14px;
+}
+.booking-scene .licence-section details {
+  margin-top: 25px;
+  padding: 16px 0 8px;
+  border-bottom: 0;
+}
+.booking-scene .licence-section summary {
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 32px;
+}
+.booking-scene .licence-section details > p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 17px;
+}
+.booking-scene .contact-fields {
+  gap: 21px;
+}
+.booking-scene .contact-fields label {
+  font-size: 13px;
+}
+.booking-scene .contact-fields input {
+  background: transparent;
+}
+.booking-scene .contact-fields input:focus {
+  background: #ffffff08;
+}
+.booking-scene fieldset:disabled {
+  opacity: 0.6;
+}
+.booking-review {
+  border-top: 1px solid #ffffff40;
+  margin-top: 27px;
+  padding-top: 15px;
+}
+.booking-review summary {
+  cursor: pointer;
+  font-size: 13px;
+  min-height: 36px;
+  padding: 4px 0;
+}
+.booking-review dl {
+  margin: 15px 0 0;
+  display: grid;
+  gap: 15px;
+}
+.booking-review dt {
+  font-size: 11px;
+  color: #cfdbca;
+}
+.booking-review dd {
+  margin: 5px 0 0;
+  font-size: 14px;
+}
+.booking-review .text-button {
+  font-size: 12px;
+  margin-top: 10px;
+}
+.booking-scene .submit-booking {
+  width: auto;
+  min-height: 49px;
+  margin: 0;
+  font-size: 14px;
+  padding: 12px 20px;
+  flex: 1;
+  max-width: 280px;
+}
+.booking-scene .submit-note {
+  text-align: left;
+  margin-top: 24px;
+  font-size: 11px;
+}
+.booking-scene .form-message {
+  margin: 20px 0 0;
+  padding: 12px 15px;
+  font-size: 13px;
+  background: #60372530;
+}
+.booking-confirmation > .eyebrow {
+  font-size: 10px;
+  margin-bottom: 25px;
+}
+.booking-confirmation > h2 {
+  font-size: clamp(48px, 5vw, 70px);
+  line-height: 1.05;
+  margin-bottom: 28px;
+}
+.booking-confirmation > h2:focus {
+  outline: none;
+}
+.booking-confirmation > p:not(.eyebrow):not(.small):not(.request-reference) {
+  font-size: 16px;
+  line-height: 1.8;
+}
+.booking-confirmation .confirmation-summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+  margin: 28px 0;
+  padding: 22px 0;
+  font-size: 14px;
+}
+.booking-confirmation .small {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.booking-confirmation .request-reference {
+  margin-top: 24px;
+  font-size: 11px;
+}
+.booking-confirmation .text-button {
+  margin-top: 25px;
+}
+@keyframes draw-water {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes scene-resolve {
+  from {
+    opacity: 0.4;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@media (min-width: 1800px) {
+  .arrival-statement {
+    left: 18%;
+  }
+  .scene-copy {
+    margin-left: 14%;
+  }
+  .booking-panel {
+    max-width: 560px;
+  }
+}
+@media (max-width: 1100px) {
+  .arrival-statement {
+    left: var(--scene-gutter);
+  }
+  .arrival h1 {
+    font-size: 7.1vw;
+  }
+  .arrival-observation {
+    right: 9%;
+    top: 30%;
+    width: 110px;
+  }
+  .threshold-copy {
+    left: 39%;
+  }
+  .threshold h2 {
+    font-size: 78px;
+  }
+  .scene-copy,
+  .water-scene-1 .scene-copy,
+  .water-scene-2 .scene-copy,
+  .water-scene-3 .scene-copy {
+    margin-left: 6%;
+  }
+  .scene-copy h2 {
+    font-size: 76px;
+  }
+  .scene-cartography {
+    left: 65%;
+    right: 7%;
+  }
+  .scene-cartography > .water-outline {
+    height: 230px;
+  }
+  .day-editorial {
+    max-width: 84%;
+    margin-left: 17%;
+    grid-template-columns: minmax(0, 1fr) 140px;
+    padding: 28px;
+    gap: 28px;
+  }
+  .together-copy {
+    width: 45%;
+    margin-left: 52%;
+  }
+  .together-copy h2 {
+    font-size: 54px;
+  }
+  .booking-scene {
+    padding-left: 6%;
+    padding-right: 6%;
+    gap: 8%;
+    grid-template-columns: 40% 52%;
+  }
+  .booking-place {
+    left: 6%;
+    width: 30%;
+  }
+  .booking-step > h2 {
+    font-size: 36px;
+  }
+  .booking-progress {
+    gap: 16px;
+  }
+  .booking-progress i {
+    width: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .header.journey-header {
+    height: 78px;
+    padding: 0 25px;
+    gap: 20px;
+  }
+  .header.journey-header .header-note {
+    display: none;
+  }
+  .header.journey-header .wordmark {
+    font-size: 32px;
+  }
+  .header.journey-header .journey-nav {
+    display: flex;
+    margin-left: auto;
+  }
+  .header.journey-header .journey-nav > .journey-book {
+    font-size: 12px;
+    gap: 24px;
+  }
+  .journey-return {
+    display: none;
+  }
+  .journey-nav > .eyebrow {
+    font-size: 9px;
+  }
+  .arrival {
+    min-height: 700px !important;
+  }
+  .arrival > .chapter-photo {
+    object-position: 53% 52%;
+  }
+  .arrival-top {
+    top: 21%;
+    font-size: 8px;
+  }
+  .arrival-statement {
+    top: 43%;
+    right: 25px;
+    left: 25px;
+  }
+  .arrival-statement > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 20px;
+  }
+  .arrival h1 {
+    font-size: clamp(43px, 8vw, 56px);
+    line-height: 1.06;
+  }
+  .arrival-observation {
+    right: 25px;
+    top: 28%;
+    width: 80px;
+  }
+  .arrival-observation .focus-frame {
+    height: 62px;
+  }
+  .arrival-observation p {
+    font-size: 8px;
+    margin-top: 12px;
+  }
+  .arrival-bottom {
+    bottom: 29px;
+    padding-top: 20px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .arrival-bottom > .eyebrow {
+    font-size: 9px;
+  }
+  .arrival-bottom > p {
+    display: none;
+  }
+  .scroll-thread {
+    font-size: 9px;
+    gap: 19px;
+  }
+  .scroll-thread i {
+    height: 32px;
+  }
+  .journey > .threshold {
+    min-height: 90svh;
+  }
+  .threshold-top {
+    top: 110px;
+    font-size: 9px;
+    max-width: 270px;
+  }
+  .threshold-copy {
+    left: 25px;
+    right: 25px;
+    top: 32%;
+  }
+  .threshold-copy > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 25px;
+  }
+  .threshold h2 {
+    font-size: 70px;
+  }
+  .threshold-copy > p:last-child {
+    font-size: 14px;
+    margin-top: 27px;
+    max-width: 305px;
+  }
+  .desktop-break {
+    display: none;
+  }
+  .threshold-bottom {
+    bottom: 35px;
+    font-size: 8px;
+  }
+  .water-stage {
+    min-height: 700px;
+  }
+  .water-scene {
+    min-height: 110svh;
+    padding: 150px 25px 230px;
+    align-items: center;
+  }
+  .water-stage-label {
+    top: 111px;
+    font-size: 9px;
+  }
+  .water-stage-index {
+    top: auto;
+    bottom: 32px;
+    left: 25px;
+    right: 25px;
+    flex-direction: row;
+    gap: 22px;
+    font-size: 8px;
+  }
+  .water-stage-index > span {
+    gap: 9px;
+  }
+  .water-stage-index i {
+    width: 12px;
+  }
+  .water-stage-index .is-current i {
+    width: 25px;
+  }
+  .scene-copy,
+  .water-scene-1 .scene-copy,
+  .water-scene-2 .scene-copy,
+  .water-scene-3 .scene-copy {
+    margin: 0;
+    max-width: 100%;
+  }
+  .scene-copy > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 21px;
+  }
+  .scene-copy h2 {
+    font-size: clamp(57px, 10vw, 77px);
+    line-height: 1.02;
+  }
+  .scene-copy > p:last-child {
+    font-size: 14px;
+    line-height: 1.8;
+    max-width: 255px;
+    margin-top: 25px;
+  }
+  .scene-cartography {
+    top: 16%;
+    left: auto;
+    right: 25px;
+    width: 116px;
+  }
+  .scene-map-heading {
+    font-size: 8px;
+    gap: 8px;
+  }
+  .scene-map-heading > span:last-child {
+    display: none;
+  }
+  .scene-cartography > .water-outline {
+    height: 113px;
+    margin: 12px 0;
+  }
+  .scene-cartography > p {
+    font-size: 8px;
+    line-height: 1.8;
+  }
+  .scene-cartography > p span {
+    font-size: 7px;
+  }
+  .scene-footnote {
+    left: 25px;
+    bottom: 146px;
+    right: 25px;
+    max-width: 260px;
+  }
+  .scene-footnote > .eyebrow {
+    font-size: 9px;
+  }
+  .scene-footnote > p {
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .scene-source {
+    left: 25px;
+    right: 25px;
+    bottom: 92px;
+    gap: 25px;
+  }
+  .scene-source > a {
+    font-size: 9px;
+  }
+  .water-scene-3 .scene-copy h2 {
+    font-size: clamp(48px, 8.2vw, 68px);
+  }
+  .water-scene-3 .scene-cartography {
+    top: 16%;
+  }
+  .water-scene-3 .scene-copy {
+    padding-top: 35px;
+  }
+  .journey > .day-story {
+    min-height: 1050px;
+    display: block;
+    padding: 225px 25px 280px;
+  }
+  .day-story .chapter-note {
+    top: 110px;
+    font-size: 9px;
+  }
+  .day-editorial {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px 20px;
+    grid-template-columns: minmax(0, 1fr) 90px;
+    gap: 22px;
+  }
+  .day-editorial h2 {
+    font-size: 38px;
+    margin: 22px 0;
+  }
+  .day-editorial > div > .eyebrow {
+    font-size: 8px;
+  }
+  .day-editorial > div > p:last-child {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .day-editorial figure img {
+    height: 240px;
+  }
+  .day-editorial figcaption {
+    font-size: 7px;
+  }
+  .day-details {
+    bottom: 36px;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    padding-top: 22px;
+  }
+  .day-details > p {
+    font-size: 12px;
+  }
+  .day-details .eyebrow {
+    font-size: 9px;
+    margin-bottom: 8px;
+  }
+  .day-details > p:last-child {
+    grid-column: 1 / -1;
+  }
+  .day-details > p:last-child br {
+    display: none;
+  }
+  .journey > .together-story {
+    display: block;
+    min-height: 1080px;
+    padding: 535px 25px 120px;
+  }
+  .journey .together-story > .together-sharp {
+    height: 720px;
+    top: -280px;
+    bottom: auto;
+    clip-path: inset(475px 8% 0 8%);
+  }
+  .together-story .photo-scrim {
+    background: linear-gradient(0deg, #081a15ef, #081a15b5 50%, #081a1510 80%);
+  }
+  .together-focus {
+    top: 195px;
+    left: 8%;
+    width: 84%;
+    height: 245px;
+  }
+  .together-focus > span {
+    font-size: 8px;
+  }
+  .together-copy {
+    width: 100%;
+    max-width: 500px;
+    margin: 0;
+  }
+  .together-copy > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 22px;
+  }
+  .together-copy h2 {
+    font-size: 48px;
+    margin-bottom: 25px;
+  }
+  .together-copy > p:not(.eyebrow) {
+    font-size: 14px;
+  }
+  .together-signoff {
+    bottom: 37px;
+    font-size: 8px;
+    max-width: 290px;
+  }
+  .journey > .commitment {
+    min-height: 80svh;
+    padding: 130px 25px;
+  }
+  .commitment h2 {
+    font-size: clamp(43px, 7.7vw, 62px);
+  }
+  .commitment > div:not(.photo-scrim) > .eyebrow {
+    font-size: 9px;
+  }
+  .commitment > div:not(.photo-scrim) > p:last-child {
+    font-size: 14px;
+  }
+  .commitment-thread {
+    height: 80px;
+  }
+  .booking-scene {
+    display: block;
+    min-height: 1040px;
+    padding: 125px 25px 85px;
+  }
+  .booking-scrim {
+    background: linear-gradient(
+      0deg,
+      #091b16e3,
+      #091b16c2 55%,
+      #091b1665 82%,
+      #091b1642
+    );
+  }
+  .booking-introduction {
+    max-width: 250px;
+    margin-bottom: 48px;
+  }
+  .booking-introduction > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 18px;
+  }
+  .booking-main-title {
+    font-size: 49px;
+  }
+  .booking-place {
+    top: 150px;
+    left: auto;
+    right: 25px;
+    width: 105px;
+    opacity: 0.75;
+  }
+  .booking-place > p {
+    display: none;
+  }
+  .booking-outlines {
+    height: 115px;
+    margin: 0;
+  }
+  .booking-map-credit {
+    left: 25px;
+    bottom: 30px;
+    font-size: 9px;
+  }
+  .booking-panel {
+    max-width: 600px;
+    padding: 0;
+  }
+  .booking-progress {
+    margin-bottom: 25px;
+    gap: 17px;
+    padding-bottom: 18px;
+  }
+  .booking-progress > .eyebrow {
+    font-size: 10px;
+  }
+  .booking-progress > span:nth-child(2) {
+    font-size: 13px;
+  }
+  .booking-progress > div {
+    gap: 4px;
+  }
+  .booking-progress i {
+    width: 12px;
+  }
+  .booking-step {
+    min-height: 370px;
+  }
+  .booking-step > h2 {
+    font-size: 32px;
+    margin-bottom: 25px;
+  }
+  .booking-step .step-intro {
+    font-size: 14px;
+    margin-bottom: 23px;
+  }
+  .destination-options > button {
+    min-height: 56px;
+    font-size: 19px;
+  }
+  .fishing-choice {
+    margin-top: 26px;
+  }
+  .booking-scene .experience-options {
+    gap: 20px;
+  }
+  .booking-scene .experience-options > button {
+    font-size: 14px;
+  }
+  .booking-scene .field-hint {
+    font-size: 12px;
+  }
+  .booking-step-actions {
+    margin-top: 25px;
+    padding-top: 22px;
+    gap: 20px;
+  }
+  .booking-next {
+    min-width: 157px;
+  }
+  .booking-delivery-state {
+    font-size: 11px;
+    margin-top: 22px;
+  }
+  .booking-scene .segmented {
+    gap: 8px;
+  }
+  .booking-scene .segmented > button {
+    min-height: 99px;
+    font-size: 34px;
+  }
+  .booking-scene .licence-options label {
+    font-size: 14px;
+  }
+  .booking-scene .contact-fields label {
+    font-size: 14px;
+  }
+  .booking-scene .submit-booking {
+    font-size: 13px;
+    padding: 12px 16px;
+  }
+  .booking-confirmation > h2 {
+    font-size: 51px;
+  }
+  .booking-confirmation > p:not(.eyebrow):not(.small):not(.request-reference) {
+    font-size: 15px;
+  }
+  .booking-confirmation .confirmation-summary {
+    font-size: 14px;
+  }
+}
+@media (max-width: 360px) {
+  .arrival h1 {
+    font-size: 39px;
+  }
+  .arrival-observation {
+    width: 70px;
+    top: 27%;
+  }
+  .arrival-top {
+    font-size: 7px;
+  }
+  .scene-cartography {
+    width: 95px;
+  }
+  .scene-copy h2 {
+    font-size: 52px;
+  }
+  .scene-copy > p:last-child {
+    max-width: 230px;
+  }
+  .water-scene-3 .scene-copy h2 {
+    font-size: 43px;
+  }
+  .day-editorial {
+    grid-template-columns: 1fr;
+  }
+  .day-editorial figure {
+    display: none;
+  }
+  .day-editorial h2 {
+    font-size: 42px;
+  }
+  .booking-main-title {
+    font-size: 43px;
+  }
+  .booking-place {
+    width: 80px;
+  }
+  .booking-step > h2 {
+    font-size: 29px;
+  }
+  .booking-progress {
+    gap: 13px;
+  }
+  .booking-progress i {
+    width: 9px;
+  }
+  .booking-next {
+    min-width: 143px;
+  }
+  .together-copy h2 {
+    font-size: 43px;
+  }
+}
+@media (max-width: 700px) {
+  .booking-scene {
+    padding-top: 110px;
+    min-height: 100svh;
+  }
+  .booking-introduction {
+    margin-bottom: 28px;
+  }
+  .booking-main-title {
+    font-size: 43px;
+  }
+  .booking-introduction > .eyebrow {
+    margin-bottom: 14px;
+  }
+  .booking-scene:not([data-step="0"]) .booking-introduction {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .booking-scene:not([data-step="0"]) .booking-place {
+    display: none;
+  }
+  .booking-place {
+    top: 135px;
+  }
+  .booking-delivery-state {
+    margin-top: 15px;
+  }
+  .booking-scene:not([data-step="5"]) .booking-delivery-state > span {
+    display: none;
+  }
+  .day-editorial h2 {
+    font-weight: 550;
+    font-size: 38px;
+  }
+  .day-details > p {
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey [data-atmosphere] > .chapter-photo {
+    transform: none !important;
+  }
+  .water-stage {
+    position: relative;
+    display: none;
+  }
+  .water-story {
+    margin-top: 0;
+  }
+  .water-scene {
+    isolation: isolate;
+  }
+  .scene-static-photo {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    filter: saturate(0.7) brightness(0.7);
+  }
+  .water-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, #0a1a1760, transparent),
+      linear-gradient(0deg, #0a1a1770, transparent);
+    z-index: -1;
+  }
+  .water-exposure > img {
+    transform: none;
+  }
+}

@@ -6,7 +6,7 @@ import {
   isRequestDateAllowed,
   ontarioToday,
 } from "../src/data/config.ts";
-import { handleBooking } from "../server/booking.ts";
+import { bookingEmail, handleBooking } from "../server/booking.ts";
 function futureDate(days = 10) {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + days);
@@ -165,4 +165,36 @@ test("missing provider receipt is not treated as success", async () => {
     Response.json({}),
   );
   assert.equal(result.status, 502);
+});
+
+test("optional conversation answers and requests reach the guide without becoming required fields", () => {
+  assert.equal(bookingSchema.safeParse(valid()).success, true);
+  const parsed = bookingSchema.parse({
+    ...valid(),
+    tripIntent: "first-time",
+    fishingLevel: "new",
+    destinationAdviceRequested: true,
+    specialRequests: "We would like to discuss equipment before the trip.",
+  });
+  const text = bookingEmail(parsed, parsed.clientSubmittedAt);
+  assert.ok(text.includes("My first fishing experience"));
+  assert.ok(text.includes("I’m completely new"));
+  assert.ok(text.includes("Please help the customer choose"));
+  assert.ok(text.includes("We would like to discuss equipment"));
+});
+test("conversation fields are bounded and do not permit unknown preference values", () => {
+  assert.equal(
+    bookingSchema.safeParse({ ...valid(), tripIntent: "boat-charter" }).success,
+    false,
+  );
+  assert.equal(
+    bookingSchema.safeParse({ ...valid(), fishingLevel: "expert-guide" })
+      .success,
+    false,
+  );
+  assert.equal(
+    bookingSchema.safeParse({ ...valid(), specialRequests: "x".repeat(1501) })
+      .success,
+    false,
+  );
 });

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { officialLinks } from "./data/config";
-import { AnalyticsSettings } from "./services/analytics";
+import { AnalyticsSettings, track } from "./services/analytics";
+import photography from "./data/photography.json";
 
 export function Horizon({ className = "" }: { className?: string }) {
   return (
@@ -29,28 +30,39 @@ export function Photo({
   alt,
   className = "",
   eager = false,
+  priority = false,
+  onLoad,
   sizes = "(max-width: 700px) 100vw, 50vw",
 }: {
   name: string;
   alt: string;
   className?: string;
   eager?: boolean;
+  priority?: boolean;
+  onLoad?: React.ReactEventHandler<HTMLImageElement>;
   sizes?: string;
 }) {
+  const photo = photography[name as keyof typeof photography];
+  // A tall cover crop needs enough pixels for its height, not just viewport width.
+  const imageSizes =
+    sizes === "100vw" && photo
+      ? `(max-aspect-ratio: ${photo.width}/${photo.height}) ${Math.round((photo.width / photo.height) * 100)}vh, 100vw`
+      : sizes;
   return (
     <img
       className={className}
       src={`/images/${name}-960.webp`}
-      srcSet={[480, 960, 1600]
-        .map((w) => `/images/${name}-${w}.webp ${w}w`)
+      srcSet={photo?.sources
+        .map((source) => `${source.src} ${source.width}w`)
         .join(", ")}
-      sizes={sizes}
+      sizes={imageSizes}
       alt={alt}
-      width="1600"
-      height="1200"
+      width={photo?.width ?? 1600}
+      height={photo?.height ?? 1200}
       loading={eager ? "eager" : "lazy"}
-      fetchPriority={eager ? "high" : "auto"}
+      fetchPriority={priority ? "high" : "auto"}
       decoding="async"
+      onLoad={onLoad}
     />
   );
 }
@@ -78,19 +90,57 @@ export function BookLink({
   experience,
   location,
   className = "button",
+  source,
 }: {
   children?: React.ReactNode;
   experience?: string;
   location?: string;
   className?: string;
+  source?: string;
 }) {
   const q = new URLSearchParams();
   if (experience) q.set("experience", experience);
   if (location) q.set("location", location);
   return (
-    <Link className={className} to={`/book${q.size ? "?" + q : ""}`}>
+    <Link
+      className={className}
+      to={`/book${q.size ? "?" + q : ""}`}
+      onClick={() => {
+        if (source) track("BookingEntryClicked", { placement: source });
+      }}
+    >
       {children}
     </Link>
+  );
+}
+export function FocusFrame({ className = "" }: { className?: string }) {
+  return (
+    <div className={`focus-frame ${className}`} aria-hidden="true">
+      <i />
+      <i />
+      <i />
+      <i />
+      <span className="focus-cross" />
+    </div>
+  );
+}
+
+export function ChapterNote({
+  index,
+  title,
+  detail = "ONTARIO / CANADA",
+}: {
+  index: string;
+  title: string;
+  detail?: string;
+}) {
+  return (
+    <div className="chapter-note">
+      <span>
+        {index} / {title}
+      </span>
+      <span>{detail}</span>
+    </div>
   );
 }
 const routeTitles: Record<string, string> = {
@@ -105,12 +155,8 @@ const routeTitles: Record<string, string> = {
 };
 export function Layout() {
   const { pathname } = useLocation();
-  const [menu, setMenu] = useState(false);
   const previous = useRef(pathname);
-  const photoHeader =
-    pathname === "/" ||
-    pathname.startsWith("/experiences/") ||
-    pathname === "/about";
+  const photoHeader = pathname !== "/privacy";
   useEffect(() => {
     document.title = `fishn — ${routeTitles[pathname] ?? "Explore Ontario"}`;
     if (previous.current !== pathname) {
@@ -121,73 +167,46 @@ export function Layout() {
       previous.current = pathname;
     }
   }, [pathname]);
-  useEffect(() => {
-    if (!menu) return;
-    const close = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setMenu(false);
-        document.getElementById("menu-toggle")?.focus();
-      }
-    };
-    document.addEventListener("keydown", close);
-    return () => document.removeEventListener("keydown", close);
-  }, [menu]);
   return (
     <>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
       <header
-        className={`header ${photoHeader ? "header-photo" : ""} ${menu ? "menu-open" : ""}`}
+        className={`header journey-header ${photoHeader ? "header-photo" : ""}`}
       >
-        <Link
-          to="/"
-          className="wordmark"
-          aria-label="fishn home"
-          onClick={() => setMenu(false)}
-        >
+        <Link to="/" className="wordmark" aria-label="fishn home">
           fishn<span className="brand-dot">.</span>
         </Link>
-        <nav
-          aria-label="Main navigation"
-          id="main-navigation"
-          className={menu ? "is-open" : ""}
-        >
-          <NavLink to="/experiences" onClick={() => setMenu(false)}>
-            Experiences
-          </NavLink>
-          <NavLink to="/explore" onClick={() => setMenu(false)}>
-            Explore Ontario
-          </NavLink>
-          <NavLink to="/about" onClick={() => setMenu(false)}>
-            Our story
-          </NavLink>
-          <BookLink className="mobile-nav-book">Plan your day</BookLink>
+        {pathname === "/" ? (
+          <span className="header-note">AN INVITATION TO SLOW DOWN.</span>
+        ) : (
+          <Link className="journey-return" to="/">
+            Back to the journey
+          </Link>
+        )}
+        <nav aria-label="Main navigation" className="journey-nav">
+          {pathname === "/" ? (
+            <BookLink className="journey-book" source="header">
+              Plan your fishing trip <span aria-hidden="true">+</span>
+            </BookLink>
+          ) : pathname === "/book" ? (
+            <span className="eyebrow">A GOOD DAY IN THE MAKING</span>
+          ) : (
+            <BookLink className="journey-book">
+              Plan your fishing trip <span aria-hidden="true">+</span>
+            </BookLink>
+          )}
         </nav>
-        <BookLink className="button nav-book">Plan your day</BookLink>
-        <button
-          id="menu-toggle"
-          className="menu-toggle"
-          onClick={() => setMenu(!menu)}
-          aria-expanded={menu}
-          aria-controls="main-navigation"
-        >
-          {menu ? "Close" : "Menu"}
-          <span aria-hidden="true">{menu ? "−" : "+"}</span>
-        </button>
       </header>
       <main id="main">
         <Outlet />
       </main>
       <footer className="footer">
-        <div className="footer-top">
-          <Link className="wordmark" to="/">
-            fishn<span className="brand-dot">.</span>
-          </Link>
-          <p>A little closer to what matters.</p>
-          <Horizon />
-        </div>
         <div className="footer-bottom">
+          <Link className="wordmark" to="/">
+            fishn.
+          </Link>
           <span>Ontario, Canada · Outside, together.</span>
           <div>
             <External href={officialLinks.instagram}>Instagram</External>
@@ -202,16 +221,30 @@ export function Layout() {
 }
 export function Invitation() {
   return (
-    <section className="invitation section-pad">
-      <Horizon />
-      <p className="eyebrow">SOME DAYS STAY WITH YOU</p>
-      <h2>
-        Let’s make one
-        <br />
-        of those days.
-      </h2>
-      <BookLink>Request your adventure</BookLink>
-      <p className="small">A request first. The details, together.</p>
+    <section className="invitation photo-chapter">
+      <Photo
+        name="waterlandscape"
+        alt="Evening light settling over a quiet forest lake"
+        className="chapter-photo"
+        sizes="100vw"
+      />
+      <div className="photo-scrim" />
+      <ChapterNote index="06" title="SOMETHING TO LOOK FORWARD TO" />
+      <div className="invitation-content">
+        <p className="eyebrow">SOME DAYS STAY WITH YOU.</p>
+        <h2>
+          Let’s make
+          <br />
+          <em>one of those days.</em>
+        </h2>
+        <BookLink>
+          Request your adventure <span aria-hidden="true">+</span>
+        </BookLink>
+        <p className="small">A request first. The details, together.</p>
+      </div>
+      <span className="invitation-signoff eyebrow">
+        A LITTLE CLOSER TO WHAT MATTERS.
+      </span>
     </section>
   );
 }

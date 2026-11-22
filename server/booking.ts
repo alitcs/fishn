@@ -2,6 +2,7 @@ import { bookingSchema, licenceOptions } from "../src/booking/schema";
 import type { BookingInput } from "../src/booking/schema";
 import { experiences } from "../src/data/config";
 import { locations } from "../src/data/locations";
+import { tripIntents, fishingLevels } from "../src/data/booking";
 
 export interface BookingEnv {
   RESEND_API_KEY?: string;
@@ -42,6 +43,24 @@ export function bookingEmail(data: BookingInput, submittedAt: string) {
     `Preferred date (Ontario): ${data.preferredDate}`,
     `Licence acknowledgement: ${licenceOptions.find((l) => l.value === data.licenceAcknowledgement)!.label}`,
     "Licence acknowledgement is self-reported, not legal verification.",
+    ...(data.tripIntent
+      ? [
+          `Kind of day: ${tripIntents.find((option) => option.value === data.tripIntent)!.label}`,
+        ]
+      : []),
+    ...(data.fishingLevel
+      ? [
+          `Fishing experience: ${fishingLevels.find((option) => option.value === data.fishingLevel)!.label}`,
+        ]
+      : []),
+    ...(data.destinationAdviceRequested
+      ? [
+          "Destination advice: Please help the customer choose. The selected destination is a starting suggestion.",
+        ]
+      : []),
+    ...(data.specialRequests
+      ? ["", "Customer note (optional):", data.specialRequests]
+      : []),
     "",
     "Review the season, regulations, permissions, access, weather and (where relevant) ice conditions. Agree the meeting point and pricing directly with the customer.",
     ...(data.analyticsConsent && data.attribution

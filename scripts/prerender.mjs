@@ -48,6 +48,9 @@ const routes = {
   ],
 };
 const template = await readFile("dist/client/index.html", "utf8");
+const photography = JSON.parse(
+  await readFile("src/data/photography.json", "utf8"),
+);
 const origin = (
   process.env.SITE_URL ||
   "https://fishn-ontario-outside.stellarcouch.chatgpt.site"
@@ -55,23 +58,37 @@ const origin = (
 for (const [route, [title, description]] of Object.entries(routes)) {
   const image = route.includes("ice-fishing")
     ? "Lake-simcoe-ice"
-    : "waterlandscape1";
+    : route.includes("holland-river") || route === "/experiences"
+      ? "HollandRiver"
+      : route.includes("nottawasaga-river")
+        ? "Nottawasaga-River"
+        : route === "/about"
+          ? "winterpath"
+          : route.includes("shoreline-fishing")
+            ? "waterlandscape1"
+            : "lake-simcoe";
   const head = template
+    .replace(
+      /<link\s+data-hero-preload\b[^>]*\/?>/,
+      route === "/privacy"
+        ? ""
+        : `<link rel="preload" as="image" href="/images/${image}-960.webp" imagesrcset="${photography[image].sources.map((source) => `${source.src} ${source.width}w`).join(", ")}" imagesizes="(max-aspect-ratio: ${photography[image].width}/${photography[image].height}) ${Math.round((photography[image].width / photography[image].height) * 100)}vh, 100vw" fetchpriority="high" />`,
+    )
     .replace(/<title>.*?<\/title>/, `<title>fishn — ${title}</title>`)
     .replace(
-      /<meta name="description" content="[^"]*"\s*\/>/,
+      /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/,
       `<meta name="description" content="${description}" />`,
     )
     .replace(
-      /<meta property="og:title" content="[^"]*"\s*\/>/,
+      /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/,
       `<meta property="og:title" content="fishn — ${title}" />`,
     )
     .replace(
-      /<meta property="og:description" content="[^"]*"\s*\/>/,
+      /<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/,
       `<meta property="og:description" content="${description}" />`,
     )
     .replace(
-      /<meta property="og:image" content="[^"]*"\s*\/>/,
+      /<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/,
       `<meta property="og:image" content="${origin}/images/${image}-1600.webp" />`,
     )
     .replace(
@@ -88,6 +105,7 @@ for (const [route, [title, description]] of Object.entries(routes)) {
 await writeFile(
   "dist/client/404.html",
   template
+    .replace(/<link\s+data-hero-preload\b[^>]*\/?>/, "")
     .replace("<!--app-html-->", render("/not-found"))
     .replace("</head>", '<meta name="robots" content="noindex" /></head>'),
 );

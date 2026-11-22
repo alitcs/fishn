@@ -1,6 +1,6 @@
 # fishn
 
-A complete React + TypeScript website for private guided shoreline and ice fishing experiences in Ontario. The site uses the supplied photography and five visual references, a custom SVG field atlas based on OpenStreetMap geometry, and a single-page booking request form.
+A React + TypeScript website for private guided shoreline and ice fishing in Ontario. The homepage is a continuous photographic expedition through three waters and two fishing experiences, with immediate booking entry and an inline conversational request. It uses the supplied photography and five visual references, with geographic artwork based on existing OpenStreetMap data.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ The production server runs at **http://127.0.0.1:4173** by default. Set `PORT` t
 
 ## Pages
 
-- `/` — photographic homepage, experiences, atlas preview, philosophy, guide, invitation.
+- `/` — arrival, discovery, four destination/season scenes, the experience, Nikita, and inline booking/confirmation.
 - `/experiences` — both experiences.
 - `/experiences/shoreline-fishing` and `/experiences/ice-fishing` — advertising-ready landing pages with photo journals, FAQs, and preselected booking links.
 - `/explore` — interactive field atlas with accessible text selection.
@@ -47,7 +47,7 @@ Copy `.env.example` to `.env` and set **server-only** variables:
 
 The business inbox and sender were not supplied. No email addresses or private keys have been invented or placed in frontend code. Until all three email variables exist, `/api/booking/status` reports `ready: false`, the form explains that online requests are opening soon, and Instagram is available as a contact route. A direct submission receives HTTP 503, never a false success.
 
-When configured, `POST /api/bookings` validates the body with the shared schema, enforces same-origin JSON requests and a 16 KiB limit, checks experience/location/date combinations, and sends a plain-text notification through [Resend’s email API](https://resend.com/docs/api-reference/emails/send-email). The message includes all requested trip/contact fields, licence acknowledgement, request ID, a validated client submission timestamp, and consented campaign attribution. The delivery provider’s receipt headers record trusted server receipt time. Reply-to is the customer’s address.
+When configured, `POST /api/bookings` validates the body with the shared schema, enforces same-origin JSON requests and a 16 KiB limit, checks experience/location/date combinations, and sends a plain-text notification through [Resend’s email API](https://resend.com/docs/api-reference/emails/send-email). The message includes all requested trip/contact fields, licence acknowledgement, optional trip preferences, fishing familiarity, destination-help requests, optional customer notes, request ID, a validated client submission timestamp, and consented campaign attribution. The delivery provider’s receipt headers record trusted server receipt time. Reply-to is the customer’s address.
 
 The UI retains the same request ID and timestamp when retrying an unchanged form. The server supplies a matching [Resend idempotency key](https://resend.com/docs/dashboard/emails/idempotency-keys); Resend protects identical retries for 24 hours. Double-clicks are also blocked in the UI. Changing the form creates a new request. Delivery failures, missing receipts, timeouts, and validation failures leave the form intact and never show confirmation. The successful state means the provider accepted a **pending request**, not a reserved or confirmed trip. No live email has been sent or tested without credentials.
 
@@ -71,29 +71,34 @@ Before opening requests publicly, supply the actual business email/sender, revie
 
 See [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md) for the visual analysis and [ASSET_INVENTORY.md](ASSET_INVENTORY.md) for every supplied image, its dimensions, role, and editorial selection.
 
-- `waterlandscape1.jpg` — homepage hero.
-- `closeupreelandmug.jpg` — shoreline feature/hero and guide detail.
+- `lake-simcoe.jpg` — high-resolution arrival, Simcoe shoreline scene, and shoreline booking backdrop.
+- `HollandRiver.jpg` — river transition, Holland scene and booking backdrop, and the floating experience journal.
+- `closeupreelandmug.jpg` — shoreline inset, overview, and guide focus study.
 - `Lake-simcoe-ice.jpg` — ice feature/hero and winter location context.
 - `lake-simcoe.jpg`, `HollandRiver.jpg`, `Nottawasaga-River.jpg` — their respective atlas/details.
 - `waterlandscape.jpg` — philosophy; `winterpath.jpg` — about hero.
 - Fish, lure, ice, and catch photographs — curated experience journals, listed individually in the inventory.
 - `UIinspo.jpg`, `UIinspo1.jpg`, `UIinspo2.jpg`, `UIinspo3.jpg`, `mapUIinspo.jpg` — design references only, never served as website assets.
 
-`scripts/prepare-assets.mjs` generates three WebP sizes per selected photograph and copies the local Manrope variable font. Originals remain untouched. Images have aspect ratios, descriptions, responsive sources, and lazy loading below the fold. The final bundle loads no remote font or map SDK.
+`scripts/prepare-assets.mjs` generates WebP variants up to 2560px without upscaling, records actual dimensions and source widths in `src/data/photography.json`, and copies the local Manrope font. Full-screen source sizes account for portrait cover cropping. The hero is preloaded; upcoming water exposures are warmed progressively. Originals remain untouched. No remote font, map SDK, or animation dependency is loaded.
 
-The atlas paths are generated from OSM coordinates, not drawn from memory. `src/data/geography.json` contains retrieval time, bounds, source feature IDs, licence, path data, and actual source coordinate points. Holland River is a mapped main-channel section, not a claim that all branches/access points are shown. `scripts/fetch-geography.mjs` reproduces the source fetch and projection (network access required; Overpass can be temporarily unavailable). This fetch is **not** needed to build the site. Attribution is visible on each atlas map and in the privacy page. Keep attribution and review [OpenStreetMap’s ODbL terms](https://www.openstreetmap.org/copyright) when reusing the data.
+`src/data/scenes.ts` shares the destination/experience/photo mapping between the story and booking. Lake Simcoe shoreline uses `lake-simcoe`; ice uses `Lake-simcoe-ice`; the two rivers use their own named photographs. Booking changes the entire photographic environment and geographic outline, then retains them through the remaining questions and confirmation. Optional kind-of-day and familiarity questions personalize the conversation and the actual guide notification. The first screen can skip directly to the supported destination choices; first-time visitors skip the redundant familiarity question. Party size, preferred date, duration, optional notes/licence acknowledgement, and a visible final summary lead to explicit submission. Existing query preselection and delivery behavior remain intact. Reduced motion presents separate static photographic chapters in place of the sticky crossfading stage.
+
+The outlines use detailed OpenStreetMap geometry: the Lake Simcoe shoreline plus 20 island contours, named main/East/West Holland branches, and the Nottawasaga main-channel relation. Raw WGS84 source data and provenance are retained in `data/geography-source.json`, outside the public bundle. `node scripts/build-geography.mjs` projects and regenerates the SVG paths offline with a 0.12px distance tolerance. `node scripts/fetch-geography.mjs` deliberately refreshes the native OSM/Nominatim sources; it is not required for an application build. Paths join only at actual matching endpoints, river lines remain open, and source coverage is documented. Reference coordinates are not access points. Visible attribution and the [ODbL source terms](https://www.openstreetmap.org/copyright) remain. See [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md) for sources and scope.
 
 ## Analytics and privacy
 
 No tracking ID is installed by default. Optional analytics require an explicit choice in “Analytics choices” in the footer. Without consent, Meta does not load and campaign attribution is not stored or submitted. With consent, bounded UTM fields and `fbclid` can be kept in session storage and included with the request. A `Lead` conversion is fired only after the server returns a successful pending request. Contact information is never put in analytics events.
 
-Local storage keeps only non-contact trip selections; contact details stay in React memory. External licence/regulation links open in new tabs so selections remain intact. No document uploads, licence sales, accounts, or payments are collected.
+Local storage keeps only non-contact trip selections and preferences; contact details and optional free-text requests stay in React memory. External licence/regulation links open in new tabs so selections remain intact. No document uploads, licence sales, accounts, or payments are collected.
+
+Consented funnel events distinguish viewing the form from actually starting it, record categorical preferences and destination choices, and measure reaching the contact step. Lead remains tied to successful request delivery. No name, email address, phone number, preferred date, or free-text note is included in the new funnel event payloads. No conversion uplift is claimed without live data.
 
 ## Deploy
 
 ### Sites private preview / Worker
 
-`.openai/hosting.json` contains the registered Site ID. `npm run build` emits a self-contained Cloudflare Worker at `dist/server/index.js`, including pre-rendered HTML, React/CSS, fonts, and image bytes. Embedding avoids dependence on a proprietary asset binding and keeps the real `/api/bookings` endpoint available on the same origin. Assets receive ETags and cache headers. The Worker is 8.26 MiB compressed, mostly photography; the images are served as image responses, never downloaded as frontend JavaScript. Check the current [Workers platform limits](https://developers.cloudflare.com/workers/platform/limits/) when deploying to another account.
+`.openai/hosting.json` contains the registered Site ID. `npm run build` emits a self-contained Cloudflare Worker at `dist/server/index.js`, including pre-rendered HTML, React/CSS, fonts, and image bytes. Embedding avoids dependence on a proprietary asset binding and keeps the real `/api/bookings` endpoint available on the same origin. Assets receive ETags and cache headers. The Worker is approximately 9.00 MiB gzip, mostly photography; the images are served as image responses, never downloaded as frontend JavaScript. Check the current [Workers platform limits](https://developers.cloudflare.com/workers/platform/limits/) when deploying to another account.
 
 Package and publish through the Sites workflow using the project ID in the manifest. Keep the Site private unless the owner requests public access. Set the three email secrets in **Sites runtime environment variables**, not in the hosting manifest. Changing a `VITE_` variable or the canonical origin requires rebuilding. Runtime email secret changes do not require frontend changes.
 
@@ -109,13 +114,14 @@ npm run lint
 npm test
 npm run build
 npm run test:e2e
+npm run verify:visuals
 ```
 
 Browser tests expect the dev server at `127.0.0.1:5173`; `PLAYWRIGHT_BASE_URL` can point to a production preview. Install a browser with `npx playwright install chromium`, or set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to an installed Chromium executable. No browser binary is hardcoded into the project configuration.
 
-The automated tests cover Ontario date boundaries, unavailable dates, blocked policies, invalid ice locations, licence acknowledgement, consent, cross-origin requests, provider failures/missing receipts, idempotency, form validation/retry/simulated confirmation, preselection, atlas navigation, mobile overflow and images across routes, mobile menu, keyboard calendar navigation, and reduced motion. Browser success is exercised with an explicitly mocked API; it is not evidence of a real email delivery.
+The tests cover Ontario date policies, invalid ice locations, licence acknowledgement, consent, provider errors, idempotency, all four booking backdrops and outlines, conversational validation and back navigation, explicit final submission, inline homepage completion, existing routes and Maps links, mobile image loading/overflow, keyboard calendar access, and reduced motion. Browser success uses an explicitly mocked API; it is not evidence of real email delivery.
 
-Desktop (1440px) and mobile (390px) pages were visually inspected and refined. See [VERIFICATION.md](VERIFICATION.md) for final run results. No real email delivery, physical fishing access, live ice conditions, or business operating schedule has been verified by the software tests.
+Desktop (1440px), phone (390px), and reference-ratio portrait (918×1632) captures were compared with all five inspiration images. `npm run verify:visuals` writes 59 screenshots and a report under `.work/visual/conversion-final/`, including motion-enabled water transitions and every booking step. All booking POSTs are intercepted. Additional overflow checks cover 320, 768, and 1024px. See [VERIFICATION.md](VERIFICATION.md) for results and limits. Live email delivery, physical access, current ice conditions, and business operating schedules are not verified by software tests.
 
 ## Content sources
 

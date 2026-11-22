@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { mkdir, stat, copyFile } from "node:fs/promises";
+import { mkdir, stat, copyFile, writeFile } from "node:fs/promises";
 const names = [
   "closeupreelandmug",
   "fishinnet",
@@ -31,9 +31,14 @@ await copyFile(
   "public/fonts/manrope-latin.woff2",
 );
 let count = 0;
+const manifest = {};
 await Promise.all(
   names.map(async (name) => {
-    for (const width of [480, 960, 1600]) {
+    const metadata = await sharp(`${name}.jpg`).metadata();
+    const sources = [];
+    for (const width of [480, 960, 1600, 2560]) {
+      const actualWidth = Math.min(width, metadata.width);
+      if (sources.some((source) => source.width === actualWidth)) continue;
       const target = `public/images/${name}-${width}.webp`;
       try {
         await stat(target);
@@ -45,8 +50,22 @@ await Promise.all(
           .toFile(target);
         count++;
       }
+      sources.push({
+        width: actualWidth,
+        src: `/images/${name}-${width}.webp`,
+      });
     }
+    manifest[name] = {
+      width: metadata.width,
+      height: metadata.height,
+      sources,
+    };
   }),
+);
+await writeFile(
+  "src/data/photography.json",
+  JSON.stringify(Object.fromEntries(Object.entries(manifest).sort()), null, 2) +
+    "\n",
 );
 console.log(
   `Prepared ${count} new photo derivatives; local variable font ready.`,

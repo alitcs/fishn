@@ -1,194 +1,175 @@
+import { useState } from "react";
+import { Journey } from "./Journey";
 import { Link, useParams } from "react-router-dom";
 import { Atlas, WaterOutline } from "./Atlas";
-import { BookLink, External, Horizon, Invitation, Photo } from "./components";
+import {
+  BookLink,
+  ChapterNote,
+  External,
+  FocusFrame,
+  Horizon,
+  Invitation,
+  Photo,
+} from "./components";
 import { experiences, officialLinks } from "./data/config";
 import { locations, mapsUrl } from "./data/locations";
 import geography from "./data/geography.json";
 
-export function ExperiencePair() {
+export function ExperiencePair({ page = false }: { page?: boolean }) {
   return (
-    <div className="experience-pair">
-      {experiences.map((experience, i) => (
-        <article
-          className={`experience-feature feature-${i}`}
-          key={experience.id}
-        >
-          <Link
-            className="experience-image"
-            to={`/experiences/${experience.id}`}
+    <div className="experience-chapters">
+      {experiences.map((experience, i) => {
+        const ice = i === 1;
+        return (
+          <section
+            className={`photo-chapter experience-chapter ${ice ? "ice-chapter" : "shore-chapter"} ${page && !ice ? "experience-opening" : ""}`}
+            key={experience.id}
           >
-            <Photo name={experience.image} alt={experience.alt} />
-            <span className="image-label">{experience.label}</span>
-            <span className="image-link">
-              Discover the experience<span aria-hidden="true">+</span>
-            </span>
-          </Link>
-          <div className="experience-caption">
-            <div>
-              <p className="eyebrow">{experience.name}</p>
-              <h3>
-                <Link to={`/experiences/${experience.id}`}>
-                  {experience.short}
-                </Link>
-              </h3>
+            <Photo
+              name={ice ? "Lake-simcoe-ice" : "HollandRiver"}
+              alt={
+                ice
+                  ? experience.alt
+                  : "Clouds reflected in the calm, tree-lined Holland River"
+              }
+              className="chapter-photo"
+              sizes="100vw"
+              eager={page && !ice}
+            />
+            <div className="photo-scrim" />
+            <ChapterNote
+              index={ice ? "02" : "01"}
+              title={
+                ice
+                  ? "A DIFFERENT KIND OF STILL"
+                  : "THE SIMPLE PLEASURE OF BEING HERE"
+              }
+              detail={ice ? "LAKE SIMCOE / WINTER" : "RIVERS & LAKES / ONTARIO"}
+            />
+            {page && !ice && (
+              <div className="experience-page-heading">
+                <p className="eyebrow">PRIVATE DAYS. OPEN POSSIBILITIES.</p>
+                <h1 tabIndex={-1}>
+                  Find your kind
+                  <br />
+                  <em>of outside.</em>
+                </h1>
+              </div>
+            )}
+            <div className="experience-composition">
+              <div className="experience-panel">
+                <div className="experience-panel-copy">
+                  <p className="eyebrow">
+                    {ice
+                      ? "THE WINTER EDITION"
+                      : "NO EXPERIENCE. JUST CURIOSITY."}
+                  </p>
+                  <h2>
+                    {ice ? "ICE" : "SHORELINE"}
+                    <br />
+                    FISHING.
+                  </h2>
+                  <div className="fine-rule" />
+                  <p>{experience.description}</p>
+                  <div className="experience-panel-actions">
+                    <Link
+                      to={`/experiences/${experience.id}`}
+                      className="text-link"
+                      aria-label={experience.short}
+                    >
+                      Explore the experience <span aria-hidden="true">+</span>
+                    </Link>
+                    <BookLink experience={experience.id} className="text-link">
+                      Book {ice ? "ice" : "shoreline"}
+                    </BookLink>
+                  </div>
+                </div>
+                <figure className="experience-inset">
+                  <span className="eyebrow">
+                    {ice ? "BENEATH THE SURFACE" : "THE LITTLE THINGS"}
+                  </span>
+                  <Photo
+                    name={ice ? "icefishingtail" : "closeupreelandmug"}
+                    alt={
+                      ice
+                        ? "A fish fin resting against textured ice"
+                        : experience.alt
+                    }
+                  />
+                  <figcaption>OUTSIDE, TOGETHER.</figcaption>
+                </figure>
+              </div>
+              <p className="experience-footnote eyebrow">
+                {ice
+                  ? "A NEW PERSPECTIVE. SAME SENSE OF WONDER."
+                  : "A CAST. A CONVERSATION. NOTHING ELSE TO BE."}
+              </p>
             </div>
-            <BookLink experience={experience.id} className="round-link">
-              <span className="sr-only">Request {experience.name}</span>
-              <span aria-hidden="true">+</span>
-            </BookLink>
-          </div>
-          <p className="experience-description">{experience.description}</p>
-        </article>
-      ))}
+            {ice && (
+              <span className="ice-coordinate eyebrow">
+                {geography.features["lake-simcoe"].coordinate}
+                <br />
+                GEOGRAPHIC REFERENCE
+              </span>
+            )}
+            <div className="chapter-bottom">
+              <span>PRIVATE / GUIDED BY NIKITA</span>
+              <span>BEGINNERS WELCOME</span>
+              <span>{ice ? "02" : "01"} / 02</span>
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
+
 export function Home() {
-  return (
-    <>
-      <section className="hero">
-        <Photo
-          name="waterlandscape1"
-          alt="Clouds reflected in a still lake framed by Ontario pines"
-          className="hero-photo"
-          eager
-          sizes="100vw"
-        />
-        <div className="hero-shade" />
-        <div className="hero-side">
-          <span>TAKE A BREATH. YOU’RE OUTSIDE.</span>
-          <span className="hero-cross" aria-hidden="true">
-            +
-          </span>
-        </div>
-        <div className="hero-content">
-          <p className="eyebrow">
-            PRIVATE FISHING EXPERIENCES · ONTARIO, CANADA
-          </p>
-          <h1 tabIndex={-1}>
-            A little further
-            <br />
-            from the everyday<span className="headline-period">.</span>
-          </h1>
-          <div className="hero-action">
-            <Link className="button button-light" to="/experiences">
-              Explore experiences
-            </Link>
-            <p>
-              Good company. Open water.
-              <br />A day that feels like a deep breath.
-            </p>
-          </div>
-        </div>
-        <div className="hero-footer">
-          <span>SHORELINE & ICE FISHING</span>
-          <Link to="/about">Guided by Nikita. Made for you.</Link>
-          <a href="#outside" className="scroll-cue">
-            SLOW DOWN. SCROLL A LITTLE.<span aria-hidden="true">↓</span>
-          </a>
-        </div>
-      </section>
-      <section id="outside" className="intro section-pad">
-        <div className="intro-label">
-          <Horizon />
-          <p className="eyebrow">A GOOD DAY STARTS OUTSIDE</p>
-        </div>
-        <div>
-          <h2>
-            Less on your mind.
-            <br />
-            More in the moment.
-          </h2>
-          <div className="intro-copy">
-            <p>
-              Remember the feeling of heading somewhere new? A day away from the
-              usual. A little fresh air. Something to tell a story about.
-            </p>
-            <p>
-              That’s fishn. Private days by Ontario’s water, guided by Nikita.
-              Come as you are. We’ll start with a cast.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className="experiences-section section-pad">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">TWO WAYS TO GET AWAY</p>
-            <h2>
-              Find your kind
-              <br />
-              of outside.
-            </h2>
-          </div>
-          <p>
-            No experience needed.
-            <br />
-            Just a little curiosity.
-          </p>
-        </div>
-        <ExperiencePair />
-      </section>
-      <Atlas />
-      <section className="philosophy section-pad">
-        <div className="philosophy-copy">
-          <p className="eyebrow">COME FOR THE FISHING</p>
-          <h2>
-            Stay for
-            <br />
-            everything else.
-          </h2>
-          <p>
-            The water has a way of putting things in perspective. Phones stay in
-            pockets a little longer. Conversations find their own pace.
-          </p>
-          <p>
-            Bring someone you love. Or take a little time for yourself. There’s
-            no one way to have a good day outside.
-          </p>
-          <Horizon />
-        </div>
-        <figure>
-          <Photo
-            name="waterlandscape"
-            alt="A pink evening sky reflected between trees along a quiet lake"
-          />
-          <figcaption>A little less hurry. A little more here.</figcaption>
-        </figure>
-      </section>
-      <GuideSection />
-      <Invitation />
-    </>
-  );
+  return <Journey />;
 }
+
 export function GuideSection() {
   return (
-    <section className="guide-section section-pad">
-      <div className="guide-image">
-        <Photo
-          name="closeupreelandmug"
-          alt="A well-used reel and a green mug beside the river"
-        />
-        <span className="field-caption">THE LITTLE THINGS MAKE THE DAY.</span>
+    <section className="guide-section photo-chapter">
+      <Photo
+        name="closeupreelandmug"
+        alt="A fishing reel and a green mug on a rock beside the river"
+        className="chapter-photo focus-soft"
+        sizes="100vw"
+      />
+      <Photo
+        name="closeupreelandmug"
+        alt=""
+        className="chapter-photo focus-sharp"
+        sizes="100vw"
+      />
+      <div className="photo-scrim" />
+      <ChapterNote index="05" title="LOCAL KNOWLEDGE. GOOD COMPANY." />
+      <div className="guide-focus">
+        <FocusFrame />
+        <span className="eyebrow">
+          THE LITTLE THINGS
+          <br />
+          MAKE THE DAY.
+        </span>
       </div>
       <div className="guide-copy">
-        <p className="eyebrow">LOCAL KNOWLEDGE. GOOD COMPANY.</p>
+        <p className="eyebrow">NIKITA / YOUR GUIDE</p>
         <h2>
-          Meet your
+          Your outside
           <br />
-          outside person.
+          <em>person.</em>
         </h2>
-        <p className="guide-name">Nikita. Your guide.</p>
         <p>
           A local outdoorsman with a love for Ontario’s lakes and rivers. From
           the shoreline to the ice, Nikita brings hands-on fishing knowledge and
-          a genuine connection to the places he explores.
+          a connection to the places he explores.
         </p>
         <p>
           First cast or one of many, there’s always something new to notice.
         </p>
         <Link to="/about" className="text-link">
-          A little more about Nikita
+          A little more about Nikita <span aria-hidden="true">+</span>
         </Link>
         <External href={officialLinks.instagram} className="instagram-link">
           @nikita.troff
@@ -197,29 +178,23 @@ export function GuideSection() {
     </section>
   );
 }
+
 export function ExperiencesPage() {
   return (
     <>
-      <section className="page-intro section-pad">
-        <p className="eyebrow">PRIVATE DAYS. OPEN POSSIBILITIES.</p>
-        <h1 tabIndex={-1}>
-          Find your kind
-          <br />
-          of outside.
-        </h1>
-        <p>
-          A little learning. A little exploring. A whole day’s worth of feeling
-          somewhere else.
-        </p>
-      </section>
-      <section className="section-pad experience-list-page">
-        <ExperiencePair />
-      </section>
-      <section className="simple-notes section-pad">
+      <ExperiencePair page />
+      <section className="simple-notes photo-chapter">
+        <Photo
+          name="Nottawasaga-River"
+          alt="Light breaking through clouds over a tree-lined river"
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <h2>
           Your first cast
           <br />
-          starts here.
+          <em>starts here.</em>
         </h2>
         <div>
           <p>
@@ -232,7 +207,9 @@ export function ExperiencesPage() {
             on the season, conditions, permissions, and applicable fishing
             rules.
           </p>
-          <BookLink>Plan your day</BookLink>
+          <BookLink>
+            Plan your day <span aria-hidden="true">+</span>
+          </BookLink>
         </div>
       </section>
       <Invitation />
@@ -260,6 +237,57 @@ const photoAlt: Record<string, string> = {
   monsterfish3: "A quiet close-up of an angler holding a fish",
   winterpath: "A narrow trail through snow-dusted pine trees",
 };
+
+function PhotoJournal({ photos }: { photos: string[] }) {
+  const [active, setActive] = useState(0);
+  return (
+    <section className="journal photo-chapter" aria-label="Photo journal">
+      <div className="journal-images">
+        {photos.map((name, i) => (
+          <Photo
+            key={name}
+            name={name}
+            alt={
+              i === active
+                ? (photoAlt[name] ?? "A moment from a fishing day outdoors")
+                : ""
+            }
+            className={`chapter-photo ${i === active ? "is-active" : ""}`}
+            sizes="100vw"
+          />
+        ))}
+      </div>
+      <div className="photo-scrim" />
+      <ChapterNote index="JOURNAL" title="MOMENTS FROM THE WATER" />
+      <h2>
+        The days
+        <br />
+        <em>we bring home.</em>
+      </h2>
+      <div className="journal-caption" aria-live="polite">
+        <span className="eyebrow">
+          {String(active + 1).padStart(2, "0")} /{" "}
+          {String(photos.length).padStart(2, "0")}
+        </span>
+        <p>{photoAlt[photos[active]]}</p>
+      </div>
+      <div className="journal-index" aria-label="Choose a journal photograph">
+        {photos.map((name, i) => (
+          <button
+            key={name}
+            type="button"
+            aria-label={`View photograph ${i + 1}: ${photoAlt[name]}`}
+            aria-pressed={active === i}
+            onClick={() => setActive(i)}
+          >
+            {String(i + 1).padStart(2, "0")}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ExperienceDetail() {
   const { slug } = useParams();
   const experience = experiences.find((e) => e.id === slug);
@@ -267,46 +295,64 @@ export function ExperienceDetail() {
   const ice = experience.id === "ice-fishing";
   return (
     <>
-      <section className="detail-hero">
+      <section
+        className={`detail-hero photo-chapter ${ice ? "detail-ice" : "detail-shore"}`}
+      >
         <Photo
-          name={experience.image}
-          alt={experience.alt}
+          name={ice ? "Lake-simcoe-ice" : "waterlandscape1"}
+          alt={
+            ice
+              ? experience.alt
+              : "A quiet forest lake beneath a wide cloud-filled sky"
+          }
           eager
           sizes="100vw"
+          className="chapter-photo"
         />
-        <div className="hero-shade" />
+        <div className="photo-scrim" />
         <div className="detail-hero-content">
           <p className="eyebrow">
-            PRIVATE GUIDED {ice ? "ICE" : "SHORELINE"} FISHING · ONTARIO
+            PRIVATE GUIDED {ice ? "ICE" : "SHORELINE"} FISHING / ONTARIO
           </p>
           <h1 tabIndex={-1}>
             {ice ? (
               <>
                 Winter has
-                <br />a quieter side.
+                <br />
+                <em>a quieter side.</em>
               </>
             ) : (
               <>
                 Find your own
                 <br />
-                kind of quiet.
+                <em>kind of quiet.</em>
               </>
             )}
           </h1>
-          <BookLink experience={experience.id} className="button button-light">
-            Request {experience.name.toLowerCase()}
+          <BookLink experience={experience.id}>
+            Request {experience.name.toLowerCase()}{" "}
+            <span aria-hidden="true">+</span>
           </BookLink>
         </div>
-        <span className="detail-hero-note">
-          BEGINNERS WELCOME · YOUR DAY, AT YOUR PACE
-        </span>
+        <FocusFrame className="detail-focus" />
+        <div className="chapter-bottom">
+          <span>BEGINNERS WELCOME</span>
+          <span>YOUR DAY, AT YOUR PACE.</span>
+        </div>
       </section>
-      <section className="experience-overview section-pad">
+      <section className="experience-overview photo-chapter">
+        <Photo
+          name={ice ? "icefishinglandscape1" : "closeupreelandmug"}
+          alt={ice ? photoAlt.icefishinglandscape1 : experience.alt}
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <div>
           <p className="eyebrow">{experience.name}</p>
           <h2>{experience.short}</h2>
         </div>
-        <div>
+        <div className="overview-copy">
           <p className="large-copy">{experience.description}</p>
           <p>
             {ice
@@ -339,13 +385,28 @@ export function ExperienceDetail() {
               reserved trip.
             </p>
           )}
-          <BookLink experience={experience.id}>Let’s plan your day</BookLink>
+          <BookLink experience={experience.id}>
+            Let’s plan your day <span aria-hidden="true">+</span>
+          </BookLink>
         </div>
       </section>
-      <section className="experience-places section-pad">
-        <p className="eyebrow">A CHANGE OF SCENERY</p>
-        <h2>{ice ? "A new side of Simcoe." : "A few places to begin."}</h2>
+      <section className="experience-places photo-chapter">
+        <Photo
+          name={ice ? "Lake-simcoe-ice" : "HollandRiver"}
+          alt={
+            ice
+              ? "A wide frozen Lake Simcoe beneath a pale winter sky"
+              : "Clouds reflected along the Holland River"
+          }
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <div>
+          <p className="eyebrow">A CHANGE OF SCENERY</p>
+          <h2>{ice ? "A new side of Simcoe." : "A few places to begin."}</h2>
+        </div>
+        <nav aria-label="Experience locations">
           {locations
             .filter((l) => experience.locations.includes(l.id))
             .map((l) => (
@@ -354,64 +415,25 @@ export function ExperienceDetail() {
                 key={l.id}
                 to={`/explore/${l.id}`}
               >
-                <Photo
-                  name={ice ? "Lake-simcoe-ice" : l.image}
-                  alt={
-                    ice
-                      ? "A wide frozen Lake Simcoe beneath a pale winter sky"
-                      : l.alt
-                  }
-                />
-                <span>
-                  {l.name}
-                  <span aria-hidden="true">+</span>
-                </span>
+                <span>{l.name}</span>
+                <span aria-hidden="true">+</span>
               </Link>
             ))}
-        </div>
+        </nav>
       </section>
-      <section className="journal section-pad">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">MOMENTS FROM THE WATER</p>
-            <h2>
-              The days
-              <br />
-              we bring home.
-            </h2>
-          </div>
-          <p>
-            A few glimpses from outside.
-            <br />
-            Every day has its own story.
-          </p>
-        </div>
-        <div className={`journal-grid ${ice ? "winter-journal" : ""}`}>
-          {experience.journal.map((name, i) => (
-            <figure key={name}>
-              <Photo
-                name={name}
-                alt={photoAlt[name] ?? "A moment from a fishing day outdoors"}
-              />
-              <figcaption>
-                {
-                  [
-                    "A little closer.",
-                    "Time well spent.",
-                    "Something to notice.",
-                    "Somewhere else.",
-                  ][i % 4]
-                }
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-      <section className="faq section-pad">
+      <PhotoJournal key={experience.id} photos={experience.journal} />
+      <section className="faq photo-chapter">
+        <Photo
+          name={ice ? "winterpath" : "waterlandscape"}
+          alt={ice ? photoAlt.winterpath : photoAlt.waterlandscape}
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <h2>
           A little
           <br />
-          before you go.
+          <em>before you go.</em>
         </h2>
         <div>
           <details>
@@ -450,23 +472,27 @@ export function ExperienceDetail() {
     </>
   );
 }
+
 export function ExplorePage() {
   return (
     <>
-      <section className="page-intro explore-intro section-pad">
-        <p className="eyebrow">THE FISHN FIELD ATLAS</p>
-        <h1 tabIndex={-1}>
-          Somewhere new.
-          <br />
-          Something familiar.
-        </h1>
-        <p>Three Ontario waters. A different way to spend a day.</p>
-      </section>
       <Atlas full />
-      <section className="map-explanation section-pad">
+      <section className="map-explanation photo-chapter">
+        <Photo
+          name="HollandRiver"
+          alt="Trees and sky reflected in the Holland River"
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <Horizon />
         <div>
-          <h2>Good places deserve a little care.</h2>
+          <p className="eyebrow">LEAVE IT AS YOU FOUND IT.</p>
+          <h2>
+            Good places deserve
+            <br />
+            <em>a little care.</em>
+          </h2>
           <p>
             These are general service areas. Nikita selects the exact meeting
             point after reviewing your request. Seasons, fish sanctuaries,
@@ -481,28 +507,56 @@ export function ExplorePage() {
     </>
   );
 }
+
 export function LocationDetail() {
   const { slug } = useParams();
   const place = locations.find((l) => l.id === slug);
   if (!place) return <NotFound />;
   return (
     <>
-      <section className="location-title section-pad">
-        <Link className="text-link" to="/explore">
-          Back to the field atlas
-        </Link>
-        <p className="eyebrow">{place.region}</p>
-        <h1 tabIndex={-1}>{place.name}</h1>
-        <p className="coordinate">
-          {geography.features[place.id].coordinate}{" "}
-          <span>· Geographic reference only</span>
-        </p>
+      <section className="location-hero photo-chapter">
+        <Photo
+          name={place.image}
+          alt={place.alt}
+          eager
+          sizes="100vw"
+          className="chapter-photo"
+        />
+        <div className="photo-scrim" />
+        <div className="location-title">
+          <Link className="text-link" to="/explore">
+            Back to the field atlas
+          </Link>
+          <p className="eyebrow">{place.region}</p>
+          <h1 tabIndex={-1}>{place.name}</h1>
+          <p className="coordinate">
+            {geography.features[place.id].coordinate}
+            <br />
+            <span>Geographic reference only</span>
+          </p>
+          <BookLink location={place.id}>
+            Request a day here <span aria-hidden="true">+</span>
+          </BookLink>
+        </div>
+        <div className="location-hero-outline">
+          <WaterOutline id={place.id} />
+          <External href="https://www.openstreetmap.org/copyright">
+            © OpenStreetMap contributors
+          </External>
+        </div>
+        <div className="chapter-bottom">
+          <span>ONTARIO / CANADA</span>
+          <span>{place.intro}</span>
+        </div>
       </section>
-      <section className="location-landscape">
-        <Photo name={place.image} alt={place.alt} eager sizes="100vw" />
-        <WaterOutline id={place.id} />
-      </section>
-      <section className="location-editorial section-pad">
+      <section className="location-editorial photo-chapter">
+        <Photo
+          name={place.image}
+          alt=""
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <h2>{place.intro}</h2>
         <div>
           <p className="large-copy">{place.description}</p>
@@ -538,31 +592,45 @@ export function LocationDetail() {
     </>
   );
 }
+
 export function AboutPage() {
   return (
     <>
-      <section className="detail-hero about-hero">
+      <section className="detail-hero about-hero photo-chapter">
         <Photo
           name="winterpath"
           alt="A path inviting you into a snow-covered Ontario forest"
           eager
           sizes="100vw"
+          className="chapter-photo"
         />
-        <div className="hero-shade" />
+        <div className="photo-scrim" />
         <div className="detail-hero-content">
           <p className="eyebrow">A LOCAL GUIDE. A SHARED LOVE OF OUTSIDE.</p>
           <h1 tabIndex={-1}>
             Good days begin
             <br />
-            with good company.
+            <em>with good company.</em>
           </h1>
+        </div>
+        <div className="chapter-bottom">
+          <span>A WAY BACK TO OUTSIDE.</span>
+          <span>THE FISHN STORY</span>
         </div>
       </section>
       <GuideSection />
-      <section className="simple-notes section-pad">
+      <section className="simple-notes photo-chapter">
+        <Photo
+          name="waterlandscape1"
+          alt="Pine trees reflected in a still lake"
+          className="chapter-photo"
+          sizes="100vw"
+        />
+        <div className="photo-scrim" />
         <h2>
           A little knowledge.
-          <br />A lot to discover.
+          <br />
+          <em>A lot to discover.</em>
         </h2>
         <div>
           <p>
@@ -587,6 +655,7 @@ export function AboutPage() {
     </>
   );
 }
+
 export function PrivacyPage() {
   return (
     <section className="prose-page section-pad">
@@ -595,9 +664,11 @@ export function PrivacyPage() {
       <h2>When you request a day</h2>
       <p>
         We ask for your name, email, phone number, trip preferences, and an
-        acknowledgement of the fishing licence requirements. This information is
-        used to respond to your enquiry and arrange your experience. No identity
-        documents or licence images are collected.
+        acknowledgement of the fishing licence requirements. You may also share
+        the kind of day you want, your fishing experience, whether you would
+        like help choosing a destination, and an optional note. This information
+        is used to respond to your enquiry and arrange your experience. No
+        identity documents or licence images are collected.
       </p>
       <p>
         Requests are sent securely to fishn’s configured business inbox through
@@ -609,9 +680,10 @@ export function PrivacyPage() {
       <h2>Remembering your selections</h2>
       <p>
         This browser can remember your experience, location, group size,
-        duration, date, and licence acknowledgement. Contact information is kept
-        in memory while you fill out the form and is not saved in browser
-        storage. You can clear the remembered selections on the booking page.
+        duration, date, licence acknowledgement, and non-contact trip
+        preferences. Contact information and optional notes are kept in memory
+        while you fill out the form and is not saved in browser storage. You can
+        clear the remembered selections on the booking page.
       </p>
       <h2>Optional analytics</h2>
       <p>
@@ -641,20 +713,30 @@ export function PrivacyPage() {
     </section>
   );
 }
+
 export function NotFound() {
   return (
-    <section className="not-found section-pad">
-      <Horizon />
-      <p className="eyebrow">A LITTLE OFF THE PATH</p>
-      <h1 tabIndex={-1}>
-        Let’s find our
-        <br />
-        way back.
-      </h1>
-      <p>That page isn’t here. Your next day outside still is.</p>
-      <Link className="button" to="/">
-        Back to fishn
-      </Link>
+    <section className="not-found photo-chapter">
+      <Photo
+        name="winterpath"
+        alt="A quiet path through a snowy forest"
+        className="chapter-photo"
+        eager
+        sizes="100vw"
+      />
+      <div className="photo-scrim" />
+      <div>
+        <p className="eyebrow">A LITTLE OFF THE PATH</p>
+        <h1 tabIndex={-1}>
+          Let’s find our
+          <br />
+          <em>way back.</em>
+        </h1>
+        <p>That page isn’t here. Your next day outside still is.</p>
+        <Link className="button" to="/">
+          Back to fishn
+        </Link>
+      </div>
     </section>
   );
 }

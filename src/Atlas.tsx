@@ -19,15 +19,25 @@ export function WaterOutline({
       viewBox="0 0 500 500"
       fill="none"
       aria-hidden="true"
+      data-location={id}
     >
       <g
         stroke="currentColor"
-        strokeWidth={id === "lake-simcoe" ? 1.7 : 2.5}
+        strokeWidth={id === "lake-simcoe" ? 1.6 : 1.9}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
         {feature.paths.map((d, i) => (
-          <path key={i} d={d} />
+          <path key={i} d={d} pathLength="1" />
+        ))}
+        {feature.detailPaths.map((d, i) => (
+          <path
+            key={`detail-${i}`}
+            d={d}
+            pathLength="1"
+            strokeWidth="1.1"
+            opacity="0.6"
+          />
         ))}
       </g>
     </svg>
@@ -44,26 +54,59 @@ export function Atlas({
   const place = locations.find((l) => l.id === selected)!;
   return (
     <section
-      className={`atlas ${full ? "atlas-full" : ""}`}
+      className={`atlas photo-chapter ${full ? "atlas-full" : ""}`}
       aria-label="Explore Ontario’s fishing locations"
     >
-      <div className="atlas-visual">
-        <Photo
-          key={place.id}
-          name={place.image}
-          alt={place.alt}
-          sizes="(max-width: 800px) 100vw, 60vw"
-        />
-        <div className="atlas-scrim" />
-        <div className="atlas-top">
-          <span className="eyebrow">THE FISHN FIELD ATLAS</span>
+      <div className="atlas-images">
+        {locations.map((location) => (
+          <Photo
+            key={location.id}
+            name={location.image}
+            alt={location.id === selected ? location.alt : ""}
+            className={`chapter-photo ${location.id === selected ? "is-active" : ""}`}
+            eager={full}
+            sizes="100vw"
+          />
+        ))}
+      </div>
+      <div className="photo-scrim atlas-scrim" />
+      <div className="atlas-top eyebrow">
+        <span>03 / THE FISHN FIELD ATLAS</span>
+        <span>THREE WATERS. A WORLD AWAY.</span>
+      </div>
+      <div className="atlas-heading">
+        <p className="eyebrow">A FEW PLACES WE CALL OUTSIDE.</p>
+        {full ? (
+          <h1 tabIndex={-1}>
+            Somewhere
+            <br />
+            <em>out there.</em>
+          </h1>
+        ) : (
+          <h2>
+            Somewhere
+            <br />
+            <em>out there.</em>
+          </h2>
+        )}
+      </div>
+      <div className="atlas-geography">
+        <div className="atlas-map-label eyebrow">
+          <span>GEOGRAPHIC STUDY</span>
           <span className="compass" aria-hidden="true">
-            N<br />
-            <span>↑</span>
+            N ↑
           </span>
         </div>
-        <WaterOutline id={selected} />
-        <div className="atlas-coordinate">
+        <div className="atlas-outlines">
+          {locations.map((location) => (
+            <WaterOutline
+              key={location.id}
+              id={location.id}
+              className={selected === location.id ? "is-active" : ""}
+            />
+          ))}
+        </div>
+        <div className="atlas-coordinate eyebrow">
           <span className="crosshair" aria-hidden="true">
             +
           </span>
@@ -73,20 +116,40 @@ export function Atlas({
             {geography.features[selected].coordinate}
           </span>
         </div>
-        <div className="atlas-bottom">
-          <span>ONTARIO, CANADA</span>
-          <External href="https://www.openstreetmap.org/copyright">
-            © OpenStreetMap contributors
+        <External
+          className="atlas-attribution"
+          href="https://www.openstreetmap.org/copyright"
+        >
+          © OpenStreetMap contributors
+        </External>
+      </div>
+      <div className="atlas-panel" aria-live="polite">
+        <div className="location-summary" key={place.id}>
+          <p className="eyebrow">{place.region}</p>
+          <h3>{place.name}</h3>
+          <p>{full ? place.description : place.intro}</p>
+          <div className="atlas-actions">
+            <Link className="text-link" to={`/explore/${place.id}`}>
+              Discover {place.name}
+            </Link>
+            <BookLink location={place.id} className="text-link">
+              Book a day here <span aria-hidden="true">+</span>
+            </BookLink>
+          </div>
+          <External className="text-link maps-link" href={mapsUrl(place.maps)}>
+            View on Google Maps
           </External>
         </div>
       </div>
-      <div className="atlas-panel">
-        <p className="eyebrow">A FEW PLACES WE CALL OUTSIDE</p>
-        <h2>
-          Find your
-          <br />
-          change of scenery.
-        </h2>
+      <dl className="atlas-facts">
+        {place.facts.slice(0, 2).map(([label, value]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="atlas-navigation">
         <div className="location-switch" aria-label="Select a location">
           {locations.map((location) => (
             <button
@@ -94,43 +157,19 @@ export function Atlas({
               aria-pressed={selected === location.id}
               onClick={() => setSelected(location.id)}
             >
-              {location.name}
+              <span className="location-index" aria-hidden="true">
+                0{locations.indexOf(location) + 1}
+              </span>
+              <span>{location.name}</span>
               <span aria-hidden="true">
                 {selected === location.id ? "−" : "+"}
               </span>
             </button>
           ))}
         </div>
-        <div className="location-summary" key={place.id} aria-live="polite">
-          <p className="eyebrow">{place.region}</p>
-          <h3>{place.intro}</h3>
-          <p>
-            {full
-              ? place.description
-              : "A new view. A little local knowledge. A day that feels a world away."}
-          </p>
-          <Link className="text-link" to={`/explore/${place.id}`}>
-            Discover {place.name}
-          </Link>
-        </div>
-        {full ? (
-          <>
-            <BookLink location={place.id}>Request a day here</BookLink>
-            <External
-              className="text-link maps-link"
-              href={mapsUrl(place.maps)}
-            >
-              View on Google Maps
-            </External>
-          </>
-        ) : (
-          <Link to="/explore" className="text-link atlas-all">
-            Explore the field atlas
-          </Link>
-        )}
         <p className="atlas-note">
-          General service areas. Nikita confirms the meeting point after review.
-          This map does not show fishing access or ice conditions.
+          General service areas. Meeting points arranged by Nikita. Outlines do
+          not show fishing access or ice conditions.
         </p>
       </div>
     </section>

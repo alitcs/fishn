@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { External, Horizon, Photo } from "../components";
+import { External, Photo } from "../components";
+import { WaterOutline } from "../Atlas";
+import { getTripScene, tripScenes } from "../data/scenes";
+import geography from "../data/geography.json";
 import {
   durationOptions,
   experiences,
@@ -13,14 +16,19 @@ import { getAttribution, hasConsent, track } from "../services/analytics";
 import { bookingSchema, licenceOptions } from "./schema";
 import type { BookingInput, BookingResponse } from "./schema";
 import { BookingError, submitBooking } from "./service";
-import { Calendar } from "./Calendar";
-type Selection = {
+import { ConversationStep } from "./ConversationStep";
+import { tripIntents, fishingLevels } from "../data/booking";
+import type { TripIntent, FishingLevel } from "../data/booking";
+export type Selection = {
   experience: ExperienceId;
   location: LocationId;
   groupSize: number;
   duration: number;
   preferredDate: string;
   licenceAcknowledgement: string;
+  tripIntent: TripIntent | "";
+  fishingLevel: FishingLevel | "";
+  destinationAdviceRequested: boolean;
 };
 const defaults: Selection = {
   experience: "shoreline-fishing",
@@ -29,9 +37,12 @@ const defaults: Selection = {
   duration: 2,
   preferredDate: "",
   licenceAcknowledgement: "",
+  tripIntent: "",
+  fishingLevel: "",
+  destinationAdviceRequested: false,
 };
 const storageKey = "fishn-trip-preferences";
-export function BookingPage() {
+export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const [params] = useSearchParams();
   const [selection, setSelection] = useState<Selection>(defaults);
   const [hydrated, setHydrated] = useState(false);
@@ -46,6 +57,11 @@ export function BookingPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<boolean | null>(null);
+  const [step, setStep] = useState(0);
+  const [specialRequests, setSpecialRequests] = useState("");
+  const flowStarted = useRef(false);
+  const measuredSteps = useRef(new Set<number>());
+  const section = useRef<HTMLElement>(null);
   const [confirmation, setConfirmation] = useState<BookingResponse | null>(
     null,
   );
@@ -80,6 +96,12 @@ export function BookingPage() {
           licenceOptions.some((l) => l.value === saved.licenceAcknowledgement)
         )
           initial.licenceAcknowledgement = saved.licenceAcknowledgement;
+        if (tripIntents.some((option) => option.value === saved.tripIntent))
+          initial.tripIntent = saved.tripIntent;
+        if (fishingLevels.some((option) => option.value === saved.fishingLevel))
+          initial.fishingLevel = saved.fishingLevel;
+        initial.destinationAdviceRequested =
+          saved.destinationAdviceRequested === true;
       }
     } catch {
       /* Browser storage is optional. */
@@ -103,7 +125,23 @@ export function BookingPage() {
     setSelection(initial);
     setGroupMore(initial.groupSize >= 4);
     setHydrated(true);
-    track("BookingStarted", { experience: initial.experience });
+  }, [params]);
+  useEffect(() => {
+    const element = section.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          track("BookingViewed", {
+            experience: params.get("experience") || "shoreline-fishing",
+          });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
   }, [params]);
   useEffect(() => {
     if (hydrated)
@@ -124,6 +162,117 @@ export function BookingPage() {
     return () => controller.abort();
   }, []);
   const experience = experiences.find((e) => e.id === selection.experience)!;
+  const place = locations.find(
+    (location) => location.id === selection.location,
+  )!;
+  const scene = getTripScene(selection.location, selection.experience);
+  const Heading = embedded ? "h2" : "h1";
+  const stepNames = [
+    "Your kind of day",
+    "A little about you",
+    "Your water",
+    "Your people",
+    "Your date",
+    "Your pace",
+    "Anything else",
+    "Let’s arrange it",
+  ];
+  const flow =
+    selection.tripIntent === "first-time"
+      ? [0, 2, 3, 4, 5, 6, 7]
+      : [0, 1, 2, 3, 4, 5, 6, 7];
+  const progressIndex = flow.indexOf(step);
+  function startFlow() {
+    if (flowStarted.current) return;
+    flowStarted.current = true;
+    track("BookingStarted", { experience: selection.experience });
+  }
+  function goToStep(next: number) {
+    startFlow();
+    if (next === 7 && !measuredSteps.current.has(7)) {
+      measuredSteps.current.add(7);
+      track("BookingDetailsCompleted", {
+        experience: selection.experience,
+        group_size: selection.groupSize,
+        duration: selection.duration,
+      });
+      track("ContactStepReached", { experience: selection.experience });
+    }
+    setStep(next);
+    setMessage("");
+    setTimeout(() => {
+      const panel = document.getElementById("booking-step-title");
+      section.current?.scrollIntoView({ block: "start", behavior: "instant" });
+      panel?.focus({ preventScroll: true });
+    }, 0);
+  }
+  function nextStep() {
+    const fields: Record<string, string> = {};
+    if (
+      step === 4 &&
+      !isRequestDateAllowed(selection.preferredDate, selection.experience)
+    )
+      fields.preferredDate = "Please choose a preferred request date.";
+    if (
+      step === 3 &&
+      (!Number.isInteger(selection.groupSize) ||
+        selection.groupSize < (groupMore ? 4 : 1) ||
+        selection.groupSize > 100)
+    )
+      fields.groupSize = "Please enter your group size, from 4 to 100 people.";
+    if (
+      step === 6 &&
+      !licenceOptions.some(
+        (option) => option.value === selection.licenceAcknowledgement,
+      )
+    )
+      fields.licenceAcknowledgement =
+        "Please acknowledge the fishing licence requirements.";
+    setErrors(fields);
+    if (Object.keys(fields).length) {
+      setMessage("A little detail before we continue.");
+      setTimeout(() => messageRef.current?.focus(), 0);
+      return;
+    }
+    goToStep(flow[Math.min(flow.length - 1, progressIndex + 1)]);
+  }
+  function chooseIntent(value: TripIntent) {
+    startFlow();
+    setSelection((previous) => ({
+      ...previous,
+      tripIntent: value,
+      ...(value === "first-time" ? { fishingLevel: "new" as const } : {}),
+    }));
+    track("TripPreferenceSelected", { preference: value });
+    goToStep(value === "first-time" ? 2 : 1);
+  }
+  function chooseLevel(value: FishingLevel) {
+    startFlow();
+    update("fishingLevel", value);
+    track("FishingExperienceSelected", { experience_level: value });
+    goToStep(2);
+  }
+  function chooseDestination(id: string, advice = false) {
+    startFlow();
+    const destination = tripScenes.find((option) => option.id === id)!;
+    setSelection((previous) => ({
+      ...previous,
+      location: destination.location,
+      experience: destination.experience,
+      destinationAdviceRequested: advice,
+      preferredDate: isRequestDateAllowed(
+        previous.preferredDate,
+        destination.experience,
+      )
+        ? previous.preferredDate
+        : "",
+    }));
+    track("DestinationSelected", {
+      location: destination.location,
+      experience: destination.experience,
+      needs_guidance: Number(advice),
+    });
+  }
   function update<K extends keyof Selection>(key: K, value: Selection[K]) {
     setSelection((old) => {
       const next = { ...old, [key]: value };
@@ -146,11 +295,18 @@ export function BookingPage() {
   }
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (step < 7) {
+      nextStep();
+      return;
+    }
     if (inFlight.current) return;
     setMessage("");
     setErrors({});
     const base = {
       ...selection,
+      tripIntent: selection.tripIntent || undefined,
+      fishingLevel: selection.fishingLevel || undefined,
+      specialRequests,
       ...contact,
       analyticsConsent: hasConsent(),
       ...(hasConsent() ? { attribution: getAttribution() } : {}),
@@ -174,6 +330,21 @@ export function BookingPage() {
           )
         : { groupSize: "Please enter the actual group size, starting at 4." };
       setErrors(fields);
+      const fieldSteps: Record<string, number> = {
+        location: 2,
+        experience: 2,
+        preferredDate: 4,
+        groupSize: 3,
+        duration: 5,
+        licenceAcknowledgement: 6,
+        specialRequests: 6,
+        name: 7,
+        email: 7,
+        phone: 7,
+      };
+      setStep(
+        Math.min(...Object.keys(fields).map((field) => fieldSteps[field] ?? 7)),
+      );
       setMessage("A few details need a look.");
       setTimeout(() => {
         form.current
@@ -198,10 +369,16 @@ export function BookingPage() {
         /* Optional storage. */
       }
       setContact({ name: "", email: "", phone: "", website: "" });
-      setTimeout(
-        () => document.getElementById("confirmation-title")?.focus(),
-        0,
-      );
+      setSpecialRequests("");
+      setTimeout(() => {
+        section.current?.scrollIntoView({
+          block: "start",
+          behavior: "instant",
+        });
+        document
+          .getElementById("confirmation-title")
+          ?.focus({ preventScroll: true });
+      }, 0);
     } catch (error) {
       if (error instanceof BookingError) {
         setErrors(error.fields);
@@ -214,449 +391,257 @@ export function BookingPage() {
       setBusy(false);
     }
   }
-  const error = (key: string) =>
-    errors[key] ? (
-      <p className="field-error" id={`${key}-error`}>
-        {errors[key]}
-      </p>
-    ) : null;
   const formattedDate = selection.preferredDate
     ? new Intl.DateTimeFormat("en-CA", {
         dateStyle: "medium",
         timeZone: "UTC",
       }).format(new Date(selection.preferredDate + "T12:00:00Z"))
     : "A day that works for you";
-  if (confirmation)
-    return (
-      <section className="confirmation section-pad">
-        <Horizon />
-        <p className="eyebrow">A GOOD DAY IS TAKING SHAPE</p>
-        <h1 id="confirmation-title" tabIndex={-1}>
-          Adventure
-          <br />
-          requested.
-        </h1>
-        <p>
-          Thanks for reaching out. Nikita will be in touch to confirm the
-          details of your trip.
-        </p>
-        <div className="confirmation-summary">
-          <span>{experience.name}</span>
-          <span>
-            {locations.find((l) => l.id === selection.location)!.name}
-          </span>
-          <span>
-            {formattedDate} · {selection.groupSize}{" "}
-            {selection.groupSize === 1 ? "person" : "people"}
-          </span>
-        </div>
-        <p className="small">
-          This is a submitted request. Your date, pricing, meeting point, and
-          trip are not yet confirmed or reserved.
-        </p>
-        <p className="request-reference">
-          Request reference: {confirmation.requestId}
-        </p>
-        <button
-          type="button"
-          className="text-button"
-          onClick={() => {
-            setConfirmation(null);
-            setSelection({ ...defaults });
-            setGroupMore(false);
-            attempt.current = null;
-            window.scrollTo(0, 0);
-          }}
-        >
-          Plan another day
-        </button>
-        <Link className="button" to="/">
-          Back to fishn
-        </Link>
-      </section>
-    );
   return (
-    <div className="booking-page section-pad">
-      <div className="booking-heading">
-        <p className="eyebrow">LESS PLANNING. MORE LOOKING FORWARD.</p>
-        <h1 tabIndex={-1}>
+    <section
+      ref={section}
+      id="book"
+      className={`booking-scene photo-chapter ${embedded ? "booking-embedded" : "booking-standalone"}`}
+      aria-label="Plan your fishing day"
+      data-backdrop={scene.id}
+      data-step={confirmation ? "confirmation" : step}
+    >
+      <div className="booking-backdrops">
+        {tripScenes.map((backdrop) => (
+          <Photo
+            key={backdrop.id}
+            name={backdrop.image}
+            alt={scene.id === backdrop.id ? backdrop.alt : ""}
+            className={`booking-exposure ${scene.id === backdrop.id ? "is-active" : ""}`}
+            sizes="100vw"
+            eager={scene.id === backdrop.id}
+          />
+        ))}
+      </div>
+      <div className="booking-scrim" />
+      <div className="booking-place" aria-hidden="true">
+        <p className="eyebrow">
+          {scene.experience === "ice-fishing"
+            ? "LAKE SIMCOE / WINTER"
+            : `${place.name.toUpperCase()} / SHORELINE`}
+        </p>
+        <div className="booking-outlines">
+          {locations.map((location) => (
+            <WaterOutline
+              key={location.id}
+              id={location.id}
+              className={place.id === location.id ? "is-active" : ""}
+            />
+          ))}
+        </div>
+        <p className="eyebrow">
+          {geography.features[place.id].coordinate}
+          <br />
+          GEOGRAPHIC REFERENCE
+        </p>
+      </div>
+      <External
+        className="booking-map-credit"
+        href="https://www.openstreetmap.org/copyright"
+      >
+        © OpenStreetMap contributors
+      </External>
+      <div className="booking-introduction">
+        <p className="eyebrow">THE NEXT CHAPTER IS YOURS.</p>
+        <Heading className="booking-main-title">
           Your next
           <br />
-          good day.
-        </h1>
-        <p>
-          A few details. A little anticipation.
-          <br />
-          Nikita will take it from here.
-        </p>
+          <span>good day.</span>
+        </Heading>
       </div>
-      {ready === false && (
-        <div className="request-unavailable booking-status" role="status">
-          <strong>Online requests are opening soon.</strong>
+      {confirmation ? (
+        <div className="booking-panel booking-confirmation">
+          <p className="eyebrow">A GOOD DAY IS TAKING SHAPE</p>
+          <h2 id="confirmation-title" tabIndex={-1}>
+            Adventure
+            <br />
+            requested.
+          </h2>
           <p>
-            You can plan your day here. To send your enquiry now,{" "}
-            <External href={officialLinks.instagram}>
-              contact Nikita on Instagram
-            </External>
-            .
+            Thanks for reaching out. Nikita will be in touch to confirm the
+            details of your trip.
           </p>
+          <div className="confirmation-summary">
+            <span>{experience.name}</span>
+            <span>{place.name}</span>
+            <span>
+              {formattedDate} · {selection.groupSize}{" "}
+              {selection.groupSize === 1 ? "person" : "people"} ·{" "}
+              {selection.duration}h
+            </span>
+          </div>
+          <p className="small">
+            This is a submitted request. Your date, pricing, meeting point, and
+            trip are not yet confirmed or reserved.
+          </p>
+          <p className="request-reference">
+            Request reference: {confirmation.requestId}
+          </p>
+          <button
+            className="text-button"
+            type="button"
+            onClick={() => {
+              setConfirmation(null);
+              setSelection({ ...defaults });
+              setGroupMore(false);
+              setStep(0);
+              setSpecialRequests("");
+              flowStarted.current = false;
+              measuredSteps.current.clear();
+              attempt.current = null;
+            }}
+          >
+            Plan another day
+          </button>
         </div>
-      )}
-      <div className="booking-layout">
-        <form
-          ref={form}
-          onSubmit={submit}
-          noValidate
-          aria-label="Booking request"
-        >
-          <fieldset>
-            <legend>What kind of outside?</legend>
-            <div className="experience-options">
-              {experiences.map((e) => (
+      ) : (
+        <div className="booking-panel">
+          <div
+            className="booking-progress"
+            role="group"
+            aria-label={`Step ${progressIndex + 1} of ${flow.length}: ${stepNames[step]}`}
+          >
+            <span className="eyebrow">
+              {String(progressIndex + 1).padStart(2, "0")} /{" "}
+              {String(flow.length).padStart(2, "0")}
+            </span>
+            <span>{stepNames[step]}</span>
+            <div aria-hidden="true">
+              {flow.map((number, i) => (
+                <i
+                  key={number}
+                  className={i <= progressIndex ? "is-complete" : ""}
+                />
+              ))}
+            </div>
+          </div>
+          <form
+            ref={form}
+            onSubmit={submit}
+            noValidate
+            aria-label="Booking request"
+          >
+            <ConversationStep
+              step={step}
+              selection={selection}
+              groupMore={groupMore}
+              update={update}
+              chooseIntent={chooseIntent}
+              chooseLevel={chooseLevel}
+              chooseDestination={chooseDestination}
+              setGroupMore={setGroupMore}
+              goToStep={goToStep}
+              specialRequests={specialRequests}
+              setSpecialRequests={setSpecialRequests}
+              contact={contact}
+              setContact={setContact}
+              errors={errors}
+              setErrors={setErrors}
+              busy={busy}
+              formattedDate={formattedDate}
+            />
+            {message && (
+              <div
+                className="form-message"
+                role="alert"
+                tabIndex={-1}
+                ref={messageRef}
+              >
+                {message}
+              </div>
+            )}
+            {ready === false && (
+              <div className="booking-delivery-state" role="status">
+                <strong>Online requests are opening soon.</strong>
+                <span>
+                  {step === 7 ? (
+                    <>
+                      To send your enquiry now,{" "}
+                      <External href={officialLinks.instagram}>
+                        contact Nikita on Instagram
+                      </External>
+                      .
+                    </>
+                  ) : (
+                    "You can still plan your day here."
+                  )}
+                </span>
+              </div>
+            )}
+            <div className="booking-step-actions">
+              {step > 0 ? (
                 <button
                   type="button"
-                  className={selection.experience === e.id ? "selected" : ""}
-                  aria-pressed={selection.experience === e.id}
-                  key={e.id}
-                  onClick={() => update("experience", e.id)}
+                  className="booking-back"
+                  disabled={busy}
+                  onClick={() => goToStep(flow[Math.max(0, progressIndex - 1)])}
                 >
-                  <Photo name={e.image} alt="" />
-                  <span>
-                    {e.name}
-                    <span className="selection-circle" aria-hidden="true">
-                      {selection.experience === e.id ? "✓" : ""}
-                    </span>
-                  </span>
+                  Back
                 </button>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset>
-            <legend>Where shall we go?</legend>
-            <div className="segmented location-options">
-              {locations
-                .filter((l) => experience.locations.includes(l.id))
-                .map((l) => (
-                  <button
-                    type="button"
-                    key={l.id}
-                    aria-pressed={selection.location === l.id}
-                    onClick={() => update("location", l.id)}
-                  >
-                    {l.name}
-                  </button>
-                ))}
-            </div>
-            {error("location")}
-            <p className="field-hint">
-              A general area for now. Nikita will arrange the exact meeting
-              point.
-            </p>
-          </fieldset>
-          <div className="form-columns">
-            <fieldset>
-              <legend>Who’s coming?</legend>
-              <div className="segmented">
-                {[1, 2, 3, 4].map((size) => (
-                  <button
-                    type="button"
-                    key={size}
-                    aria-pressed={
-                      size === 4
-                        ? groupMore
-                        : !groupMore && selection.groupSize === size
-                    }
-                    onClick={() => {
-                      setGroupMore(size === 4);
-                      update("groupSize", size);
-                    }}
-                  >
-                    {size === 4 ? "4+" : size}
-                    <span className="sr-only">
-                      {" "}
-                      {size === 1 ? "person" : "people"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              {groupMore && (
-                <label className="extra-group">
-                  How many people?
-                  <input
-                    type="number"
-                    min="4"
-                    max="100"
-                    value={selection.groupSize}
-                    onChange={(e) =>
-                      update("groupSize", Number(e.target.value))
-                    }
-                    aria-invalid={Boolean(errors.groupSize)}
-                    aria-describedby={
-                      errors.groupSize ? "groupSize-error" : undefined
-                    }
-                  />
-                </label>
+              ) : (
+                <span className="booking-first-note">
+                  A request first.
+                  <br />
+                  The details, together.
+                </span>
               )}
-              {error("groupSize")}
-            </fieldset>
-            <fieldset>
-              <legend>How long outside?</legend>
-              <div className="segmented">
-                {durationOptions.map((hours) => (
-                  <button
-                    type="button"
-                    key={hours}
-                    aria-pressed={selection.duration === hours}
-                    onClick={() => update("duration", hours)}
-                  >
-                    {hours}h
-                  </button>
-                ))}
-              </div>
-              <p className="field-hint">
-                Pricing is shared when Nikita reviews your request.
-              </p>
-            </fieldset>
-          </div>
-          <fieldset>
-            <legend>A day to look forward to.</legend>
-            <p className="field-hint date-intro">
-              Choose a preferred date. This calendar shows request dates, not
-              available appointments.
-            </p>
-            <Calendar
-              value={selection.preferredDate}
-              onChange={(v) => update("preferredDate", v)}
-              experience={selection.experience}
-              invalid={Boolean(errors.preferredDate)}
-            />
-            {error("preferredDate")}
-            {selection.experience === "ice-fishing" && (
-              <p className="conditions-note">
-                Ice requests depend on appropriate fishing seasons, suitable ice
-                conditions, permissions, and Nikita’s approval. A selectable
-                date is not an indication of safe ice.
+              {step < 7 ? (
+                <button
+                  type="button"
+                  className="button booking-next"
+                  key="continue-trip"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    nextStep();
+                  }}
+                >
+                  {(step === 0 && !selection.tripIntent) ||
+                  (step === 1 && !selection.fishingLevel)
+                    ? "Skip for now"
+                    : "Continue"}{" "}
+                  <span aria-hidden="true">+</span>
+                </button>
+              ) : (
+                <button
+                  className="button submit-booking"
+                  key="submit-request"
+                  type="submit"
+                  disabled={busy || ready !== true}
+                  aria-busy={busy}
+                >
+                  {busy ? "Sending your request…" : "Request my fishing trip"}
+                </button>
+              )}
+            </div>
+            {step === 7 && (
+              <p className="field-hint submit-note">
+                A request, not a confirmed booking. No payment is taken.
+                <br />
+                Your details are used to arrange your trip.{" "}
+                <Link to="/privacy">Read our privacy notice.</Link>
               </p>
             )}
-          </fieldset>
-          <fieldset className="licence-section">
-            <legend>One little thing before we go.</legend>
-            <p>
-              Most Ontario and other Canadian residents aged 18–64 need a
-              fishing licence. Residents under 18 or 65 and older generally
-              don’t need to buy one, but must carry the required ID.
-              International visitors have different requirements.
+          </form>
+          {step > 0 && (
+            <p className="booking-tripline">
+              {place.name} <span> / </span>
+              {experience.name}
+              {selection.preferredDate && (
+                <>
+                  {" "}
+                  <span> / </span>
+                  {formattedDate}
+                </>
+              )}
             </p>
-            <details>
-              <summary>A little help with the licence rules</summary>
-              <p>
-                A one-day sport fishing licence does not require an Outdoors
-                Card. Check the current rules for your residency and
-                circumstances. Each person is responsible for meeting the
-                requirements; this acknowledgement is not legal verification.
-              </p>
-              <div className="licence-links">
-                <External href={officialLinks.licence}>
-                  Need a licence? Get one through Ontario.
-                </External>
-                <External href={officialLinks.visitors}>
-                  International visitor guidance
-                </External>
-                <External href={officialLinks.regulations}>
-                  Official Ontario rules & regulations
-                </External>
-              </div>
-            </details>
-            <p className="licence-question" id="licence-label">
-              Are you all set with the fishing licence requirements?
-            </p>
-            <div
-              className="licence-options"
-              role="radiogroup"
-              aria-labelledby="licence-label"
-              aria-invalid={Boolean(errors.licenceAcknowledgement)}
-              aria-describedby={
-                errors.licenceAcknowledgement
-                  ? "licenceAcknowledgement-error"
-                  : undefined
-              }
-            >
-              {licenceOptions.map((option) => (
-                <label key={option.value}>
-                  <input
-                    type="radio"
-                    name="licence"
-                    value={option.value}
-                    checked={selection.licenceAcknowledgement === option.value}
-                    onChange={() =>
-                      update("licenceAcknowledgement", option.value)
-                    }
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-            {error("licenceAcknowledgement")}
-            <p className="field-hint">
-              Not sure whether you need one?{" "}
-              <External href={officialLinks.regulations}>
-                Check the official Ontario rules.
-              </External>
-            </p>
-          </fieldset>
-          <fieldset>
-            <legend>How can Nikita reach you?</legend>
-            <div className="contact-fields">
-              {(
-                [
-                  {
-                    key: "name",
-                    label: "Full name",
-                    type: "text",
-                    autoComplete: "name",
-                  },
-                  {
-                    key: "email",
-                    label: "Email address",
-                    type: "email",
-                    autoComplete: "email",
-                  },
-                  {
-                    key: "phone",
-                    label: "Phone number",
-                    type: "tel",
-                    autoComplete: "tel",
-                  },
-                ] as const
-              ).map((field) => (
-                <label key={field.key}>
-                  {field.label}
-                  <input
-                    name={field.key}
-                    type={field.type}
-                    autoComplete={field.autoComplete}
-                    value={contact[field.key]}
-                    required
-                    maxLength={
-                      field.key === "name"
-                        ? 100
-                        : field.key === "email"
-                          ? 254
-                          : 30
-                    }
-                    onChange={(e) => {
-                      setContact({ ...contact, [field.key]: e.target.value });
-                      setErrors({ ...errors, [field.key]: "" });
-                    }}
-                    aria-invalid={Boolean(errors[field.key])}
-                    aria-describedby={
-                      errors[field.key] ? `${field.key}-error` : undefined
-                    }
-                  />
-                  {error(field.key)}
-                </label>
-              ))}
-            </div>
-            <div className="honeypot" aria-hidden="true">
-              <label>
-                Leave this empty
-                <input
-                  type="text"
-                  name="website"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={contact.website}
-                  onChange={(e) =>
-                    setContact({ ...contact, website: e.target.value })
-                  }
-                />
-              </label>
-            </div>
-          </fieldset>
-          {message && (
-            <div
-              className="form-message"
-              role="alert"
-              tabIndex={-1}
-              ref={messageRef}
-            >
-              {message}
-            </div>
           )}
-          <button
-            className="button submit-booking"
-            type="submit"
-            disabled={busy || ready !== true}
-            aria-busy={busy}
-          >
-            {busy ? "Sending your request…" : "Request your adventure"}
-          </button>
-          <p className="field-hint submit-note">
-            A request, not a confirmed booking. No payment is taken.
-            <br />
-            Your details are used to arrange your trip.{" "}
-            <Link to="/privacy">Read our privacy notice.</Link>
-          </p>
-        </form>
-        <aside className="booking-aside">
-          <div className="trip-summary">
-            <Photo name={experience.image} alt={experience.alt} />
-            <div className="trip-summary-body">
-              <p className="eyebrow">A GOOD DAY IN THE MAKING</p>
-              <h2>{experience.name}</h2>
-              <dl>
-                <div>
-                  <dt>Somewhere</dt>
-                  <dd>
-                    {locations.find((l) => l.id === selection.location)!.name}
-                  </dd>
-                </div>
-                <div>
-                  <dt>With</dt>
-                  <dd>
-                    {selection.groupSize}{" "}
-                    {selection.groupSize === 1 ? "person" : "people"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>For</dt>
-                  <dd>
-                    {selection.duration}{" "}
-                    {selection.duration === 1 ? "hour" : "hours"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>On</dt>
-                  <dd>{formattedDate}</dd>
-                </div>
-              </dl>
-              <p>
-                Nikita reviews every request personally. The season, the
-                conditions, and your plans shape the day.
-              </p>
-              <button
-                type="button"
-                className="text-button"
-                onClick={() => {
-                  setSelection({ ...defaults });
-                  setGroupMore(false);
-                  setErrors({});
-                  setMessage("");
-                }}
-              >
-                Clear trip selections
-              </button>
-            </div>
-          </div>
-          <Horizon />
-          <p className="aside-signoff">
-            Good company.
-            <br />A little local knowledge.
-            <br />
-            Something to look forward to.
-          </p>
-        </aside>
-      </div>
-    </div>
+        </div>
+      )}
+    </section>
   );
 }

@@ -1,0 +1,406 @@
+{
+  "HollandRiver": {
+    "width": 3600,
+    "height": 2400,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/HollandRiver-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/HollandRiver-960.webp"
+      },
+      {
+        "width": 1600,
+        "src": "/images/HollandRiver-1600.webp"
+      },
+      {
+        "width": 2560,
+        "src": "/images/HollandRiver-2560.webp"
+      }
+    ]
+  },
+  "Lake-simcoe-ice": {
+    "width": 1920,
+    "height": 1280,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/Lake-simcoe-ice-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/Lake-simcoe-ice-960.webp"
+      },
+      {
+        "width": 1600,
+        "src": "/images/Lake-simcoe-ice-1600.webp"
+      },
+      {
+        "width": 1920,
+        "src": "/images/Lake-simcoe-ice-2560.webp"
+      }
+    ]
+  },
+  "Nottawasaga-River": {
+    "width": 1600,
+    "height": 1200,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/Nottawasaga-River-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/Nottawasaga-River-960.webp"
+      },
+      {
+        "width": 1600,
+        "src": "/images/Nottawasaga-River-1600.webp"
+      }
+    ]
+  },
+  "closeupreelandmug": {
+    "width": 1440,
+    "height": 1800,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/closeupreelandmug-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/closeupreelandmug-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/closeupreelandmug-1600.webp"
+      }
+    ]
+  },
+  "fishinnet": {
+    "width": 1200,
+    "height": 1800,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/fishinnet-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/fishinnet-960.webp"
+      },
+      {
+        "width": 1200,
+        "src": "/images/fishinnet-1600.webp"
+      }
+    ]
+  },
+  "fishonrock": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/fishonrock-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/fishonrock-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/fishonrock-1600.webp"
+      }
+    ]
+  },
+  "icefishinglandscape": {
+    "width": 1152,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishinglandscape-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishinglandscape-960.webp"
+      },
+      {
+        "width": 1152,
+        "src": "/images/icefishinglandscape-1600.webp"
+      }
+    ]
+  },
+  "icefishinglandscape1": {
+    "width": 1152,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishinglandscape1-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishinglandscape1-960.webp"
+      },
+      {
+        "width": 1152,
+        "src": "/images/icefishinglandscape1-1600.webp"
+      }
+    ]
+  },
+  "icefishinglandscape2": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishinglandscape2-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishinglandscape2-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/icefishinglandscape2-1600.webp"
+      }
+    ]
+  },
+  "icefishingtail": {
+    "width": 1440,
+    "height": 1439,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishingtail-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishingtail-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/icefishingtail-1600.webp"
+      }
+    ]
+  },
+  "icefishtail": {
+    "width": 1152,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishtail-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishtail-960.webp"
+      },
+      {
+        "width": 1152,
+        "src": "/images/icefishtail-1600.webp"
+      }
+    ]
+  },
+  "icefishtail3": {
+    "width": 1152,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/icefishtail3-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/icefishtail3-960.webp"
+      },
+      {
+        "width": 1152,
+        "src": "/images/icefishtail3-1600.webp"
+      }
+    ]
+  },
+  "lake-simcoe": {
+    "width": 3600,
+    "height": 2400,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/lake-simcoe-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/lake-simcoe-960.webp"
+      },
+      {
+        "width": 1600,
+        "src": "/images/lake-simcoe-1600.webp"
+      },
+      {
+        "width": 2560,
+        "src": "/images/lake-simcoe-2560.webp"
+      }
+    ]
+  },
+  "lure": {
+    "width": 736,
+    "height": 1193,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/lure-480.webp"
+      },
+      {
+        "width": 736,
+        "src": "/images/lure-960.webp"
+      }
+    ]
+  },
+  "monsterfish": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterfish-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterfish-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/monsterfish-1600.webp"
+      }
+    ]
+  },
+  "monsterfish1": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterfish1-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterfish1-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/monsterfish1-1600.webp"
+      }
+    ]
+  },
+  "monsterfish2": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterfish2-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterfish2-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/monsterfish2-1600.webp"
+      }
+    ]
+  },
+  "monsterfish3": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterfish3-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterfish3-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/monsterfish3-1600.webp"
+      }
+    ]
+  },
+  "monsterheadfish1": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/monsterheadfish1-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/monsterheadfish1-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/monsterheadfish1-1600.webp"
+      }
+    ]
+  },
+  "waterlandscape": {
+    "width": 1080,
+    "height": 1080,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/waterlandscape-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/waterlandscape-960.webp"
+      },
+      {
+        "width": 1080,
+        "src": "/images/waterlandscape-1600.webp"
+      }
+    ]
+  },
+  "waterlandscape1": {
+    "width": 1440,
+    "height": 1440,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/waterlandscape1-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/waterlandscape1-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/waterlandscape1-1600.webp"
+      }
+    ]
+  },
+  "winterpath": {
+    "width": 1440,
+    "height": 1598,
+    "sources": [
+      {
+        "width": 480,
+        "src": "/images/winterpath-480.webp"
+      },
+      {
+        "width": 960,
+        "src": "/images/winterpath-960.webp"
+      },
+      {
+        "width": 1440,
+        "src": "/images/winterpath-1600.webp"
+      }
+    ]
+  }
+}

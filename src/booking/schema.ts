@@ -44,6 +44,16 @@ export const bookingSchema = z
     licenceAcknowledgement: z.enum(["valid", "exempt", "before-trip"], {
       error: "Please acknowledge the fishing licence requirements.",
     }),
+    tripIntent: z
+      .enum(["escape", "first-time", "together", "focused"])
+      .optional(),
+    fishingLevel: z.enum(["new", "some", "regular"]).optional(),
+    destinationAdviceRequested: z.boolean().optional(),
+    specialRequests: z
+      .string()
+      .trim()
+      .max(1500, "Please keep your note under 1,500 characters.")
+      .optional(),
     website: z.string().max(0),
     attribution: z
       .object({
