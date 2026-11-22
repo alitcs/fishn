@@ -197,16 +197,16 @@ test("four-step request validates, preserves answers, and safely retries deliver
   ).toBeVisible();
   await chooseDate(page);
   await next(page);
-  await page.getByRole("button", { name: "12 people", exact: true }).click();
-  await page.getByRole("button", { name: "12 hours", exact: true }).click();
-  await expect(page.locator(".number-options > button")).toHaveCount(24);
-  await expect(page.locator("input[type=number]")).toHaveCount(0);
+  await page.getByLabel("Number of people", { exact: true }).fill("25");
+  await page.getByRole("button", { name: "8 hours", exact: true }).click();
+  await expect(page.locator(".number-options > button")).toHaveCount(8);
+  await expect(page.locator("input[type=number]")).toHaveCount(1);
   await next(page);
   await expect(page.locator(".booking-progress")).toHaveAttribute(
     "aria-label",
     "Step 4 of 4: Your details",
   );
-  await expect(page.locator(".session-review")).toContainText("12 people");
+  await expect(page.locator(".session-review")).toContainText("25 people");
   expect(requests).toHaveLength(0);
   await submitButton(page).click();
   await expect(
@@ -219,8 +219,8 @@ test("four-step request validates, preserves answers, and safely retries deliver
     .fill("Please discuss equipment for our group.");
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await expect(
-    page.getByRole("button", { name: "12 people", exact: true }),
-  ).toHaveAttribute("aria-pressed", "true");
+    page.getByLabel("Number of people", { exact: true }),
+  ).toHaveValue("25");
   await next(page);
   await expect(page.getByLabel("Full name")).toHaveValue("Test Visitor");
   await page.getByText("Add a note (optional)", { exact: true }).click();
@@ -256,13 +256,13 @@ test("four-step request validates, preserves answers, and safely retries deliver
     page.getByRole("heading", { name: "Request sent." }),
   ).toBeVisible();
   await expect(
-    page.getByText(/Date and price await confirmation/),
+    page.getByText(/No payment taken. Nikita will confirm/),
   ).toBeVisible();
   expect(requests).toHaveLength(2);
   expect(requests[0].requestId).toBe(requests[1].requestId);
   expect(requests[1]).toMatchObject({
-    groupSize: 12,
-    duration: 12,
+    groupSize: 25,
+    duration: 8,
     location: "lake-simcoe",
     experience: "ice-fishing",
     specialRequests: "Please discuss equipment for our group.",
@@ -501,7 +501,7 @@ test("the optional gallery preserves the session, traps focus, and supports keyb
   await page.getByRole("button", { name: "Open catch gallery" }).click();
   const dialog = page.getByRole("dialog", { name: "Journal" });
   await expect(dialog).toBeVisible();
-  await expect(page.locator(".journal-frame")).toHaveCount(27);
+  await expect(page.locator(".journal-frame")).toHaveCount(23);
   expect(
     await page.locator(".journal-frame img").evaluateAll(async (nodes) => {
       const images = nodes as HTMLImageElement[];
@@ -513,19 +513,19 @@ test("the optional gallery preserves the session, traps focus, and supports keyb
     }),
   ).toEqual([]);
   await page.getByRole("button", { name: "Next catch", exact: true }).click();
-  await expect(page.locator(".gallery-controls > span")).toHaveText("02 / 27");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("02 / 23");
   await expect(
     page.locator(".journal-frame[aria-pressed=true] img"),
   ).toHaveAttribute("src", /monsterfish2/);
   await page.keyboard.press("ArrowLeft");
-  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 27");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 23");
   await page.keyboard.press("End");
-  await expect(page.locator(".gallery-controls > span")).toHaveText("27 / 27");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("23 / 23");
   await expect(
     page.locator(".journal-frame[aria-pressed=true] img"),
-  ).toHaveAttribute("src", /winterpath/);
+  ).toHaveAttribute("src", /icefishtail1/);
   await page.keyboard.press("Home");
-  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 27");
+  await expect(page.locator(".gallery-controls > span")).toHaveText("01 / 23");
   await page.keyboard.press("Tab");
   expect(
     await page.evaluate(() =>
@@ -592,8 +592,34 @@ test("the three homepage chapters snap in order while the contact form remains s
   await expect(submitButton(page)).toBeInViewport();
   await expect(page.locator("#book")).toHaveAttribute("data-step", "3");
   const activeBounds = await page.locator("#book").boundingBox();
-  expect(activeBounds!.y).toBeLessThan(0);
+  expect(Math.abs(activeBounds!.y)).toBeLessThan(3);
   expect(activeBounds!.y + activeBounds!.height).toBeGreaterThan(0);
+});
+
+test("booking fits one screen with its total and actions visible at every step", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 1366, height: 768 },
+    { width: 390, height: 844 },
+    { width: 390, height: 700 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    await page.locator(".hero-plan").click();
+    for (let step = 0; step < 4; step++) {
+      await expect(page.locator(".booking-panel")).toBeInViewport({ ratio: 1 });
+      await expect(page.locator(".trip-estimate")).toBeInViewport({ ratio: 1 });
+      await expect(page.locator(".booking-step-actions")).toBeInViewport({ ratio: 1 });
+      const bounds = await page.locator("#book").boundingBox();
+      expect(Math.abs(bounds!.height - viewport.height)).toBeLessThan(2);
+      if (step === 1) await chooseDate(page);
+      if (step < 3) await next(page);
+    }
+    await fillContact(page);
+    await expect(submitButton(page)).toBeInViewport({ ratio: 1 });
+  }
 });
 
 test("licence menu supports keyboard selection, dismissal, and retained values", async ({
@@ -627,4 +653,67 @@ test("licence menu supports keyboard selection, dismissal, and retained values",
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await next(page);
   await expect(select).toContainText("required licence before my trip");
+});
+
+test("pricing stays visible through the flow and updates for the trip and any group size", async ({ page }) => {
+  await page.goto("/book");
+  const quote = page.locator(".trip-estimate");
+  await expect(quote.locator("strong")).toHaveText("$100");
+  await tripButton(page, "Lake Simcoe", "Ice Fishing").click();
+  await expect(quote.locator("strong")).toHaveText("$150");
+  await next(page);
+  await expect(quote.locator("strong")).toHaveText("$150");
+  await chooseDate(page);
+  await next(page);
+  await page.getByRole("button", { name: "4 people", exact: true }).click();
+  await page.getByRole("button", { name: "8 hours", exact: true }).click();
+  await expect(quote.locator("strong")).toHaveText("$1,200");
+  await page.getByLabel("Number of people", { exact: true }).fill("25");
+  await expect(quote.locator("strong")).toHaveText("$5,400");
+  await expect(quote).not.toContainText("/hr");
+  await page.getByLabel("Number of people", { exact: true }).fill("");
+  await next(page);
+  await expect(page.locator("#book")).toHaveAttribute("data-step", "2");
+  await expect(page.locator("#groupSize-error")).toBeVisible();
+  await expect(quote).not.toContainText("$5,400");
+  await page.getByLabel("Number of people", { exact: true }).fill("25");
+  await next(page);
+  await expect(quote.locator("strong")).toHaveText("$5,400");
+  await expect(page.locator(".submit-note")).toContainText("No payment now");
+});
+
+test("Good to know shows compact rate formulas and included equipment on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/#good-to-know");
+  await page.getByText("Equipment", { exact: true }).click();
+  await expect(page.locator(".booking-questions")).toContainText("Dress for the weather and conditions. All fishing gear and equipment is provided.");
+  await page.getByText("Pricing", { exact: true }).click();
+  const rates = page.locator(".trip-rates");
+  await expect(rates).toContainText("$50/hour for one person + $20/hour per extra person.");
+  await expect(rates).toContainText("$75/hour for one person + $25/hour per extra person.");
+  await expect(rates.locator("table")).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test.describe("calendar follows the visitor's browser clock", () => {
+  test.use({ timezoneId: "Pacific/Kiritimati" });
+  test("opens months after deployment, discards stale saved dates, and refreshes on return", async ({ page }) => {
+    // February locally while it is still January in Ontario.
+    await page.clock.install({ time: new Date("2027-01-31T10:05:00Z") });
+    await page.addInitScript(() => {
+      localStorage.setItem("fishn-trip-preferences-v2", JSON.stringify({
+        preferredDate: "2026-11-24", groupSize: 25, duration: 12,
+      }));
+    });
+    await page.goto("/book");
+    await expect(page.locator(".trip-estimate")).toContainText("25 people · 2 hours");
+    await next(page);
+    await expect(page.locator("#calendar-title")).toHaveText("February 2027");
+    await expect(page.locator('.calendar-grid button[aria-current="date"]')).toHaveAttribute("data-date", "2027-02-01");
+    await expect(page.locator('.calendar-grid button[aria-pressed="true"]')).toHaveCount(0);
+    await page.clock.setSystemTime(new Date("2027-02-28T10:05:00Z"));
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await expect(page.locator("#calendar-title")).toHaveText("March 2027");
+    await expect(page.locator('.calendar-grid button[aria-current="date"]')).toHaveAttribute("data-date", "2027-03-01");
+  });
 });

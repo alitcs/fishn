@@ -1,4 +1,12 @@
-﻿# fishn: minimal interface verification
+﻿# fishn: pricing and booking verification
+
+Current revision: the booking chapter fits one viewport; the total and navigation remain visible while longer details scroll within the panel. Verified all four steps at 1440x900, 1366x768, 390x844, 390x700, and 320x568, including licence selection. Fresh sessions default to one person, two hours, shoreline fishing ($100 CAD). Booking shows only the total and selected session; Good to know uses compact rate formulas. Ice fishing is now $75/hour for the first person plus $25/hour per extra person; shoreline remains $50 plus $20. The 23-photo journal interleaves landscapes and catches. The Netlify build and TypeScript check pass, along with 21 unit tests and five production browser checks covering form delivery/retry, journal browsing, one-screen booking at all five sizes, live pricing, and minimal pricing copy.
+
+Previous pricing update, 22 November 2026 (America/Toronto): equipment copy states that visitors dress for the conditions and all fishing gear is provided. The Journal has 23 images after removing original entries 1, 3, 16, and 17. Trips are limited to 2, 4, 6, and 8 hours; group sizes accept positive whole numbers without the old 12-person cap. Shared pricing matches every supplied table entry and appears throughout booking, confirmation, copyable plans, and delivery payloads. Water outlines have stronger strokes, more space, an entrance animation triggered in view, and a dark variant over ice.
+
+Validation for this update: 20 unit tests passed, including all 32 supplied prices and larger groups. The development browser suite passed all 17 tests; the Netlify-only case was skipped there and passed separately against the production static build. Three production browser checks passed: Netlify delivery/retry payloads, mobile rate tables/equipment copy, and a browser-clock test for February/March 2027 in Pacific/Kiritimati. The latter verifies stale saved dates are discarded, today follows the browser rather than Toronto, and the month refreshes when returning to a long-lived tab. The Netlify build and TypeScript check passed. Desktop/mobile visual captures are in `.work/visual/pricing-update/`. No publication or real message delivery was performed.
+
+## Earlier interface verification
 
 Verified 22 November 2026 (America/Toronto), using Node 24 and Chrome on Windows. This is local source work and Netlify preparation. No site was published and no real email or Instagram message was sent.
 

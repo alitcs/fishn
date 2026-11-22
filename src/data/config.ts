@@ -45,8 +45,15 @@ export const experiences = [
     ],
   },
 ];
-export const durationOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const;
-export const groupSizeOptions = durationOptions;
+export const durationOptions = [2, 4, 6, 8] as const;
+export const groupSizeOptions = [1, 2, 3, 4] as const;
+export function browserToday(now = new Date()): string {
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
+}
 export interface AvailabilityRule {
   mode: "request-only";
   enabled: boolean;

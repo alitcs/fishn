@@ -14,6 +14,7 @@ import {
 import { experiences, officialLinks } from "./data/config";
 import { locations, mapsUrl } from "./data/locations";
 import geography from "./data/geography.json";
+import { TripRates } from "./booking/TripPricing";
 
 export function ExperiencePair({ page = false }: { page?: boolean }) {
   return (
@@ -366,7 +367,7 @@ export function ExperienceDetail() {
             </div>
             <div>
               <span>THE PACE</span>
-              <p>Request 1–12 hours</p>
+              <p>2, 4, 6, or 8 hour trips</p>
             </div>
             <div>
               <span>THE KNOW-HOW</span>
@@ -447,16 +448,13 @@ export function ExperienceDetail() {
             <summary>What should I bring?</summary>
             <p>
               Dress for the conditions and bring any required fishing licence
-              and identification. Nikita will discuss equipment, clothing, and
-              the exact plan with you before the trip.
+              and identification. All fishing gear and equipment is provided.
+              Nikita will confirm the exact plan with you before the trip.
             </p>
           </details>
           <details>
             <summary>How much does it cost?</summary>
-            <p>
-              Nikita will share pricing when reviewing your request, before you
-              commit. No payment is taken on this website.
-            </p>
+            <TripRates experience={experience.id} />
           </details>
           <details>
             <summary>Is my date confirmed when I request it?</summary>

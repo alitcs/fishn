@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import geography from "./data/geography.json";
 import { locations, mapsUrl } from "./data/locations";
@@ -13,9 +13,20 @@ export function WaterOutline({
   className?: string;
 }) {
   const feature = geography.features[id];
+  const outline = useRef<SVGSVGElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (!outline.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+    }, { threshold: 0.15 });
+    observer.observe(outline.current);
+    return () => observer.disconnect();
+  }, []);
   return (
     <svg
-      className={`water-outline ${className}`}
+      ref={outline}
+      className={`water-outline ${className} ${visible ? "is-visible" : ""}`}
       viewBox="0 0 500 500"
       fill="none"
       aria-hidden="true"
@@ -23,7 +34,7 @@ export function WaterOutline({
     >
       <g
         stroke="currentColor"
-        strokeWidth={id === "lake-simcoe" ? 1.6 : 1.9}
+        strokeWidth={id === "lake-simcoe" ? 2.5 : 2.8}
         strokeLinecap="round"
         strokeLinejoin="round"
       >
@@ -35,8 +46,8 @@ export function WaterOutline({
             key={`detail-${i}`}
             d={d}
             pathLength="1"
-            strokeWidth="1.1"
-            opacity="0.6"
+            strokeWidth="1.5"
+            opacity="0.8"
           />
         ))}
       </g>

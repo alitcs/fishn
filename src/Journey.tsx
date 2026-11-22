@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { BookingPage } from "./booking/BookingPage";
+import { TripRates } from "./booking/TripPricing";
 import { External, FocusFrame, Photo } from "./components";
 import { officialLinks } from "./data/config";
 import { track } from "./services/analytics";
@@ -85,11 +86,11 @@ export function Journey() {
         <div className="booking-questions">
           <details>
             <summary>Pricing</summary>
-            <p>Nikita confirms the price before you commit.</p>
+            <TripRates />
           </details>
           <details>
             <summary>Equipment</summary>
-            <p>What to bring is agreed with Nikita.</p>
+            <p>Dress for the weather and conditions. All fishing gear and equipment is provided.</p>
           </details>
           <details>
             <summary>Licence</summary>

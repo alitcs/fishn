@@ -3,6 +3,7 @@ import type { BookingInput } from "../src/booking/schema";
 import { experiences } from "../src/data/config";
 import { locations } from "../src/data/locations";
 import { tripIntents, fishingLevels } from "../src/data/booking";
+import { formatPrice, tripPrice } from "../src/data/pricing";
 
 export interface BookingEnv {
   RESEND_API_KEY?: string;
@@ -40,6 +41,8 @@ export function bookingEmail(data: BookingInput, submittedAt: string) {
     `Location: ${locations.find((l) => l.id === data.location)!.name}`,
     `Group: ${data.groupSize}`,
     `Duration: ${data.duration} hour(s)`,
+    `Hourly rate: ${formatPrice(tripPrice(data.experience, data.groupSize, data.duration).hourlyRate)} CAD`,
+    `Session total: ${formatPrice(tripPrice(data.experience, data.groupSize, data.duration).total)} CAD; all fishing gear and equipment included.`,
     `Preferred date (Ontario): ${data.preferredDate}`,
     `Licence acknowledgement: ${licenceOptions.find((l) => l.value === data.licenceAcknowledgement)!.label}`,
     "Licence acknowledgement is self-reported, not legal verification.",

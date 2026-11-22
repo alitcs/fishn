@@ -30,8 +30,8 @@ test("Netlify build submits the full URL-encoded session, handles failures, and 
   await page
     .getByRole("button", { name: /^(Choose date|Set group|Your details)$/ })
     .click();
-  await page.getByRole("button", { name: "12 people", exact: true }).click();
-  await page.getByRole("button", { name: "12 hours", exact: true }).click();
+  await page.getByLabel("Number of people", { exact: true }).fill("25");
+  await page.getByRole("button", { name: "8 hours", exact: true }).click();
   await page
     .getByRole("button", { name: /^(Choose date|Set group|Your details)$/ })
     .click();
@@ -72,8 +72,11 @@ test("Netlify build submits the full URL-encoded session, handles failures, and 
   expect(bodies[0].get("requestId")).toBe(bodies[1].get("requestId"));
   for (const [key, value] of [
     ["form-name", "fishing-session"],
-    ["groupSize", "12"],
-    ["duration", "12"],
+    ["groupSize", "25"],
+    ["duration", "8"],
+    ["hourlyRate", "530"],
+    ["sessionTotal", "4240"],
+    ["currency", "CAD"],
     ["name", "Netlify QA Visitor"],
   ])
     expect(bodies[1].get(key)).toBe(value);

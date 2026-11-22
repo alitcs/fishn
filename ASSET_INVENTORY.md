@@ -39,4 +39,4 @@ All originals remain untouched in the repository root. Public WebP derivatives a
 
 ## Optional photo journal
 
-The compact Journal drawer includes all 27 original photographs and excludes the five design references. Display crops live in src/gallery/catches.ts; original files remain unchanged. Five newly included photos use gallery-specific responsive WebPs at 480px and 960px. Portrait crops exclude faces; some hands or clothing remain behind the fish.
+The compact Journal drawer includes 23 selected original photographs and excludes the five design references. Original entries 1, 3, 16, and 17 (fishonrock, fishinnet, closeupreelandmug, and lure) were removed from this drawer at the owner's request. Display crops live in src/gallery/catches.ts; original files remain unchanged. Five newly included photos use gallery-specific responsive WebPs at 480px and 960px. Portrait crops exclude faces; some hands or clothing remain behind the fish.

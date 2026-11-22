@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { isRequestDateAllowed, ontarioToday } from "../data/config";
+import { useEffect, useRef, useState } from "react";
+import { browserToday, isRequestDateAllowed, ontarioToday } from "../data/config";
 import type { ExperienceId } from "../data/config";
 export function Calendar({
   value,
@@ -12,10 +12,31 @@ export function Calendar({
   experience: ExperienceId;
   invalid?: boolean;
 }) {
-  const today = ontarioToday();
-  const [month, setMonth] = useState(() =>
-    new Date(`${value || today}T12:00:00Z`).toISOString().slice(0, 7),
+  const [now, setNow] = useState(() => new Date());
+  const today = browserToday(now);
+  const [browsedMonth, setMonth] = useState("");
+  // Read the visitor's clock on opening and when returning to a long-lived tab.
+  useEffect(() => {
+    const refresh = () => setNow(new Date());
+    const timer = window.setInterval(refresh, 60000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, []);
+  const lastAllowed = new Date(`${ontarioToday(now)}T12:00:00Z`);
+  lastAllowed.setUTCDate(lastAllowed.getUTCDate() + 365);
+  const firstMonth = today.slice(0, 7);
+  const lastMonth = lastAllowed.toISOString().slice(0, 7);
+  const requestedMonth = browsedMonth || (
+    isRequestDateAllowed(value, experience, now) ? value.slice(0, 7) : firstMonth
   );
+  const month = requestedMonth < firstMonth
+    ? firstMonth
+    : requestedMonth > lastMonth ? lastMonth : requestedMonth;
   const grid = useRef<HTMLDivElement>(null);
   const year = Number(month.slice(0, 4)),
     monthIndex = Number(month.slice(5, 7)) - 1;
@@ -26,8 +47,6 @@ export function Calendar({
     year: "numeric",
     timeZone: "UTC",
   }).format(first);
-  const lastAllowed = new Date(`${today}T12:00:00Z`);
-  lastAllowed.setUTCDate(lastAllowed.getUTCDate() + 365);
   function changeMonth(amount: number) {
     const next = new Date(Date.UTC(year, monthIndex + amount, 1, 12));
     setMonth(next.toISOString().slice(0, 7));
@@ -102,7 +121,7 @@ export function Calendar({
         ))}
         {Array.from({ length: days }, (_, i) => {
           const date = `${month}-${String(i + 1).padStart(2, "0")}`;
-          const allowed = isRequestDateAllowed(date, experience);
+          const allowed = isRequestDateAllowed(date, experience, now);
           return (
             <button
               type="button"
@@ -111,6 +130,7 @@ export function Calendar({
               disabled={!allowed}
               aria-label={`${new Intl.DateTimeFormat("en-CA", { dateStyle: "full", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`))}${allowed ? ", request only" : ", not requestable"}`}
               aria-pressed={value === date}
+              aria-current={date === today ? "date" : undefined}
               onClick={() => onChange(date)}
               onKeyDown={(e) => keyDown(e, date)}
             >

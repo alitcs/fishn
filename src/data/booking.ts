@@ -50,7 +50,7 @@ export function tripGuidance(
   if (experience === "ice-fishing")
     return "A new side of Lake Simcoe. Nikita reviews the season, ice conditions, and your plans before agreeing a trip.";
   if (level === "new" || intent === "first-time")
-    return "First time? You’re welcome here. Nikita helps you get comfortable and learn at your own pace. Equipment arrangements are discussed before your trip.";
+    return "First time? You’re welcome here. Nikita helps you get comfortable and learn at your own pace. All fishing gear and equipment is provided; dress for the conditions.";
   if (intent === "together")
     return "Your outing is private. Tell us who’s coming, and Nikita will talk through a plan for your group.";
   if (level === "regular" || intent === "focused")

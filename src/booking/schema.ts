@@ -33,12 +33,12 @@ export const bookingSchema = z
       ),
     experience: z.enum(["shoreline-fishing", "ice-fishing"]),
     location: z.enum(["lake-simcoe", "holland-river", "nottawasaga-river"]),
-    groupSize: z.number().int().min(1).max(12),
+    groupSize: z.number().int().min(1),
     duration: z
       .number()
       .refine(
         (v) => durationOptions.includes(v as (typeof durationOptions)[number]),
-        "Please choose a session duration.",
+        "Please choose a 2, 4, 6, or 8 hour trip.",
       ),
     preferredDate: z.string().min(1, "Please choose a preferred date."),
     licenceAcknowledgement: z.enum(["valid", "exempt", "before-trip"], {

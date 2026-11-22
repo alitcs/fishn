@@ -12,7 +12,7 @@ The footer sits within the final chapter, so it does not create a fourth page. R
 
 The hero keeps the service, Ontario, a beginner welcome, and one booking action. Booking headings are Choose your water, Choose a date, People & hours, and Your details. Repeated promises, introductory paragraphs, decorative coordinates, and duplicated trip lines were removed. Pricing, equipment, and licence answers remain behind three one-word disclosures.
 
-The four-step flow, 1-12 selections, licence acknowledgement, contact validation, delivery adapters, error retention, consent rules, and pending-request confirmation remain.
+The four-step flow, 2/4/6/8 hour trips, flexible group sizes, live CAD totals, licence acknowledgement, contact validation, delivery adapters, error retention, consent rules, and pending-request confirmation remain.
 
 ## Clear, square surfaces
 
@@ -20,7 +20,7 @@ The panes have a 1.8% neutral fill, 13px background blur, fine straight borders,
 
 ## A small journal
 
-The quiet Journal action opens a compact filmstrip drawer at the bottom of the screen. The page remains visible. The drawer contains all 27 supplied photographs, excluding the five UI references. It has no oversized title, thumbnail dashboard, captions, or separate landing page.
+The quiet Journal action opens a compact filmstrip drawer at the bottom of the screen. The page remains visible. The drawer mixes 23 catch and landscape photographs, excluding the five UI references. It has no oversized title, thumbnail dashboard, captions, or separate landing page.
 
 Frames retain varied proportions, show neighboring photographs, and settle into the center with native horizontal snapping. Arrow controls, keyboard arrows, Home/End, touch swiping, Escape, explicit focus wrapping, and restoration of focus and page position are supported. Images outside the immediate frame load lazily. Originals remain untouched; display crops focus on fish and keep faces outside the selected portraits. Some hands and clothing remain where they overlap the catch.
 
@@ -59,4 +59,4 @@ The four choices are valid pairs rather than independent controls that can creat
 
 ## Verification and owner information
 
-See VERIFICATION.md for the builds, tests, native scroll checks, all-image loading checks, and visual captures. The sourced outlines and attribution are unchanged. Existing owner facts and the pricing-review model remain; no rates, reviews, guarantees, credentials, or confirmed availability were invented.
+See VERIFICATION.md for the builds, tests, native scroll checks, all-image loading checks, and visual captures. The sourced outlines and attribution are unchanged. Rates follow the owner-supplied tables: $50/hour shoreline plus $20/hour per additional person, or $75/hour ice plus $25/hour per additional person. Each base rate covers the first person. All fishing gear and equipment is included. No reviews, guarantees, credentials, or confirmed availability were invented.

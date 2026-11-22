@@ -8,6 +8,7 @@ import {
 } from "../data/config";
 import { locations } from "../data/locations";
 import { tripScenes } from "../data/scenes";
+import { formatPrice, tripPrice } from "../data/pricing";
 import { Calendar } from "./Calendar";
 import type { Selection } from "./BookingPage";
 import { LicenceSelect } from "./LicenceSelect";
@@ -65,7 +66,8 @@ export function ConversationStep(props: Props) {
       " · " +
       selection.duration +
       (selection.duration === 1 ? " hour" : " hours"),
-    "Could you confirm pricing, availability, and what to bring?",
+    "Session total: " + formatPrice(tripPrice(selection.experience, selection.groupSize, selection.duration).total) + " CAD. All fishing gear and equipment included.",
+    "Could you confirm availability and the final plan?",
   ].join("\n");
 
   return (
@@ -165,7 +167,7 @@ export function ConversationStep(props: Props) {
               },
               {
                 key: "duration",
-                title: "Hours",
+                title: "Trip length",
                 options: durationOptions,
                 unit: "hours",
                 singular: "hour",
@@ -180,7 +182,7 @@ export function ConversationStep(props: Props) {
                   {selection[choice.key] === 1 ? choice.singular : choice.unit}
                 </output>
               </legend>
-              <div className="number-options">
+              <div className={`number-options ${choice.key === "duration" ? "duration-options" : "people-options"}`}>
                 {choice.options.map((value) => (
                   <button
                     type="button"
@@ -197,6 +199,24 @@ export function ConversationStep(props: Props) {
                   </button>
                 ))}
               </div>
+              {choice.key === "groupSize" && (
+                <div className="group-size-label">
+                  <label htmlFor="group-size">Number of people</label>
+                  <input
+                    id="group-size"
+                    type="number"
+                    name="groupSize"
+                    min="1"
+                    step="1"
+                    inputMode="numeric"
+                    required
+                    value={selection.groupSize || ""}
+                    onChange={(event) => update("groupSize", Number(event.target.value))}
+                    aria-invalid={Boolean(errors.groupSize)}
+                    aria-describedby={errors.groupSize ? "groupSize-error" : undefined}
+                  />
+                </div>
+              )}
               {error(choice.key)}
             </fieldset>
           ))}

@@ -15,6 +15,7 @@ import { bookingSchema, licenceOptions } from "./schema";
 import type { BookingInput, BookingResponse } from "./schema";
 import { BookingError, submitBooking } from "./service";
 import { ConversationStep } from "./ConversationStep";
+import { TripEstimate } from "./TripPricing";
 import { netlifyFormName, netlifyFormEndpoint } from "./netlify";
 export type Selection = {
   experience: ExperienceId;
@@ -28,13 +29,13 @@ export type Selection = {
 const defaults: Selection = {
   experience: "shoreline-fishing",
   location: "lake-simcoe",
-  groupSize: 2,
+  groupSize: 1,
   duration: 2,
   preferredDate: "",
   licenceAcknowledgement: "",
   destinationAdviceRequested: false,
 };
-const storageKey = "fishn-trip-preferences";
+const storageKey = "fishn-trip-preferences-v2";
 export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const [params] = useSearchParams();
   const [selection, setSelection] = useState<Selection>(defaults);
@@ -74,9 +75,8 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
         if (locations.some((l) => l.id === saved.location))
           initial.location = saved.location;
         if (
-          Number.isInteger(saved.groupSize) &&
-          saved.groupSize >= 1 &&
-          saved.groupSize <= 12
+          Number.isSafeInteger(saved.groupSize) &&
+          saved.groupSize >= 1
         )
           initial.groupSize = saved.groupSize;
         if (durationOptions.includes(saved.duration))
@@ -179,11 +179,15 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
       fields.preferredDate = "Please choose a preferred request date.";
     if (
       step === 2 &&
-      (!Number.isInteger(selection.groupSize) ||
-        selection.groupSize < 1 ||
-        selection.groupSize > 12)
+      (!Number.isSafeInteger(selection.groupSize) ||
+        selection.groupSize < 1)
     )
-      fields.groupSize = "Please choose a group size from 1 to 12.";
+      fields.groupSize = "Please enter a whole number of people, at least 1.";
+    if (
+      step === 2 &&
+      !durationOptions.includes(selection.duration as (typeof durationOptions)[number])
+    )
+      fields.duration = "Please choose a 2, 4, 6, or 8 hour trip.";
     setErrors(fields);
     if (Object.keys(fields).length) {
       setMessage("Please check the detail below.");
@@ -396,7 +400,8 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
               {selection.duration}h
             </span>
           </div>
-          <p className="small">Date and price await confirmation.</p>
+          <TripEstimate {...selection} />
+          <p className="small">No payment taken. Nikita will confirm your date and final plan.</p>
           <p className="request-reference">
             Request reference: {confirmation.requestId}
           </p>
@@ -446,21 +451,24 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
             aria-label="Booking request"
           >
             <input type="hidden" name="form-name" value={netlifyFormName} />
-            <ConversationStep
-              step={step}
-              selection={selection}
-              update={update}
-              chooseDestination={chooseDestination}
-              goToStep={goToStep}
-              specialRequests={specialRequests}
-              setSpecialRequests={setSpecialRequests}
-              contact={contact}
-              setContact={setContact}
-              errors={errors}
-              setErrors={setErrors}
-              busy={busy}
-              formattedDate={formattedDate}
-            />
+            <div className="booking-step-scroll">
+              <ConversationStep
+                step={step}
+                selection={selection}
+                update={update}
+                chooseDestination={chooseDestination}
+                goToStep={goToStep}
+                specialRequests={specialRequests}
+                setSpecialRequests={setSpecialRequests}
+                contact={contact}
+                setContact={setContact}
+                errors={errors}
+                setErrors={setErrors}
+                busy={busy}
+                formattedDate={formattedDate}
+              />
+            </div>
+            <TripEstimate {...selection} />
             {message && (
               <div
                 className="form-message"
@@ -509,7 +517,7 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
             </div>
             {step === 3 && (
               <p className="field-hint submit-note">
-                No payment now. Nikita confirms pricing and availability.{" "}
+                No payment now. Nikita confirms availability and your final plan.{" "}
                 <Link to="/privacy">Privacy</Link>
               </p>
             )}

@@ -15,10 +15,16 @@ export function LicenceSelect({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const [above, setAbove] = useState(false);
+  const [menuHeight, setMenuHeight] = useState(250);
   const selected = licenceOptions.findIndex((option) => option.value === value);
   function show(last = false) {
     const bounds = trigger.current!.getBoundingClientRect();
-    setAbove(innerHeight - bounds.bottom < 210 && bounds.top > 210);
+    const panel = trigger.current!.closest(".booking-step-scroll")?.getBoundingClientRect();
+    const belowSpace = Math.min(innerHeight, panel?.bottom ?? innerHeight) - bounds.bottom;
+    const aboveSpace = bounds.top - Math.max(0, panel?.top ?? 0);
+    const opensAbove = belowSpace < 210 && aboveSpace > belowSpace;
+    setAbove(opensAbove);
+    setMenuHeight(Math.max(48, Math.min(250, (opensAbove ? aboveSpace : belowSpace) - 12)));
     setActive(selected >= 0 ? selected : last ? licenceOptions.length - 1 : 0);
     setOpen(true);
   }
@@ -121,6 +127,7 @@ export function LicenceSelect({
             role="listbox"
             aria-labelledby="licence-label"
             data-side={above ? "above" : "below"}
+            style={{ maxHeight: menuHeight }}
           >
             {licenceOptions.map((option, index) => (
               <button

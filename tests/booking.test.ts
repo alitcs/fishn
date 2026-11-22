@@ -5,7 +5,9 @@ import {
   availability,
   isRequestDateAllowed,
   ontarioToday,
+  browserToday,
 } from "../src/data/config.ts";
+import { tripPrice } from "../src/data/pricing.ts";
 import { bookingEmail, handleBooking } from "../server/booking.ts";
 function futureDate(days = 10) {
   const d = new Date();
@@ -199,20 +201,27 @@ test("conversation fields are bounded and do not permit unknown preference value
   );
 });
 
-test("group size and duration accept 1 through 12 and reject values outside the range", () => {
-  assert.equal(
-    bookingSchema.safeParse({ ...valid(), groupSize: 12, duration: 12 })
-      .success,
-    true,
-  );
-  assert.equal(
-    bookingSchema.safeParse({ ...valid(), groupSize: 1, duration: 1 }).success,
-    true,
-  );
-  for (const field of ["groupSize", "duration"])
-    for (const value of [0, 13, 2.5])
-      assert.equal(
-        bookingSchema.safeParse({ ...valid(), [field]: value }).success,
-        false,
-      );
+test("trips allow only 2, 4, 6, or 8 hours and any positive whole group size", () => {
+  for (const duration of [2, 4, 6, 8])
+    for (const groupSize of [1, 4, 12, 25])
+      assert.equal(bookingSchema.safeParse({ ...valid(), groupSize, duration }).success, true);
+  for (const duration of [0, 1, 3, 5, 7, 9, 12, 2.5])
+    assert.equal(bookingSchema.safeParse({ ...valid(), duration }).success, false);
+  for (const groupSize of [0, -1, 2.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])
+    assert.equal(bookingSchema.safeParse({ ...valid(), groupSize }).success, false);
+});
+test("prices match every supplied shoreline and ice table entry", () => {
+  const shoreline = [[100, 140, 180, 220], [200, 280, 360, 440], [300, 420, 540, 660], [400, 560, 720, 880]];
+  const ice = [[150, 200, 250, 300], [300, 400, 500, 600], [450, 600, 750, 900], [600, 800, 1000, 1200]];
+  for (const [index, duration] of [2, 4, 6, 8].entries())
+    for (const people of [1, 2, 3, 4]) {
+      assert.equal(tripPrice("shoreline-fishing", people, duration).total, shoreline[index][people - 1]);
+      assert.equal(tripPrice("ice-fishing", people, duration).total, ice[index][people - 1]);
+    }
+  assert.equal(tripPrice("shoreline-fishing", 25, 8).total, 4240);
+  assert.equal(tripPrice("ice-fishing", 25, 8).total, 5400);
+});
+test("browser date follows the local date components across month boundaries", () => {
+  assert.equal(browserToday(new Date(2027, 0, 1, 0, 1)), "2027-01-01");
+  assert.equal(browserToday(new Date(2027, 11, 31, 23, 59)), "2027-12-31");
 });
