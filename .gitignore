@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.work/
+.env
+.env.*
+!.env.example
+.sites-runtime/
+test-results/
+playwright-report/
+*.log
