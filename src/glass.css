@@ -1357,3 +1357,84 @@ html.home-snap {
 @media (max-width: 700px) and (prefers-reduced-motion: reduce) {
   .booking-home { scroll-behavior: auto; }
 }
+
+/* A quieter mobile booking panel, with room around each decision. */
+@media (max-width: 700px) {
+  .booking-scene[data-step] .booking-introduction { margin-bottom: 20px; }
+  .booking-introduction > .eyebrow { display: none; }
+  .booking-main-title { font-size: 32px; }
+  .booking-scene[data-step] .booking-place { top: 82px; height: 52px; width: 70px; }
+  .booking-scene .booking-panel { padding: 20px; border-color: #ffffff45; }
+  .booking-scene .booking-progress { margin-bottom: 18px; padding-bottom: 0; border: 0; }
+  .booking-progress > .eyebrow { font-size: 11px; }
+  .booking-progress i { width: 15px; height: 2px; }
+  .booking-step > h2 { font-size: 23px; line-height: 1.2; margin-bottom: 24px; }
+  .destination-choices { gap: 10px; }
+  .destination-choices > button {
+    min-height: 56px;
+    padding: 9px 8px;
+    gap: 12px;
+    border-color: transparent;
+    border-bottom-color: #ffffff30;
+    background: transparent;
+  }
+  .destination-choices > button > img { width: 36px; height: 36px; }
+  .destination-choices strong { font-size: 15px; font-weight: 500; }
+  .destination-choices small { font-size: 14px; margin-top: 2px; }
+  .destination-choices i { width: 16px; padding: 0; font-size: 16px; opacity: 0; }
+  .destination-choices > button[aria-pressed="true"] { background: #ffffff08; border-color: #ffffff85; }
+  .destination-choices > button[aria-pressed="true"] i { opacity: 1; }
+  .destination-choices > button:not([aria-pressed="true"]):hover { background: transparent; border-color: transparent; border-bottom-color: #ffffff30; }
+  .booking-scene[data-backdrop="simcoe-ice"] .booking-panel .destination-choices > button { border-color: transparent; border-bottom-color: #17212c30; }
+  .booking-scene[data-backdrop="simcoe-ice"] .booking-panel .destination-choices > button[aria-pressed="true"] { border-color: #17212c85; }
+  .help-choose { font-size: 14px; margin-top: 14px; border-bottom: 0; }
+  .trip-estimate { margin-top: 18px; padding-top: 14px; border-top-color: #ffffff35; }
+  .trip-estimate-total { font-size: 14px; }
+  .trip-estimate-total strong { font-size: 22px; }
+  .trip-estimate p { font-size: 14px; margin-top: 7px; }
+  .booking-scene[data-backdrop="simcoe-ice"] .trip-estimate { border-top-color: #17212c35; }
+  .booking-scene .booking-step-actions { border: 0; margin-top: 16px; padding-top: 0; }
+  .booking-next, .booking-scene .submit-booking { min-height: 46px; font-size: 14px; }
+  .booking-step .step-intro { font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+  .booking-step fieldset.number-choice > legend { font-size: 14px; margin-bottom: 12px; }
+  .number-options { gap: 12px; }
+  .number-options > button { font-size: 15px; min-height: 44px; }
+  .group-size-label { font-size: 14px; margin-top: 18px; }
+  .booking-step > fieldset.number-choice + fieldset.number-choice { margin-top: 30px; }
+  .session-review { padding-bottom: 16px; margin-bottom: 20px; }
+  .session-review strong { font-size: 16px; }
+  .session-review p > span { display: none; }
+  .booking-scene .contact-fields { gap: 18px; }
+  .booking-scene .contact-fields label, .licence-select > label { font-size: 14px; }
+  .booking-scene .contact-fields input { font-size: 16px; min-height: 44px; }
+}
+@media (max-width: 380px) {
+  .booking-scene .booking-panel { padding: 16px; }
+  .booking-main-title { font-size: 30px; }
+  .booking-step > h2 { font-size: 22px; }
+}
+
+/* Let the selected water be a feature of the mobile booking header. */
+@media (max-width: 700px) {
+  .booking-scene[data-step] .booking-introduction {
+    display: flex;
+    align-items: center;
+    min-height: 94px;
+    padding-right: 122px;
+    margin-bottom: 14px;
+  }
+  .booking-scene[data-step] .booking-place {
+    top: 88px;
+    right: 20px;
+    width: 112px;
+    height: 96px;
+  }
+  .booking-outlines .water-outline { filter: drop-shadow(0 2px 4px #06121ecc) drop-shadow(0 0 5px #ffffff35); }
+  .booking-outlines .water-outline g { stroke-width: 5; }
+  .booking-outlines .water-outline path[opacity] { stroke-width: 3; opacity: 0.9; }
+}
+@media (max-width: 380px) {
+  .booking-scene[data-step] .booking-introduction { min-height: 82px; padding-right: 100px; }
+  .booking-scene[data-step] .booking-place { width: 94px; height: 84px; }
+  .booking-main-title { font-size: 28px; }
+}
