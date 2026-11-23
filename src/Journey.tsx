@@ -1,7 +1,7 @@
 ﻿import { useEffect, useRef, useState } from "react";
 import { BookingPage } from "./booking/BookingPage";
 import { TripRates } from "./booking/TripPricing";
-import { External, FocusFrame, Photo } from "./components";
+import { External, FocusFrame, Photo, SiteFooter } from "./components";
 import { officialLinks } from "./data/config";
 import { track } from "./services/analytics";
 
@@ -105,6 +105,7 @@ export function Journey() {
             Book a session
           </a>
         </div>
+        <SiteFooter />
       </section>
       <nav className="chapter-nav" aria-label="Page sections">
         {[

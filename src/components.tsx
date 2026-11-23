@@ -221,6 +221,12 @@ export function Layout() {
         <Outlet />
       </main>
       <CatchGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+      {pathname !== "/" && <SiteFooter />}
+    </div>
+  );
+}
+export function SiteFooter() {
+  return (
       <footer className="footer">
         <div className="footer-bottom">
           <Link className="wordmark" to="/">
@@ -235,7 +241,6 @@ export function Layout() {
           <span>© {new Date().getFullYear()} fishn</span>
         </div>
       </footer>
-    </div>
   );
 }
 export function Invitation() {

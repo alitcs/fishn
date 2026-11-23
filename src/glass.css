@@ -445,7 +445,7 @@ html.home-snap {
 .chapter-nav a:hover span {
   opacity: 1;
 }
-.is-home > .footer {
+.is-home .footer {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -1299,4 +1299,61 @@ html.home-snap {
   .service-catch { bottom: 76px; width: 85px; height: 110px; }
   .service-description { margin-top: 16px; }
   .hero-plan { margin-top: 18px; }
+}
+
+/* Mobile has one scroll surface and three viewport-sized snap pages. */
+@media (max-width: 700px) {
+  html.home-snap,
+  html.home-snap body {
+    height: 100%;
+    overflow: hidden;
+    scroll-snap-type: none;
+  }
+  .is-home { height: 100dvh; min-height: 0; }
+  .is-home > main { height: 100%; min-height: 0; }
+  .booking-home {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-padding: 0;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .booking-home > section {
+    height: 100%;
+    min-height: 100%;
+    max-height: 100%;
+    margin: 0;
+    scroll-margin: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    overflow: hidden;
+  }
+  .booking-home > section > .chapter-photo,
+  .booking-home .booking-backdrops,
+  .booking-home .booking-exposure {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .booking-home > .booking-answers {
+    padding-block: 100px 80px;
+    gap: 24px;
+  }
+  .booking-answers > h2 { flex-shrink: 0; }
+  .booking-questions {
+    min-height: 0;
+    max-height: 100%;
+    flex-shrink: 1;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+}
+@media (max-width: 700px) and (prefers-reduced-motion: reduce) {
+  .booking-home { scroll-behavior: auto; }
 }

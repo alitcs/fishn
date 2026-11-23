@@ -717,3 +717,40 @@ test.describe("calendar follows the visitor's browser clock", () => {
     await expect(page.locator('.calendar-grid button[aria-current="date"]')).toHaveAttribute("data-date", "2027-03-01");
   });
 });
+
+test.describe("mobile full-screen chapters", () => {
+  test.use({ isMobile: true, hasTouch: true });
+  test("each snap fills the viewport and stays aligned after resizing", async ({ page }) => {
+    for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+      const scroller = page.locator(".booking-home");
+      async function fillsScreen(id: string) {
+        await expect.poll(async () => {
+          const bounds = await page.locator(id).boundingBox();
+          return Math.abs(bounds!.y) + Math.abs(bounds!.height - page.viewportSize()!.height);
+        }).toBeLessThan(2);
+        expect(await page.locator(id).evaluate((element) => {
+          const image = element.querySelector(".chapter-photo, .booking-exposure.is-active")!;
+          const bounds = image.getBoundingClientRect();
+          const section = element.getBoundingClientRect();
+          return bounds.top <= section.top + 1 && bounds.bottom >= section.bottom - 1 &&
+            bounds.left <= section.left + 1 && bounds.right >= section.right - 1;
+        })).toBe(true);
+      }
+      await fillsScreen("#intro");
+      await scroller.evaluate((element) => element.scrollBy({ top: element.clientHeight * 0.75, behavior: "smooth" }));
+      await fillsScreen("#book");
+      await page.setViewportSize({ width: viewport.width, height: viewport.height - 60 });
+      await fillsScreen("#book");
+      await scroller.evaluate((element) => element.scrollBy({ top: element.clientHeight * 0.75, behavior: "smooth" }));
+      await fillsScreen("#good-to-know");
+      await page.getByText("Pricing", { exact: true }).click();
+      await page.getByText("Equipment", { exact: true }).click();
+      await fillsScreen("#good-to-know");
+      await page.locator(".answers-book").click();
+      await fillsScreen("#book");
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    }
+  });
+});
