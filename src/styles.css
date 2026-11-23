@@ -16,7 +16,7 @@
   --muted: #c2c9c2;
   --line: #ffffff42;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --gutter: clamp(24px, 4.2vw, 72px);
+  --gutter: clamp(24px, calc(4.2 * var(--layout-vw)), 72px);
 }
 * {
   box-sizing: border-box;
@@ -68,11 +68,11 @@ h3 {
   letter-spacing: -0.055em;
 }
 h1 {
-  font-size: clamp(54px, 6.2vw, 96px);
+  font-size: clamp(54px, calc(6.2 * var(--layout-vw)), 96px);
   line-height: 1.08;
 }
 h2 {
-  font-size: clamp(42px, 4.8vw, 72px);
+  font-size: clamp(42px, calc(4.8 * var(--layout-vw)), 72px);
   line-height: 1.08;
 }
 h3 {
@@ -218,7 +218,7 @@ h1:focus {
   position: relative;
   isolation: isolate;
   min-height: 800px;
-  min-height: max(800px, 100svh);
+  min-height: max(800px, calc(100 * var(--layout-svh)));
   overflow: hidden;
 }
 .chapter-photo {
@@ -346,7 +346,7 @@ h1:focus {
 /* Opening image: a loose editorial grid, with a single optical frame. */
 .hero {
   min-height: 700px;
-  height: 100svh;
+  height: calc(100 * var(--layout-svh));
   max-height: 1300px;
 }
 .hero .chapter-photo {
@@ -380,7 +380,7 @@ h1:focus {
   font-size: 11px;
 }
 .hero h1 {
-  font-size: clamp(58px, 6.2vw, 94px);
+  font-size: clamp(58px, calc(6.2 * var(--layout-vw)), 94px);
   font-weight: 350;
   line-height: 1.03;
   letter-spacing: -0.06em;
@@ -528,7 +528,7 @@ h1:focus {
   font-size: 10px;
 }
 .experience-panel h2 {
-  font-size: clamp(43px, 4.3vw, 64px);
+  font-size: clamp(43px, calc(4.3 * var(--layout-vw)), 64px);
   font-weight: 600;
   line-height: 0.98;
   letter-spacing: -0.055em;
@@ -598,7 +598,7 @@ h1:focus {
   gap: 80px;
 }
 .ice-chapter .experience-panel h2 {
-  font-size: clamp(72px, 9vw, 130px);
+  font-size: clamp(72px, calc(9 * var(--layout-vw)), 130px);
   font-weight: 350;
   line-height: 0.9;
   margin-top: 25px;
@@ -620,7 +620,7 @@ h1:focus {
   text-align: right;
 }
 .experience-opening {
-  min-height: max(960px, 115svh);
+  min-height: max(960px, calc(115 * var(--layout-svh)));
   padding-top: 390px;
 }
 .experience-opening .chapter-note {
@@ -632,7 +632,7 @@ h1:focus {
   left: var(--gutter);
 }
 .experience-page-heading h1 {
-  font-size: clamp(42px, 4.7vw, 68px);
+  font-size: clamp(42px, calc(4.7 * var(--layout-vw)), 68px);
   margin-top: 12px;
 }
 .experience-opening .experience-composition {
@@ -640,7 +640,7 @@ h1:focus {
 }
 /* Field atlas: accurate shapes drawn in the photographic space. */
 .atlas {
-  min-height: max(860px, 100svh);
+  min-height: max(860px, calc(100 * var(--layout-svh)));
 }
 .atlas-images,
 .journal-images {
@@ -690,7 +690,7 @@ h1:focus {
 }
 .atlas-heading h1,
 .atlas-heading h2 {
-  font-size: clamp(48px, 5.2vw, 76px);
+  font-size: clamp(48px, calc(5.2 * var(--layout-vw)), 76px);
 }
 .atlas-panel {
   position: absolute;
@@ -868,7 +868,7 @@ h1:focus {
   font-size: 11px;
 }
 .philosophy-content h2 {
-  font-size: clamp(48px, 5.5vw, 82px);
+  font-size: clamp(48px, calc(5.5 * var(--layout-vw)), 82px);
 }
 .philosophy-notes {
   display: grid;
@@ -955,7 +955,7 @@ h1:focus {
   min-height: 32px;
 }
 .invitation {
-  min-height: max(700px, 88svh);
+  min-height: max(700px, calc(88 * var(--layout-svh)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -973,7 +973,7 @@ h1:focus {
   margin-bottom: 24px;
 }
 .invitation h2 {
-  font-size: clamp(50px, 6vw, 88px);
+  font-size: clamp(50px, calc(6 * var(--layout-vw)), 88px);
 }
 .invitation .button {
   margin: 35px 0 17px;
@@ -990,7 +990,7 @@ h1:focus {
 }
 /* Long-form details stay in the photographic world. */
 .detail-hero {
-  height: 100svh;
+  height: calc(100 * var(--layout-svh));
   min-height: 720px;
 }
 .detail-hero .chapter-photo {
@@ -1029,7 +1029,7 @@ h1:focus {
   gap: 10%;
   align-items: center;
   padding: 140px 9%;
-  min-height: max(720px, 90svh);
+  min-height: max(720px, calc(90 * var(--layout-svh)));
 }
 .experience-overview .photo-scrim,
 .simple-notes .photo-scrim,
@@ -1039,7 +1039,7 @@ h1:focus {
 }
 .experience-overview h2 {
   margin-top: 25px;
-  font-size: clamp(45px, 4.6vw, 68px);
+  font-size: clamp(45px, calc(4.6 * var(--layout-vw)), 68px);
 }
 .large-copy {
   font-size: 23px;
@@ -1109,7 +1109,7 @@ h1:focus {
   position: absolute;
   left: var(--gutter);
   top: 21%;
-  font-size: clamp(42px, 5vw, 72px);
+  font-size: clamp(42px, calc(5 * var(--layout-vw)), 72px);
 }
 .journal .photo-scrim {
   background:
@@ -1210,7 +1210,7 @@ h1:focus {
 }
 .map-explanation h2 {
   margin: 22px 0 27px;
-  font-size: clamp(38px, 4.5vw, 60px);
+  font-size: clamp(38px, calc(4.5 * var(--layout-vw)), 60px);
 }
 .map-explanation p:not(.eyebrow) {
   max-width: 610px;
@@ -1220,7 +1220,7 @@ h1:focus {
   margin-top: 25px;
 }
 .location-hero {
-  height: 100svh;
+  height: calc(100 * var(--layout-svh));
   min-height: 800px;
 }
 .location-hero .photo-scrim {
@@ -1243,7 +1243,7 @@ h1:focus {
   margin-bottom: 16px;
 }
 .location-title h1 {
-  font-size: clamp(48px, 6vw, 86px);
+  font-size: clamp(48px, calc(6 * var(--layout-vw)), 86px);
   max-width: 650px;
 }
 .coordinate {
@@ -1310,7 +1310,7 @@ h1:focus {
   position: relative;
   isolation: isolate;
   padding: 150px 5.5% 80px 49%;
-  min-height: 100svh;
+  min-height: calc(100 * var(--layout-svh));
   background: #14221f;
 }
 .booking-landscape {
@@ -1318,7 +1318,7 @@ h1:focus {
   top: 0;
   left: 0;
   width: 43%;
-  height: 100svh;
+  height: calc(100 * var(--layout-svh));
   z-index: -1;
   overflow: hidden;
 }
@@ -1363,7 +1363,7 @@ h1:focus {
   font-size: 10px;
 }
 .booking-photo-copy h2 {
-  font-size: clamp(38px, 3.7vw, 58px);
+  font-size: clamp(38px, calc(3.7 * var(--layout-vw)), 58px);
   margin: 21px 0;
 }
 .booking-photo-copy > p:last-child {
@@ -1376,7 +1376,7 @@ h1:focus {
   font-size: 10px;
 }
 .booking-heading h1 {
-  font-size: clamp(42px, 4.5vw, 64px);
+  font-size: clamp(42px, calc(4.5 * var(--layout-vw)), 64px);
   margin: 16px 0 20px;
   max-width: 600px;
 }
@@ -1755,7 +1755,7 @@ h1:focus {
 .confirmation {
   position: relative;
   isolation: isolate;
-  min-height: 100svh;
+  min-height: calc(100 * var(--layout-svh));
   text-align: center;
   padding-top: 175px;
   padding-bottom: 100px;
@@ -1882,10 +1882,10 @@ h1:focus {
   margin: 0 auto;
   padding-top: 170px;
   padding-bottom: 120px;
-  min-height: 100svh;
+  min-height: calc(100 * var(--layout-svh));
 }
 .prose-page h1 {
-  font-size: clamp(44px, 6vw, 76px);
+  font-size: clamp(44px, calc(6 * var(--layout-vw)), 76px);
   margin: 25px 0 60px;
 }
 .prose-page h2 {
@@ -1951,7 +1951,7 @@ h1:focus {
     left: 8%;
   }
   .hero h1 {
-    font-size: 7.4vw;
+    font-size: calc(7.4 * var(--layout-vw));
   }
   .hero-observation {
     left: 78%;
@@ -2119,10 +2119,10 @@ h1:focus {
     background: #14241f;
   }
   .photo-chapter {
-    min-height: max(750px, 100svh);
+    min-height: max(750px, calc(100 * var(--layout-svh)));
   }
   .hero {
-    height: 100svh;
+    height: calc(100 * var(--layout-svh));
     min-height: 720px;
   }
   .hero .chapter-photo {
@@ -2141,7 +2141,7 @@ h1:focus {
     transform: none;
   }
   .hero h1 {
-    font-size: clamp(47px, 8.2vw, 66px);
+    font-size: clamp(47px, calc(8.2 * var(--layout-vw)), 66px);
     line-height: 1.08;
   }
   .hero-kicker {
@@ -2226,7 +2226,7 @@ h1:focus {
     padding: 25px;
   }
   .experience-panel h2 {
-    font-size: clamp(39px, 7vw, 57px);
+    font-size: clamp(39px, calc(7 * var(--layout-vw)), 57px);
   }
   .experience-panel-copy > .eyebrow {
     font-size: 9px;
@@ -2440,7 +2440,7 @@ h1:focus {
     top: 31%;
   }
   .philosophy-content h2 {
-    font-size: clamp(43px, 7vw, 64px);
+    font-size: clamp(43px, calc(7 * var(--layout-vw)), 64px);
   }
   .philosophy-notes {
     gap: 28px;
@@ -2503,7 +2503,7 @@ h1:focus {
     min-height: 740px;
   }
   .invitation h2 {
-    font-size: clamp(45px, 7.5vw, 65px);
+    font-size: clamp(45px, calc(7.5 * var(--layout-vw)), 65px);
   }
   .invitation-content {
     padding: 0 var(--gutter);
@@ -2520,7 +2520,7 @@ h1:focus {
   }
   .detail-hero {
     min-height: 750px;
-    height: 100svh;
+    height: calc(100 * var(--layout-svh));
   }
   .detail-hero-content {
     left: var(--gutter);
@@ -2529,7 +2529,7 @@ h1:focus {
     transform: none;
   }
   .detail-hero h1 {
-    font-size: clamp(48px, 7.7vw, 68px);
+    font-size: clamp(48px, calc(7.7 * var(--layout-vw)), 68px);
   }
   .detail-hero-content > .eyebrow {
     font-size: 10px;
@@ -3015,7 +3015,7 @@ h2 em {
   max-height: none;
 }
 .hero h1 {
-  font-size: clamp(56px, 5.8vw, 84px);
+  font-size: clamp(56px, calc(5.8 * var(--layout-vw)), 84px);
 }
 .chapter-note {
   top: 125px;
@@ -3030,7 +3030,7 @@ h2 em {
   top: 46%;
 }
 .atlas:not(.atlas-full) {
-  min-height: max(960px, 100svh);
+  min-height: max(960px, calc(100 * var(--layout-svh)));
 }
 .guide-section > .chapter-photo {
   object-position: 35% 100%;
@@ -3043,7 +3043,7 @@ h2 em {
     top: 40%;
   }
   .hero h1 {
-    font-size: clamp(58px, 5.8vw, 84px);
+    font-size: clamp(58px, calc(5.8 * var(--layout-vw)), 84px);
   }
   .hero-topline {
     top: 23%;
@@ -3060,7 +3060,7 @@ h2 em {
 }
 @media (max-width: 800px) {
   .hero h1 {
-    font-size: clamp(43px, 7vw, 59px);
+    font-size: clamp(43px, calc(7 * var(--layout-vw)), 59px);
   }
   .chapter-note {
     top: 108px;

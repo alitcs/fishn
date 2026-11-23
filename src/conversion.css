@@ -6,7 +6,7 @@
   font-size: 15px;
 }
 .service-hero {
-  min-height: max(740px, 92svh);
+  min-height: max(740px, calc(92 * var(--layout-svh)));
   display: flex;
   align-items: center;
   padding: 155px 8% 130px;
@@ -30,7 +30,7 @@
   letter-spacing: 0.12em;
 }
 .service-hero h1 {
-  font-size: clamp(60px, 6.7vw, 100px);
+  font-size: clamp(60px, calc(6.7 * var(--layout-vw)), 100px);
   line-height: 1.03;
   letter-spacing: -0.055em;
   font-weight: 450;
@@ -96,7 +96,7 @@
 
 /* A solid form surface guarantees contrast over every destination photograph. */
 .booking-scene {
-  min-height: max(900px, 100svh);
+  min-height: max(900px, calc(100 * var(--layout-svh)));
   padding: 130px 7% 90px;
   grid-template-columns: 0.9fr 1.1fr;
   gap: 7%;
@@ -109,7 +109,7 @@
   padding-top: 28px;
 }
 .booking-main-title {
-  font-size: clamp(46px, 4.6vw, 67px);
+  font-size: clamp(46px, calc(4.6 * var(--layout-vw)), 67px);
   line-height: 1.08;
 }
 .booking-introduction > .eyebrow {
@@ -528,7 +528,7 @@
     right: 7%;
   }
   .service-hero h1 {
-    font-size: 7.4vw;
+    font-size: calc(7.4 * var(--layout-vw));
   }
   .booking-scene {
     padding-inline: 5%;
@@ -561,7 +561,7 @@
     gap: 18px;
   }
   .service-hero {
-    min-height: max(650px, 90svh);
+    min-height: max(650px, calc(90 * var(--layout-svh)));
     padding: 165px 25px 115px;
     align-items: center;
   }
@@ -570,7 +570,7 @@
     margin-bottom: 22px;
   }
   .service-hero h1 {
-    font-size: clamp(43px, 10.7vw, 65px);
+    font-size: clamp(43px, calc(10.7 * var(--layout-vw)), 65px);
     font-weight: 450;
   }
   .service-description {
@@ -614,7 +614,7 @@
   }
   .booking-scene {
     display: block;
-    min-height: 100svh;
+    min-height: calc(100 * var(--layout-svh));
     padding: 105px 20px 70px;
   }
   .booking-scene .booking-scrim {

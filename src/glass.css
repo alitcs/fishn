@@ -6,7 +6,7 @@
 }
 .site-shell {
   position: relative;
-  min-height: 100dvh;
+  min-height: calc(100 * var(--layout-dvh));
 }
 .glass-surface,
 .booking-scene .booking-panel,
@@ -113,7 +113,7 @@
   margin-top: 10px;
 }
 .booking-main-title {
-  font-size: clamp(50px, 5.5vw, 80px);
+  font-size: clamp(50px, calc(5.5 * var(--layout-vw)), 80px);
 }
 .booking-introduction > .eyebrow {
   font-size: 10px;
@@ -312,7 +312,7 @@ html.home-snap {
   scroll-margin-top: 0;
 }
 .service-hero {
-  height: 100dvh;
+  height: calc(100 * var(--layout-dvh));
   min-height: 640px;
   padding-block: 145px 125px;
 }
@@ -320,7 +320,7 @@ html.home-snap {
   max-width: 780px;
 }
 .service-hero h1 {
-  font-size: clamp(64px, 6.6vw, 98px);
+  font-size: clamp(64px, calc(6.6 * var(--layout-vw)), 98px);
 }
 .service-description {
   font-size: 18px;
@@ -359,11 +359,11 @@ html.home-snap {
   font-size: 17px;
 }
 .booking-home > .booking-scene {
-  min-height: 100dvh;
+  min-height: calc(100 * var(--layout-dvh));
   padding-block: 115px 70px;
 }
 .booking-answers {
-  min-height: 100dvh;
+  min-height: calc(100 * var(--layout-dvh));
   position: relative;
   isolation: isolate;
   background: transparent;
@@ -383,7 +383,7 @@ html.home-snap {
   background: linear-gradient(90deg, #08101555, #08101580 70%);
 }
 .booking-answers h2 {
-  font-size: clamp(48px, 5.5vw, 80px);
+  font-size: clamp(48px, calc(5.5 * var(--layout-vw)), 80px);
   line-height: 1.06;
   font-weight: 350;
   letter-spacing: -0.05em;
@@ -496,7 +496,7 @@ html.home-snap {
   position: fixed;
   inset: 0;
   width: 100%;
-  height: 100dvh;
+  height: calc(100 * var(--layout-dvh));
   max-width: none;
   max-height: none;
   padding: 26px;
@@ -679,7 +679,7 @@ html.home-snap {
     padding: 26px;
   }
   .service-hero h1 {
-    font-size: 7.5vw;
+    font-size: calc(7.5 * var(--layout-vw));
   }
   .service-catch {
     width: 145px;
@@ -728,12 +728,12 @@ html.home-snap {
 }
 @media (max-width: 700px) {
   .service-hero {
-    height: 100dvh;
+    height: calc(100 * var(--layout-dvh));
     min-height: 610px;
     padding: 160px 25px 115px;
   }
   .service-hero h1 {
-    font-size: clamp(44px, 10.5vw, 65px);
+    font-size: clamp(44px, calc(10.5 * var(--layout-vw)), 65px);
   }
   .service-description {
     font-size: 16px;
@@ -768,7 +768,7 @@ html.home-snap {
   }
   .booking-home > .booking-scene {
     padding: 100px 20px 60px;
-    min-height: 100dvh;
+    min-height: calc(100 * var(--layout-dvh));
   }
   .booking-scene .booking-introduction {
     position: absolute;
@@ -812,7 +812,7 @@ html.home-snap {
     min-height: 50px;
   }
   .booking-answers {
-    min-height: 100dvh;
+    min-height: calc(100 * var(--layout-dvh));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -998,7 +998,7 @@ html.home-snap {
   background: #18232af7;
   -webkit-backdrop-filter: blur(22px) brightness(0.72);
   backdrop-filter: blur(22px) brightness(0.72);
-  max-height: min(250px, 45dvh);
+  max-height: min(250px, calc(45 * var(--layout-dvh)));
   overflow-y: auto;
 }
 .licence-menu[data-side="above"] {
@@ -1139,7 +1139,7 @@ html.home-snap {
 /* One viewport per booking chapter; longer details scroll inside the panel. */
 .booking-scene,
 .booking-home > .booking-scene {
-  height: 100dvh;
+  height: calc(100 * var(--layout-dvh));
   min-height: 0;
   padding: 100px 7% 42px;
   grid-template-rows: minmax(0, 1fr);
@@ -1238,12 +1238,12 @@ html.home-snap {
   .header.journey-header .journey-nav > .journey-book,
   .header.journey-header .gallery-open { font-size: 14px; }
   .service-hero {
-    height: 100dvh;
+    height: calc(100 * var(--layout-dvh));
     min-height: 568px;
     padding: 110px 26px 230px;
   }
   .service-hero h1 {
-    font-size: clamp(40px, 11.5vw, 68px);
+    font-size: clamp(40px, calc(11.5 * var(--layout-vw)), 68px);
     line-height: 1.06;
     letter-spacing: -0.055em;
     font-weight: 450;
@@ -1279,7 +1279,7 @@ html.home-snap {
   }
   .booking-place > .eyebrow { display: none; }
   .booking-outlines { height: 100%; margin: 0; }
-  .booking-answers h2 { font-size: clamp(42px, 11.5vw, 64px); font-weight: 350; letter-spacing: -0.05em; }
+  .booking-answers h2 { font-size: clamp(42px, calc(11.5 * var(--layout-vw)), 64px); font-weight: 350; letter-spacing: -0.05em; }
   .booking-answers { padding-inline: 26px; gap: 30px; }
   .booking-questions { padding-inline: 20px; }
 }
@@ -1309,7 +1309,7 @@ html.home-snap {
     overflow: hidden;
     scroll-snap-type: none;
   }
-  .is-home { height: 100dvh; min-height: 0; }
+  .is-home { height: calc(100 * var(--layout-dvh)); min-height: 0; }
   .is-home > main { height: 100%; min-height: 0; }
   .booking-home {
     height: 100%;

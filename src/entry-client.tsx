@@ -6,6 +6,7 @@ import "./styles.css";
 import "./journey.css";
 import "./conversion.css";
 import "./glass.css";
+import "./desktop.css";
 captureAttribution();
 const root = document.getElementById("root")!;
 const app = (
