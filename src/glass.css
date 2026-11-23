@@ -1492,3 +1492,13 @@ html.home-snap {
   .trip-estimate { margin-top: 6px; padding-top: 8px; }
   .booking-scene .booking-step-actions { margin-top: 8px; }
 }
+
+/* Draw booking symbols as vectors so phone emoji fonts cannot replace them. */
+.booking-inline-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: inherit;
+}
+.licence-help { gap: 6px; }
+.instagram-option[open] > summary .booking-inline-icon { transform: rotate(45deg); }

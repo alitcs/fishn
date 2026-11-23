@@ -299,7 +299,7 @@ test("submission remains available alongside the optional Instagram route", asyn
   await expect(page.getByLabel("Full name")).toBeVisible();
   await expect(submitButton(page)).toBeEnabled();
   await page
-    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .locator(".instagram-option > summary")
     .click();
   await page
     .getByRole("button", { name: "Copy session details", exact: true })
@@ -340,7 +340,7 @@ test("clipboard denial still leaves a selectable plan for the Instagram message"
   await page.goto("/book");
   await reachContact(page);
   await page
-    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .locator(".instagram-option > summary")
     .click();
   await page
     .getByRole("button", { name: "Copy session details", exact: true })

@@ -315,7 +315,10 @@ export function ConversationStep(props: Props) {
             />
             {error("licenceAcknowledgement")}
             <External className="licence-help" href={officialLinks.licence}>
-              Licence guidance ↗
+              Licence guidance
+              <svg className="booking-inline-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                <path d="m8 12 4-4m-6 2-1 1a3.5 3.5 0 0 0 5 5l2-2m2-4 1-1a3.5 3.5 0 0 0-5-5L8 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </External>
             <details
               className="optional-request"
@@ -360,7 +363,12 @@ export function ConversationStep(props: Props) {
             </div>
           </fieldset>
           <details className="instagram-option">
-            <summary>Instagram ↗</summary>
+            <summary>
+              Instagram
+              <svg className="booking-inline-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                <path d="M5 10h10M10 5v10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </summary>
             <div className="direct-enquiry">
               <p>Copy your session details, then send them in your message.</p>
               <button
