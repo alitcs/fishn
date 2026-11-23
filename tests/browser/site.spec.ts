@@ -609,6 +609,12 @@ test("booking fits one screen with its total and actions visible at every step",
     await page.goto("/");
     await page.locator(".hero-plan").click();
     for (let step = 0; step < 4; step++) {
+      if (step === 0 && viewport.width <= 700) {
+        for (const choice of await page.locator(".destination-choices > button").all())
+          await expect(choice).toBeInViewport({ ratio: 1 });
+        const scroll = page.locator(".booking-step-scroll");
+        expect(await scroll.evaluate((element) => element.scrollHeight <= element.clientHeight + 1)).toBe(true);
+      }
       await expect(page.locator(".booking-panel")).toBeInViewport({ ratio: 1 });
       await expect(page.locator(".trip-estimate")).toBeInViewport({ ratio: 1 });
       await expect(page.locator(".booking-step-actions")).toBeInViewport({ ratio: 1 });
@@ -656,9 +662,13 @@ test("licence menu supports keyboard selection, dismissal, and retained values",
 });
 
 test("pricing stays visible through the flow and updates for the trip and any group size", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("fishn-trip-preferences-v2", JSON.stringify({
+    experience: "ice-fishing", location: "lake-simcoe", groupSize: 4, duration: 8,
+  })));
   await page.goto("/book");
   const quote = page.locator(".trip-estimate");
   await expect(quote.locator("strong")).toHaveText("$100");
+  await expect(quote).toContainText("1 person · 2 hours · Shoreline fishing");
   await tripButton(page, "Lake Simcoe", "Ice Fishing").click();
   await expect(quote.locator("strong")).toHaveText("$150");
   await next(page);
@@ -706,7 +716,7 @@ test.describe("calendar follows the visitor's browser clock", () => {
       }));
     });
     await page.goto("/book");
-    await expect(page.locator(".trip-estimate")).toContainText("25 people · 2 hours");
+    await expect(page.locator(".trip-estimate")).toContainText("1 person · 2 hours");
     await next(page);
     await expect(page.locator("#calendar-title")).toHaveText("February 2027");
     await expect(page.locator('.calendar-grid button[aria-current="date"]')).toHaveAttribute("data-date", "2027-02-01");

@@ -11,7 +11,7 @@ import {
 import type { ExperienceId, LocationId } from "../data/config";
 import { locations } from "../data/locations";
 import { getAttribution, hasConsent, track } from "../services/analytics";
-import { bookingSchema, licenceOptions } from "./schema";
+import { bookingSchema } from "./schema";
 import type { BookingInput, BookingResponse } from "./schema";
 import { BookingError, submitBooking } from "./service";
 import { ConversationStep } from "./ConversationStep";
@@ -35,11 +35,9 @@ const defaults: Selection = {
   licenceAcknowledgement: "",
   destinationAdviceRequested: false,
 };
-const storageKey = "fishn-trip-preferences-v2";
 export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const [params] = useSearchParams();
   const [selection, setSelection] = useState<Selection>(defaults);
-  const [hydrated, setHydrated] = useState(false);
   const [contact, setContact] = useState({
     name: "",
     email: "",
@@ -67,32 +65,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
   const messageRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const initial = { ...defaults };
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
-      if (saved && typeof saved === "object") {
-        if (experiences.some((e) => e.id === saved.experience))
-          initial.experience = saved.experience;
-        if (locations.some((l) => l.id === saved.location))
-          initial.location = saved.location;
-        if (
-          Number.isSafeInteger(saved.groupSize) &&
-          saved.groupSize >= 1
-        )
-          initial.groupSize = saved.groupSize;
-        if (durationOptions.includes(saved.duration))
-          initial.duration = saved.duration;
-        if (typeof saved.preferredDate === "string")
-          initial.preferredDate = saved.preferredDate;
-        if (
-          licenceOptions.some((l) => l.value === saved.licenceAcknowledgement)
-        )
-          initial.licenceAcknowledgement = saved.licenceAcknowledgement;
-        initial.destinationAdviceRequested =
-          saved.destinationAdviceRequested === true;
-      }
-    } catch {
-      /* Browser storage is optional. */
-    }
     const exp = params.get("experience");
     if (experiences.some((e) => e.id === exp))
       initial.experience = exp as ExperienceId;
@@ -107,10 +79,9 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
       initial.location = "lake-simcoe";
     if (!isRequestDateAllowed(initial.preferredDate, initial.experience))
       initial.preferredDate = "";
-    // Browser-only preferences are reconciled after static HTML hydration.
+    // Explicit experience links are applied after static HTML hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelection(initial);
-    setHydrated(true);
   }, [params]);
   useEffect(() => {
     const element = section.current;
@@ -129,14 +100,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
     observer.observe(element);
     return () => observer.disconnect();
   }, [params]);
-  useEffect(() => {
-    if (hydrated)
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(selection));
-      } catch {
-        /* Optional preference storage. */
-      }
-  }, [selection, hydrated]);
   const experience = experiences.find((e) => e.id === selection.experience)!;
   const place = locations.find(
     (location) => location.id === selection.location,
@@ -303,11 +266,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
         experience: selection.experience,
         group_size: selection.groupSize,
       });
-      try {
-        localStorage.removeItem(storageKey);
-      } catch {
-        /* Optional storage. */
-      }
       setContact({ name: "", email: "", phone: "", website: "" });
       setSpecialRequests("");
       setTimeout(() => {

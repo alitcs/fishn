@@ -106,9 +106,12 @@ export function ConversationStep(props: Props) {
                     <span>
                       <strong>{name}</strong>
                       <small>
-                        {scene.experience === "ice-fishing"
+                        <span className="destination-mode-full">{scene.experience === "ice-fishing"
                           ? "Ice fishing"
-                          : "Shoreline fishing"}
+                          : "Shoreline fishing"}</span>
+                        <span className="destination-mode-short" aria-hidden="true">
+                          {scene.experience === "ice-fishing" ? "Ice" : "Shoreline"}
+                        </span>
                       </small>
                     </span>
                     <i aria-hidden="true">{selected ? "✓" : "→"}</i>

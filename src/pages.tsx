@@ -678,11 +678,11 @@ export function PrivacyPage() {
       </p>
       <h2>Remembering your selections</h2>
       <p>
-        This browser can remember your experience, location, group size,
-        duration, date, licence acknowledgement, and destination-help choice.
+        Your selections stay available as you move between booking steps.
+        A new visit starts with one person and a two-hour shoreline session,
+        unless you open a link for a specific experience.
         Contact information and optional notes stay in memory while you fill out
-        the form and are not saved in browser storage. You can remove remembered
-        selections through your browser’s site-data settings.
+        the form and are not saved in browser storage.
       </p>
       <h2>Optional analytics</h2>
       <p>
