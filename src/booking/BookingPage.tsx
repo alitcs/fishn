@@ -501,7 +501,6 @@ export function BookingPage({ embedded = false }: { embedded?: boolean }) {
                   }}
                 >
                   {["Choose date", "Set group", "Your details"][step]}
-                  <span aria-hidden="true">→</span>
                 </button>
               ) : (
                 <button

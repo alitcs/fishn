@@ -51,7 +51,7 @@ export function Journey() {
             className="button hero-plan"
             onClick={() => track("BookingEntryClicked", { placement: "hero" })}
           >
-            Book a session <span aria-hidden="true">→</span>
+            Book a session
           </a>
         </div>
         <figure className="service-catch">
@@ -102,7 +102,7 @@ export function Journey() {
             </p>
           </details>
           <a className="answers-book" href="#book">
-            Book a session <span aria-hidden="true">↑</span>
+            Book a session
           </a>
         </div>
       </section>

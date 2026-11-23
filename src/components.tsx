@@ -208,11 +208,11 @@ export function Layout() {
                 track("BookingEntryClicked", { placement: "header" })
               }
             >
-              Book <span aria-hidden="true">↗</span>
+              Book
             </a>
           ) : pathname === "/book" ? null : (
             <BookLink className="journey-book">
-              Book <span aria-hidden="true">↗</span>
+              Book
             </BookLink>
           )}
         </nav>
