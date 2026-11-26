@@ -4,10 +4,6 @@
 test("Netlify build submits the full URL-encoded session, handles failures, and preserves its reference", async ({
   page,
 }) => {
-  test.skip(
-    process.env.TEST_NETLIFY !== "1",
-    "Requires the Netlify production build.",
-  );
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   const bodies: URLSearchParams[] = [];

@@ -8,7 +8,6 @@ import {
   browserToday,
 } from "../src/data/config.ts";
 import { tripPrice } from "../src/data/pricing.ts";
-import { bookingEmail, handleBooking } from "../server/booking.ts";
 function futureDate(days = 10) {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + days);
@@ -29,22 +28,6 @@ const valid = () => ({
   website: "",
   analyticsConsent: false,
 });
-const env = {
-  RESEND_API_KEY: "test-only-not-real",
-  BOOKING_NOTIFICATION_EMAIL: "owner@example.com",
-  BOOKING_FROM_EMAIL: "fishn@example.com",
-};
-function request(data = valid(), origin = "https://fishn.test") {
-  return new Request("https://fishn.test/api/bookings", {
-    method: "POST",
-    headers: {
-      Origin: origin,
-      "Content-Type": "application/json",
-      "Idempotency-Key": data.requestId,
-    },
-    body: JSON.stringify(data),
-  });
-}
 test("Ontario date uses Toronto rather than the host timezone", () => {
   assert.equal(ontarioToday(new Date("2026-11-22T02:00:00Z")), "2026-11-21");
 });
@@ -68,7 +51,7 @@ test("request calendar rejects today, past, invalid and far-future dates", () =>
     true,
   );
 });
-test("configured blocked dates apply to the server-side policy", () => {
+test("configured blocked dates apply to the request-date policy", () => {
   const date = futureDate();
   availability["ice-fishing"].blockedDates.push(date);
   try {
@@ -108,81 +91,6 @@ test("campaign attribution requires consent", () => {
     }).success,
     true,
   );
-});
-test("unconfigured submission fails honestly and never calls email provider", async () => {
-  let sent = false;
-  const result = await handleBooking(request(), {}, async () => {
-    sent = true;
-    return Response.json({ id: "fake" });
-  });
-  assert.equal(result.status, 503);
-  assert.equal(sent, false);
-});
-test("cross-origin submissions and invalid fields are rejected before delivery", async () => {
-  assert.equal(
-    (await handleBooking(request(valid(), "https://other.test"), env)).status,
-    403,
-  );
-  assert.equal(
-    (await handleBooking(request({ ...valid(), phone: "x" }), env)).status,
-    422,
-  );
-});
-test("delivery failures never become successful submissions", async () => {
-  const result = await handleBooking(request(), env, async () =>
-    Response.json({ error: "provider failed" }, { status: 500 }),
-  );
-  assert.equal(result.status, 502);
-  assert.equal((await result.json()).status, undefined);
-});
-test("successful delivery includes a stable provider idempotency key and private server credentials", async () => {
-  const data = valid();
-  const bodies: string[] = [];
-  for (let i = 0; i < 2; i++) {
-    const result = await handleBooking(
-      request(data),
-      env,
-      async (url, init) => {
-        assert.equal(url, "https://api.resend.com/emails");
-        const headers = new Headers(init?.headers);
-        assert.equal(
-          headers.get("Idempotency-Key"),
-          `fishn-booking/${data.requestId}`,
-        );
-        bodies.push(String(init?.body));
-        return Response.json({ id: "provider-receipt-test" });
-      },
-    );
-    assert.equal(result.status, 201);
-    assert.equal((await result.json()).requestId, data.requestId);
-  }
-  assert.equal(bodies[0], bodies[1]);
-  const email = JSON.parse(bodies[0]);
-  assert.equal(email.reply_to, data.email);
-  assert.ok(email.text.includes(data.phone));
-  assert.ok(email.text.includes("Pending — not confirmed"));
-});
-test("missing provider receipt is not treated as success", async () => {
-  const result = await handleBooking(request(), env, async () =>
-    Response.json({}),
-  );
-  assert.equal(result.status, 502);
-});
-
-test("optional conversation answers and requests reach the guide without becoming required fields", () => {
-  assert.equal(bookingSchema.safeParse(valid()).success, true);
-  const parsed = bookingSchema.parse({
-    ...valid(),
-    tripIntent: "first-time",
-    fishingLevel: "new",
-    destinationAdviceRequested: true,
-    specialRequests: "We would like to discuss equipment before the trip.",
-  });
-  const text = bookingEmail(parsed, parsed.clientSubmittedAt);
-  assert.ok(text.includes("My first fishing experience"));
-  assert.ok(text.includes("I’m completely new"));
-  assert.ok(text.includes("Please help the customer choose"));
-  assert.ok(text.includes("We would like to discuss equipment"));
 });
 test("conversation fields are bounded and do not permit unknown preference values", () => {
   assert.equal(

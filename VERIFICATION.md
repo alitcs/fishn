@@ -1,56 +1,46 @@
-﻿# fishn: pricing and booking verification
+# Netlify-only cleanup verification
 
-Current revision: the booking chapter fits one viewport; the total and navigation remain visible while longer details scroll within the panel. Verified all four steps at 1440x900, 1366x768, 390x844, 390x700, and 320x568, including licence selection. Fresh sessions default to one person, two hours, shoreline fishing ($100 CAD). Booking shows only the total and selected session; Good to know uses compact rate formulas. Ice fishing is now $75/hour for the first person plus $25/hour per extra person; shoreline remains $50 plus $20. The 23-photo journal interleaves landscapes and catches. The Netlify build and TypeScript check pass, along with 21 unit tests and five production browser checks covering form delivery/retry, journal browsing, one-screen booking at all five sizes, live pricing, and minimal pricing copy.
+Verified locally on 25 November 2026 using Node 24 and Chromium on Windows. No deployment, live enquiry, or email was sent.
 
-Previous pricing update, 22 November 2026 (America/Toronto): equipment copy states that visitors dress for the conditions and all fishing gear is provided. The Journal has 23 images after removing original entries 1, 3, 16, and 17. Trips are limited to 2, 4, 6, and 8 hours; group sizes accept positive whole numbers without the old 12-person cap. Shared pricing matches every supplied table entry and appears throughout booking, confirmation, copyable plans, and delivery payloads. Water outlines have stronger strokes, more space, an entrance animation triggered in view, and a dark variant over ice.
+## Scope
 
-Validation for this update: 20 unit tests passed, including all 32 supplied prices and larger groups. The development browser suite passed all 17 tests; the Netlify-only case was skipped there and passed separately against the production static build. Three production browser checks passed: Netlify delivery/retry payloads, mobile rate tables/equipment copy, and a browser-clock test for February/March 2027 in Pacific/Kiritimati. The latter verifies stale saved dates are discarded, today follows the browser rather than Toronto, and the month refreshes when returning to a long-lived tab. The Netlify build and TypeScript check passed. Desktop/mobile visual captures are in `.work/visual/pricing-update/`. No publication or real message delivery was performed.
+Removed the custom email API, Worker bundling, Node production wrapper, provider switching, unused booking models, and backend-only tests. Development and production now use the existing Netlify Forms submission path. The normal build creates the same static Netlify output; the old Netlify command names remain aliases. Local development uses Vite directly, and the built preview lives in scripts/preview.mjs.
 
-## Earlier interface verification
+Page components, routes, CSS, photographs, crops, business configuration, pricing, calendar logic, consent behavior, and the Netlify form blueprint were not edited. The existing Sites identity was retained and its preview metadata now points to the static output rather than an obsolete Worker.
 
-Verified 22 November 2026 (America/Toronto), using Node 24 and Chrome on Windows. This is local source work and Netlify preparation. No site was published and no real email or Instagram message was sent.
+## Results
 
-| Check                            | Result                                                   |
-| -------------------------------- | -------------------------------------------------------- |
-| Strict TypeScript and ESLint     | Passed                                                   |
-| Worker build                     | Passed; 11 pre-rendered routes, 98 assets, 9.91 MiB gzip |
-| Netlify build                    | Passed; complete static form blueprint                   |
-| Unit tests                       | 18 passed                                                |
-| Production browser journey suite | 13 passed                                                |
-| Netlify-mode integration         | 1 passed                                                 |
-| Visual captures                  | 102 PNGs in `.work/visual/minimal-final/`                |
-| Runtime errors / overflow        | None at 320, 390, 768, 1024, and 1440px                  |
+| Check | Result |
+| --- | --- |
+| Production build | Passed; all 11 public routes pre-rendered |
+| TypeScript | Passed |
+| ESLint | Passed |
+| Unit tests | 15 passed; date policies, pricing, validation, geography, and Netlify payload |
+| Browser tests | 20 passed against the production static build |
+| Screenshot comparison | All 94 before/after pairs identical at every pixel |
+| Static assets | 84 files byte-identical, including CSS, photos, fonts, sitemap, and robots.txt |
+| HTML comparison | All 13 files identical after normalizing the JavaScript bundle filename: 11 pages, 404, and form blueprint |
+| Browser runtime errors | None in either visual run |
+| Horizontal overflow | None in the checked 320, 390, 768, 1024, and 1440px layouts |
+| Direct Vite development | Started successfully; local submission kept answers, rejected unprocessed form HTML, showed no false confirmation, and made no legacy API requests |
 
-Netlify frontend JavaScript is approximately 154.70 kB gzip and CSS 19.76 kB gzip. No runtime dependency was added.
+Browser checks cover all four destination backdrops, route navigation, booking validation and back navigation, retained notes, failure/retry/success, stable request references, URL-encoded form fields, pricing, licence keyboard controls, gallery focus and navigation, consented analytics, mobile viewport sizing, section snapping, and calendar refresh across future month boundaries.
 
-## Native section snapping
+## Visual comparison method
 
-The homepage has exactly three initial viewport-height chapters at the reviewed desktop and phone sizes. Native CSS snapping is enabled only on the homepage. The footer is inside the final chapter's visual space and does not create a fourth page.
+The original Netlify build was saved under .work/cleanup-baseline/client before edits. Both that saved build and the cleaned production build were served locally and exercised with the same updated scripts/verify-visuals.mjs. The checker was corrected to use the current people input and 8-hour option, scroll the real mobile scroll container, wait for the active section indicator, and generate a fixed request UUID in the browser test only. The application still generates real random request IDs.
 
-A browser test uses real wheel events to move from the introduction to booking and then Good to know. It verifies the booking link returns to the booking chapter. On a 390x700 screen, the same test fills the longer contact step, scrolls Submit into view, and confirms the viewport remains within booking. Reduced-motion and keyboard-calendar checks still pass.
+The 94 images cover desktop, phone, portrait, narrower booking layouts, every journal frame, all booking stages, failure and confirmation states, and all destination backgrounds. Raw decoded RGBA pixels were compared with zero tolerance; every pair matched.
 
-## Minimal surfaces and copy
+Local evidence:
 
-Cards, fields, and actions have straight square edges. A 1.8% neutral surface fill and localized 13px blur replace the darker glass. Ice booking uses dark text over its light photograph. Duplicate introductions, pricing paragraphs, coordinates, trip lines, and gallery headlines were removed while required booking and licence information stays available.
+- .work/visual/cleanup-before/: original build screenshots and runtime/overflow report.
+- .work/visual/cleanup-after/: cleaned build screenshots and runtime/overflow report.
+- .work/cleanup-comparison.json: asset, HTML, and per-image pixel counts.
+- .work/compare-cleanup.mjs: comparison used for this cleanup.
 
-## Compact journal
+These generated verification artifacts are ignored by Git. To take new screenshots, build, start npm run preview, and run npm run verify:visuals -- capture-name. Use PLAYWRIGHT_BASE_URL to target another local build.
 
-The drawer includes all 27 supplied photographs and excludes the five design references. Browser checks load and decode every journal image. Original files are unchanged; crops remain in code. Portrait crops keep faces outside the selected frames, while hands or clothing may remain behind a fish.
+## Delivery limits
 
-The filmstrip supports native horizontal snapping, touch swiping, arrow controls, keyboard arrows, Home/End, focus wrapping, Escape, and restoration of page position and focus. The test verifies the first, second, and final frames, keeps the chosen date and booking step, and checks that focus remains within the dialog. Five added photos have drawer-sized responsive WebPs to keep the retained Worker within its existing package envelope.
-
-## Retained submission behavior
-
-The existing request, validation, consent, error, retry, and confirmation checks pass. Netlify-mode testing inspects URL-encoded fields, a 12-person/12-hour request, a failed response, rejection of an unprocessed form blueprint, and successful acceptance as a pending enquiry. The API adapter and optional Instagram path remain. Contact details and notes stay out of local storage and analytics payloads.
-
-All browser submission POSTs are intercepted. Live notifications still require Netlify deployment, form detection, and the chosen recipient in the dashboard. The user requested preparation without deployment. See [NETLIFY_SETUP.md](NETLIFY_SETUP.md).
-
-## Visual reproduction
-
-Run npm run build:netlify, then npm run preview:netlify. Set PLAYWRIGHT_BASE_URL=http://127.0.0.1:4176 and run npm run verify:visuals. Captures are stored in .work/visual/minimal-final/ and include every journal frame, all booking states, all four destination backdrops, phone/desktop/portrait layouts, and narrower overflow checks.
-
-Existing sourced geographic outlines, attribution, destination restrictions, request-date policy, and detail routes are unchanged. No price, availability, credential, catch guarantee, or award was invented.
-
-## Licence menu refinement
-
-The licence field now uses a styled square selector and option list rather than the browser's native menu. Desktop and phone captures cover shoreline and ice themes under `.work/visual/licence-select/`. Keyboard selection, Escape, outside dismissal, retained answers, form validation, and Netlify submission were verified. The latest Netlify build and lint checks pass.
+All automated submission tests use intercepted responses. Local Vite/static servers cannot process Netlify Forms or deliver email; an unprocessed local HTML response is rejected even when its HTTP status is 200. Live delivery still requires Netlify deployment, form detection, and a recipient configured in the dashboard. See NETLIFY_SETUP.md. The cleanup does not change deployed settings or claim a live email test.

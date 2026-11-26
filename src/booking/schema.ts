@@ -95,13 +95,6 @@ export const bookingSchema = z
       });
   });
 export type BookingInput = z.infer<typeof bookingSchema>;
-export type BookingStatus =
-  "pending" | "contacted" | "confirmed" | "completed" | "cancelled";
-export interface BookingRecord extends BookingInput {
-  status: BookingStatus;
-  submittedAt: string;
-  deliveryId: string;
-}
 export interface BookingResponse {
   requestId: string;
   status: "pending";

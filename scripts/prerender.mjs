@@ -1,5 +1,4 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { build } from "esbuild";
 import { render } from "../.work/ssr/entry-server.js";
 const routes = {
   "/": [
@@ -124,13 +123,6 @@ await writeFile(
     )
     .join("")}</urlset>`,
 );
-await build({
-  entryPoints: ["server/booking.ts"],
-  outfile: ".work/server/booking.js",
-  bundle: true,
-  platform: "node",
-  format: "esm",
-});
 console.log(
   `Pre-rendered ${Object.keys(routes).length} routes with page-specific metadata.`,
 );

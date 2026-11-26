@@ -5,11 +5,6 @@ import { tripPrice } from "../data/pricing";
 
 export const netlifyFormName = "fishing-session";
 export const netlifyFormEndpoint = "/__forms.html";
-export const bookingProvider =
-  import.meta.env?.MODE === "netlify" ||
-  import.meta.env?.VITE_BOOKING_PROVIDER === "netlify"
-    ? "netlify"
-    : "api";
 
 export function encodeNetlifyBooking(data: BookingInput) {
   const price = tripPrice(data.experience, data.groupSize, data.duration);

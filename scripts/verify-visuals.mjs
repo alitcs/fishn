@@ -7,13 +7,21 @@ if (!/^[a-z0-9-]+$/i.test(out))
   throw new Error("Use a simple output folder name.");
 const directory = ".work/visual/" + out;
 await mkdir(directory, { recursive: true });
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:5173";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:4176";
 const browser = await chromium.launch({
   executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
   headless: true,
 });
 const errors = [],
   report = [];
+async function createPage(options) {
+  const page = await browser.newPage(options);
+  // Keep the displayed request reference stable between comparison runs.
+  await page.addInitScript(() => {
+    crypto.randomUUID = () => "00000000-0000-4000-8000-000000000001";
+  });
+  return page;
+}
 async function settle(page) {
   await page.evaluate(async () => {
     await document.fonts.ready;
@@ -36,12 +44,19 @@ async function settle(page) {
 async function capture(page, name, selector, fullPage = false) {
   if (selector)
     await page.locator(selector).evaluate((element) =>
-      scrollTo({
-        top: element.getBoundingClientRect().top + scrollY,
+      element.scrollIntoView({
+        block: "start",
         behavior: "instant",
       }),
     );
   await settle(page);
+  // Let viewport observers update the active chapter before capturing it.
+  if (selector && (await page.locator(".chapter-nav").count())) {
+    await page.waitForFunction((target) => {
+      const section = document.querySelector(target)?.closest("section");
+      return !section?.id || document.querySelector(`.chapter-nav a[href="#${section.id}"]`)?.getAttribute("aria-current") === "location";
+    }, selector);
+  }
   await page.screenshot({ path: directory + "/" + name + ".png", fullPage });
 }
 const next = (page) =>
@@ -65,17 +80,8 @@ for (const [device, viewport] of [
   ["desktop", { width: 1440, height: 1000 }],
   ["mobile", { width: 390, height: 844 }],
 ]) {
-  const page = await browser.newPage({ viewport, reducedMotion: "reduce" });
+  const page = await createPage({ viewport, reducedMotion: "reduce" });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
-  await page.route("**/api/bookings", (route) =>
-    route.fulfill({
-      status: 502,
-      json: { message: "Delivery could not be verified. Please try again." },
-    }),
-  );
   await page.route("**/__forms.html", (route) =>
     route.request().method() === "POST"
       ? route.fulfill({
@@ -115,8 +121,8 @@ for (const [device, viewport] of [
   await chooseDate(page);
   await capture(page, device + "-date", "#book");
   await next(page);
-  await page.getByRole("button", { name: "12 people", exact: true }).click();
-  await page.getByRole("button", { name: "12 hours", exact: true }).click();
+  await page.getByLabel("Number of people", { exact: true }).fill("12");
+  await page.getByRole("button", { name: "8 hours", exact: true }).click();
   await capture(page, device + "-group", "#book");
   await next(page);
   await capture(page, device + "-contact", "#book");
@@ -146,17 +152,6 @@ for (const [device, viewport] of [
     })
     .waitFor();
   await capture(page, device + "-delivery-error", "#book", true);
-  await page.route("**/api/bookings", (route) => {
-    const data = route.request().postDataJSON();
-    return route.fulfill({
-      status: 201,
-      json: {
-        requestId: data.requestId,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
-      },
-    });
-  });
   await page.route("**/__forms.html", (route) =>
     route.request().method() === "POST"
       ? route.fulfill({
@@ -169,13 +164,10 @@ for (const [device, viewport] of [
   await submit.click();
   await page.getByRole("heading", { name: "Request sent." }).waitFor();
   await capture(page, device + "-sent-mock", "#book");
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: false } }),
-  );
   await page.goto(baseURL + "/book");
   await reachContact(page);
   await page
-    .getByText("Instagram " + String.fromCharCode(8599), { exact: true })
+    .locator(".instagram-option > summary")
     .click();
   await capture(page, device + "-instagram", "#book", true);
   await page.getByRole("button", { name: "Open catch gallery" }).click();
@@ -196,7 +188,7 @@ for (const [device, viewport] of [
   });
   await page.close();
 }
-const motion = await browser.newPage({
+const motion = await createPage({
   viewport: { width: 1440, height: 1000 },
   reducedMotion: "no-preference",
 });
@@ -235,14 +227,11 @@ for (const [name, mode] of [
 }
 await motion.close();
 for (const width of [320, 768, 1024]) {
-  const page = await browser.newPage({
+  const page = await createPage({
     viewport: { width, height: 900 },
     reducedMotion: "reduce",
   });
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
   for (const route of ["/", "/experiences", "/explore", "/book"]) {
     await page.goto(baseURL + route);
     report.push({
@@ -277,7 +266,7 @@ for (const width of [320, 768, 1024]) {
   }
   await page.close();
 }
-const portrait = await browser.newPage({
+const portrait = await createPage({
   viewport: { width: 918, height: 1632 },
   reducedMotion: "reduce",
 });

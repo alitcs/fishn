@@ -1,19 +1,19 @@
 # Deploy fishn with Netlify Forms
 
-The checkout is prepared for Netlify. No site has been deployed and no notification has been sent.
+1. Import this repository into Netlify. netlify.toml selects npm run build:netlify, Node 24, and the dist/client publish directory.
+2. Enable form detection, then deploy or redeploy. Netlify should detect fishing-session from public/__forms.html.
+3. Under Forms → Submission notifications, add an email notification for fishing-session. Enter the owner's chosen recipient in the dashboard. Keep the address out of frontend code and the public repository.
+4. Confirm the recipient if requested. After deployment, submit one real test enquiry and verify both the Netlify submission and inbox delivery.
+5. To change the recipient, edit the dashboard notification; no code change is needed.
 
-1. Import this repository into Netlify. The included `netlify.toml` selects `npm run build:netlify`, Node 24, and the `dist/client` publish directory.
-2. Enable **Forms → Enable form detection**, then deploy or redeploy. Netlify should detect the **fishing-session** form from the static `public/__forms.html` blueprint.
-3. In **Forms → Submission notifications → Add notification**, choose an email notification for **fishing-session**. Use the temporary Gmail address provided in the conversation. Keep this recipient in Netlify rather than frontend code or the public repository.
-4. Confirm the recipient if Netlify requests email verification. Send one real test request after deployment and verify both the submission in Netlify and receipt in the inbox.
-5. To switch to the business inbox, edit the notification recipient in Netlify. No code change is needed.
+Submit posts URL-encoded session and contact details to /__forms.html with form-name=fishing-session. The static blueprint includes the submitted fields, honeypot, and reply email. Pricing is included, but acceptance is a pending enquiry; Nikita still confirms availability and the final plan. Unchanged retries retain their reference, but automatic deduplication is not guaranteed.
 
-The final **Submit** action posts the full session and contact details to `/__forms.html` with URL-encoded fields and `form-name=fishing-session`. The blueprint includes every submitted field, a honeypot, and the `email` field used for replies. Successful submission remains a pending enquiry; the displayed CAD hourly rate and session total are included, while availability and the final plan still need guide confirmation. The reference is preserved on retry, but Netlify does not provide the legacy Resend adapter's idempotency guarantee.
+Both development and production use this single submission path. Netlify Forms runs only on Netlify; local previews cannot deliver email. HTTP or network failures leave answers intact and do not show confirmation. Browser tests intercept submissions instead of sending real enquiries.
 
-The local `npm run dev` server retains the existing API adapter and requires its email configuration to send real requests. It does not simulate delivery. `npm run build:netlify` selects the Netlify adapter, including for a local static preview. Netlify Forms itself operates on the deployed Netlify site; local previews cannot send through that service. Browser tests intercept submissions rather than sending real enquiries.
+Run npm run build, then npm run preview to inspect the pre-rendered site at http://127.0.0.1:4176. preview:netlify remains a compatibility alias. The local static preview rejects POSTs and does not impersonate Netlify Forms.
 
-After building, run `npm run preview:netlify` to inspect the static deployment locally at `http://127.0.0.1:4176`. This preview serves every pre-rendered route and rejects real form POSTs; it does not impersonate Netlify Forms.
+Set SITE_URL in Netlify's build environment to the final custom origin if needed; otherwise its URL environment variable is used for canonical metadata. No email API keys or custom application server are needed.
 
-Set `SITE_URL` to the final custom origin if applicable. Otherwise the Netlify build uses Netlify's `URL` environment variable for canonical metadata.
+This cleanup does not deploy the site or change Netlify notification settings. Live delivery must be verified on the deployed site.
 
 Official references: [Forms setup](https://docs.netlify.com/manage/forms/setup/), [Email notifications](https://docs.netlify.com/manage/forms/notifications/).

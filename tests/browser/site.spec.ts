@@ -34,24 +34,14 @@ async function fillContact(page: Page) {
     .click();
 }
 async function mockSuccess(page: Page) {
-  await page.route("**/api/bookings", (route) => {
-    const data = route.request().postDataJSON();
+  await page.route("**/__forms.html", (route) => {
     return route.fulfill({
-      status: 201,
-      json: {
-        requestId: data.requestId,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
-      },
+      status: 200,
+      contentType: "text/html",
+      body: "<html><body>Thank you</body></html>",
     });
   });
 }
-test.beforeEach(async ({ page }) => {
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: true } }),
-  );
-});
-
 test("the service is explicit and the hero leads directly into the inline four-step flow", async ({
   page,
 }) => {
@@ -176,9 +166,11 @@ test("uncertain visitors can ask Nikita to choose without extra preference quest
 test("four-step request validates, preserves answers, and safely retries delivery", async ({
   page,
 }) => {
-  const requests: Record<string, unknown>[] = [];
-  await page.route("**/api/bookings", (route) => {
-    requests.push(route.request().postDataJSON());
+  const requests: Record<string, string>[] = [];
+  await page.route("**/__forms.html", (route) => {
+    requests.push(
+      Object.fromEntries(new URLSearchParams(route.request().postData() || "")),
+    );
     return route.fulfill({
       status: 502,
       json: { message: "Delivery could not be verified. Please try again." },
@@ -230,7 +222,7 @@ test("four-step request validates, preserves answers, and safely retries deliver
   expect(requests).toHaveLength(0);
   await submitButton(page).click();
   await expect(page.getByRole("alert")).toContainText(
-    "Delivery could not be verified",
+    "couldn’t be submitted",
   );
   const storage = await page.evaluate(() => JSON.stringify(localStorage));
   for (const value of [
@@ -239,16 +231,15 @@ test("four-step request validates, preserves answers, and safely retries deliver
     "Please discuss equipment",
   ])
     expect(storage).not.toContain(value);
-  await page.route("**/api/bookings", (route) => {
-    const data = route.request().postDataJSON();
+  await page.route("**/__forms.html", (route) => {
+    const data = Object.fromEntries(
+      new URLSearchParams(route.request().postData() || ""),
+    );
     requests.push(data);
     return route.fulfill({
-      status: 201,
-      json: {
-        requestId: data.requestId,
-        status: "pending",
-        submittedAt: new Date().toISOString(),
-      },
+      status: 200,
+      contentType: "text/html",
+      body: "<html><body>Thank you</body></html>",
     });
   });
   await submitButton(page).click();
@@ -261,8 +252,8 @@ test("four-step request validates, preserves answers, and safely retries deliver
   expect(requests).toHaveLength(2);
   expect(requests[0].requestId).toBe(requests[1].requestId);
   expect(requests[1]).toMatchObject({
-    groupSize: 25,
-    duration: 8,
+    groupSize: "25",
+    duration: "8",
     location: "lake-simcoe",
     experience: "ice-fishing",
     specialRequests: "Please discuss equipment for our group.",
@@ -276,9 +267,6 @@ test("four-step request validates, preserves answers, and safely retries deliver
 test("submission remains available alongside the optional Instagram route", async ({
   page,
 }) => {
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: false } }),
-  );
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
@@ -290,7 +278,7 @@ test("submission remains available alongside the optional Instagram route", asyn
     });
   });
   let submissions = 0;
-  await page.route("**/api/bookings", (route) => {
+  await page.route("**/__forms.html", (route) => {
     submissions++;
     return route.abort();
   });
@@ -324,9 +312,6 @@ test("submission remains available alongside the optional Instagram route", asyn
 test("clipboard denial still leaves a selectable plan for the Instagram message", async ({
   page,
 }) => {
-  await page.route("**/api/booking/status", (route) =>
-    route.fulfill({ json: { ready: false } }),
-  );
   await page.addInitScript(() =>
     Object.defineProperty(navigator, "clipboard", {
       configurable: true,
